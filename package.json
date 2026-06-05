@@ -1,6 +1,6 @@
 {
   "name": "@cyanheads/pokeapi-mcp-server",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "mcpName": "io.github.cyanheads/pokeapi-mcp-server",
   "description": "Look up Pokémon, moves, abilities, items, natures, and type matchups from PokéAPI v2 via MCP. STDIO or Streamable HTTP.",
   "type": "module",

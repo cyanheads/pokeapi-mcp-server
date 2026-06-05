@@ -1,7 +1,7 @@
 {
   "manifest_version": "0.3",
   "name": "pokeapi-mcp-server",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Look up Pokémon, moves, abilities, items, natures, and type matchups from PokéAPI v2.",
   "author": { "name": "cyanheads" },
   "repository": {
