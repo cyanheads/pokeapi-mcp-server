@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "cyanheads/pokeapi-mcp-server",
-  "description": "MCP server for PokéAPI v2 — keyless, read-only access to Pokémon game data through Generation IX.",
+  "name": "io.github.cyanheads/pokeapi-mcp-server",
+  "description": "Look up Pokémon, moves, abilities, items, natures, and type matchups from PokéAPI v2.",
   "repository": {
     "url": "https://github.com/cyanheads/pokeapi-mcp-server",
     "source": "github"
@@ -11,8 +11,8 @@
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
-      "identifier": "pokeapi-mcp-server",
-      "runtimeHint": "node",
+      "identifier": "@cyanheads/pokeapi-mcp-server",
+      "runtimeHint": "bun",
       "version": "0.1.0",
       "packageArguments": [
         {
@@ -40,8 +40,8 @@
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
-      "identifier": "pokeapi-mcp-server",
-      "runtimeHint": "node",
+      "identifier": "@cyanheads/pokeapi-mcp-server",
+      "runtimeHint": "bun",
       "version": "0.1.0",
       "packageArguments": [
         {

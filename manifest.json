@@ -2,8 +2,14 @@
   "manifest_version": "0.3",
   "name": "pokeapi-mcp-server",
   "version": "0.1.0",
-  "description": "",
-  "author": { "name": "" },
+  "description": "Look up Pokémon, moves, abilities, items, natures, and type matchups from PokéAPI v2.",
+  "author": { "name": "cyanheads" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cyanheads/pokeapi-mcp-server"
+  },
+  "homepage": "https://github.com/cyanheads/pokeapi-mcp-server#readme",
+  "license": "Apache-2.0",
   "server": {
     "type": "node",
     "entry_point": "dist/index.js",

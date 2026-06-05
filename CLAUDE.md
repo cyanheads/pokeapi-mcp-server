@@ -11,19 +11,6 @@
 
 ---
 
-## First Session
-
-This project was just scaffolded with `bunx @cyanheads/mcp-ts-core init`. You're holding a production-grade MCP framework with the hard parts already solved — error handling, telemetry, auth, transport, validation, lifecycle. What's missing is the **domain**. Your job: design the tool, resource, and service surface with the user, then implement it as small pure handlers that throw — the framework catches, classifies, and instruments the rest. Design before code; the user's first messages set direction, so wait for them before scaffolding definitions.
-
-> **Remove this section** from CLAUDE.md / AGENTS.md after completing these steps. The skills and conventions below remain — this block is one-time onboarding only.
-
-1. **Get your bearings.** Take stock of the project tree, the skills in `skills/`, and the tools/MCP servers available. Light tool use is fine for context-building — you're mapping the territory, not committing yet.
-2. **Read the framework docs** — `node_modules/@cyanheads/mcp-ts-core/CLAUDE.md` (builders, Context, errors, exports, conventions)
-3. **Run the `setup` skill** — read `skills/setup/SKILL.md` and follow its checklist (project orientation, agent protocol file selection, echo definition cleanup, skill sync)
-4. **Design the server** — read `skills/design-mcp-server/SKILL.md` and work through it with the user to map the domain into tools, resources, and services before scaffolding
-
----
-
 ## What's Next?
 
 When the user asks what's next or needs direction, suggest options based on the current project state. Common next steps:
@@ -60,35 +47,47 @@ Tailor suggestions to what's actually missing or stale — don't recite the full
 
 ```ts
 import { tool, z } from '@cyanheads/mcp-ts-core';
+import { getPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 
-export const searchItems = tool('search_items', {
-  description: 'Search inventory items by query.',
-  annotations: { readOnlyHint: true },
+export const getNature = tool('pokeapi_get_nature', {
+  description: 'Nature details by name or ID — stat boost and penalty, preferred and disliked berry flavor. Returns all 25 natures when called without an identifier.',
+  annotations: { readOnlyHint: true, openWorldHint: false },
   input: z.object({
-    query: z.string().describe('Search terms'),
-    limit: z.number().default(10).describe('Max results'),
+    identifier: z.string().optional().describe('Nature name (e.g. "modest") or ID 1–25. Omit to list all 25 natures.'),
   }),
   output: z.object({
-    items: z.array(z.object({
-      id: z.string().describe('Item ID'),
-      name: z.string().describe('Item name'),
-    })).describe('Matching items'),
+    natures: z.array(z.object({
+      id: z.number().describe('Nature ID.'),
+      name: z.string().describe('Nature name.'),
+      increasedStat: z.string().nullable().describe('Stat boosted by +10%. Null for neutral natures.'),
+      decreasedStat: z.string().nullable().describe('Stat reduced by −10%. Null for neutral natures.'),
+      likesFlavor: z.string().nullable().describe('Preferred berry flavor. Null for neutral natures.'),
+      hatesFlavor: z.string().nullable().describe('Disliked berry flavor. Null for neutral natures.'),
+    })).describe('Nature entries.'),
   }),
-  auth: ['inventory:read'],
+  errors: [
+    { reason: 'not_found', code: JsonRpcErrorCode.NotFound,
+      when: 'Identifier resolves to no nature.',
+      recovery: 'Use a valid nature name (e.g. "modest") or an ID from 1–25.' },
+  ],
 
   async handler(input, ctx) {
-    const items = await findItems(input.query, input.limit);
-    ctx.log.info('Search completed', { query: input.query, count: items.length });
-    return { items };
+    const svc = getPokeApiService();
+    if (!input.identifier) {
+      const natures = await svc.listAllNatures(ctx);
+      ctx.log.info('Listed all natures', { count: natures.length });
+      return { natures };
+    }
+    const nature = await svc.getNature(input.identifier, ctx);
+    if (!nature) throw ctx.fail('not_found', `Nature '${input.identifier}' not found`);
+    return { natures: [nature] };
   },
 
-  // format() populates content[] — the markdown twin of structuredContent.
-  // Different clients read different surfaces (Claude Code → structuredContent,
-  // Claude Desktop → content[]); both must carry the same data.
-  // Enforced at lint time: every field in `output` must appear in the rendered text.
   format: (result) => [{
     type: 'text',
-    text: result.items.map(i => `**${i.id}**: ${i.name}`).join('\n'),
+    text: result.natures.map(n =>
+      `**${n.name}** (ID ${n.id}): +${n.increasedStat ?? '—'} / −${n.decreasedStat ?? '—'}`
+    ).join('\n'),
   }],
 });
 ```
@@ -98,33 +97,17 @@ export const searchItems = tool('search_items', {
 ```ts
 import { resource, z } from '@cyanheads/mcp-ts-core';
 import { notFound } from '@cyanheads/mcp-ts-core/errors';
+import { getPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 
-export const itemData = resource('inventory://{itemId}', {
-  description: 'Fetch an inventory item by ID.',
-  params: z.object({ itemId: z.string().describe('Item identifier') }),
-  auth: ['inventory:read'],
+export const pokemonResource = resource('pokeapi://pokemon/{identifier}', {
+  description: 'Pokémon dossier by name or dex number — same payload as pokeapi_get_pokemon without moves.',
+  params: z.object({ identifier: z.string().describe('Pokémon name or dex number.') }),
   async handler(params, ctx) {
-    const item = await ctx.state.get(`item:${params.itemId}`);
-    if (!item) throw notFound(`Item ${params.itemId} not found`, { itemId: params.itemId });
-    return item;
+    const svc = getPokeApiService();
+    const pokemon = await svc.getDossier(params.identifier, false, undefined, ctx);
+    if (!pokemon) throw notFound(`Pokémon '${params.identifier}' not found`, { identifier: params.identifier });
+    return pokemon;
   },
-});
-```
-
-### Prompt
-
-```ts
-import { prompt, z } from '@cyanheads/mcp-ts-core';
-
-export const reviewCode = prompt('review_code', {
-  description: 'Review code for issues and best practices.',
-  args: z.object({
-    code: z.string().describe('Code to review'),
-    language: z.string().optional().describe('Programming language'),
-  }),
-  generate: (args) => [
-    { role: 'user', content: { type: 'text', text: `Review this ${args.language ?? ''} code:\n${args.code}` } },
-  ],
 });
 ```
 
@@ -136,15 +119,17 @@ import { z } from '@cyanheads/mcp-ts-core';
 import { parseEnvConfig } from '@cyanheads/mcp-ts-core/config';
 
 const ServerConfigSchema = z.object({
-  apiKey: z.string().describe('External API key'),
-  maxResults: z.coerce.number().default(100),
+  baseUrl: z.string().default('https://pokeapi.co/api/v2').describe('PokéAPI base URL'),
+  cacheTtlSeconds: z.coerce.number().default(21600).describe('Cache TTL in seconds'),
+  requestTimeoutMs: z.coerce.number().default(10000).describe('Per-request timeout in ms'),
 });
 
 let _config: z.infer<typeof ServerConfigSchema> | undefined;
 export function getServerConfig() {
   _config ??= parseEnvConfig(ServerConfigSchema, {
-    apiKey: 'MY_API_KEY',
-    maxResults: 'MY_MAX_RESULTS',
+    baseUrl: 'POKEAPI_BASE_URL',
+    cacheTtlSeconds: 'POKEAPI_CACHE_TTL_SECONDS',
+    requestTimeoutMs: 'POKEAPI_REQUEST_TIMEOUT_MS',
   });
   return _config;
 }
@@ -165,11 +150,8 @@ Handlers receive a unified `ctx` object. Key properties:
 | Property | Description |
 |:---------|:------------|
 | `ctx.log` | Request-scoped logger — `.debug()`, `.info()`, `.notice()`, `.warning()`, `.error()`. Auto-correlates requestId, traceId, tenantId. |
-| `ctx.state` | Tenant-scoped KV — `.get(key)`, `.set(key, value, { ttl? })`, `.delete(key)`, `.list(prefix, { cursor, limit })`. Accepts any serializable value. |
-| `ctx.elicit` | Ask user for structured input. **Check for presence first:** `if (ctx.elicit) { ... }` |
-| `ctx.sample` | Request LLM completion from the client. **Check for presence first:** `if (ctx.sample) { ... }` |
+| `ctx.state` | Tenant-scoped KV — `.get(key)`, `.set(key, value, { ttl? })`, `.delete(key)`, `.list(prefix, { cursor, limit })`. Used here for PokéAPI response caching with long TTL. |
 | `ctx.signal` | `AbortSignal` for cancellation. |
-| `ctx.progress` | Task progress (present when `task: true`) — `.setTotal(n)`, `.increment()`, `.update(message)`. |
 | `ctx.requestId` | Unique request ID. |
 | `ctx.tenantId` | Tenant ID from JWT or `'default'` for stdio. |
 
@@ -227,16 +209,21 @@ src/
   config/
     server-config.ts                    # Server-specific env vars (Zod schema)
   services/
-    [domain]/
-      [domain]-service.ts               # Domain service (init/accessor pattern)
+    pokeapi/
+      pokeapi-service.ts                # PokeApiService — typed fetch methods, cache, retry
       types.ts                          # Domain types
   mcp-server/
     tools/definitions/
-      [tool-name].tool.ts               # Tool definitions
+      find-pokemon.tool.ts              # pokeapi_find_pokemon
+      get-ability.tool.ts               # pokeapi_get_ability
+      get-item.tool.ts                  # pokeapi_get_item
+      get-move.tool.ts                  # pokeapi_get_move
+      get-nature.tool.ts                # pokeapi_get_nature
+      get-pokemon.tool.ts               # pokeapi_get_pokemon (flagship)
+      get-type-matchups.tool.ts         # pokeapi_get_type_matchups
     resources/definitions/
-      [resource-name].resource.ts       # Resource definitions
-    prompts/definitions/
-      [prompt-name].prompt.ts           # Prompt definitions
+      pokemon.resource.ts               # pokeapi://pokemon/{identifier}
+      type.resource.ts                  # pokeapi://type/{typeName}
 ```
 
 ---
@@ -306,20 +293,21 @@ When you complete a skill's checklist, check the boxes and add a completion time
 
 | Command | Purpose |
 |:--------|:--------|
-| `npm run build` | Compile TypeScript |
-| `npm run rebuild` | Clean + build |
-| `npm run clean` | Remove build artifacts |
-| `npm run devcheck` | Lint + format + typecheck + security + changelog sync |
+| `bun run build` | Compile TypeScript |
+| `bun run rebuild` | Clean + build |
+| `bun run clean` | Remove build artifacts |
+| `bun run devcheck` | Lint + format + typecheck + security + changelog sync |
 | `bun run audit:refresh` | Delete `bun.lock`, reinstall, and re-run `bun audit`. Use when `devcheck` flags a transitive advisory — Bun's `update` is sticky on transitive resolutions, so the advisory may be a stale-lockfile false positive. If it survives the refresh, it's real. |
-| `npm run tree` | Generate directory structure doc |
-| `npm run format` | Auto-fix formatting (safe fixes only) |
-| `npm run format:unsafe` | Also apply Biome's unsafe autofixes — review the diff; they can change behavior |
-| `npm test` | Run tests |
-| `npm run start:stdio` | Production mode (stdio) |
-| `npm run start:http` | Production mode (HTTP) |
-| `npm run changelog:build` | Regenerate `CHANGELOG.md` from `changelog/*.md` |
-| `npm run changelog:check` | Verify `CHANGELOG.md` is in sync (used by devcheck) |
-| `npm run bundle` | Build and pack as `.mcpb` for one-click Claude Desktop install |
+| `bun run tree` | Generate directory structure doc |
+| `bun run format` | Auto-fix formatting (safe fixes only) |
+| `bun run format:unsafe` | Also apply Biome's unsafe autofixes — review the diff; they can change behavior |
+| `bun run test` | Run tests |
+| `bun run start:stdio` | Production mode (stdio) |
+| `bun run start:http` | Production mode (HTTP) |
+| `bun run changelog:build` | Regenerate `CHANGELOG.md` from `changelog/*.md` |
+| `bun run changelog:check` | Verify `CHANGELOG.md` is in sync (used by devcheck) |
+| `bun run bundle` | Build and pack as `.mcpb` for one-click Claude Desktop install |
+| `bun run publish-mcp` | Publish to MCP Registry via mcp-publisher |
 
 ---
 
@@ -386,7 +374,6 @@ import { getMyService } from '@/services/my-domain/my-service.js';
 - [ ] If wrapping external API: tests include at least one sparse payload case with omitted upstream fields
 - [ ] Registered in `createApp()` arrays (directly or via barrel exports)
 - [ ] Tests use `createMockContext()` from `@cyanheads/mcp-ts-core/testing`
-- [ ] `.codex-plugin/plugin.json` populated — `name`, `version`, `description`, `repository`, `license` from `package.json`; `interface.displayName` = package name; `interface.shortDescription` from `package.json` description
-- [ ] `.codex-plugin/mcp.json` updated — server name key matches `package.json` name; env vars added for any required API keys
-- [ ] `.claude-plugin/plugin.json` populated — `name`, `version`, `description`, `repository`, `license` from `package.json`; inline `mcpServers` entry with server name key, env vars for any required API keys
-- [ ] `npm run devcheck` passes
+- [ ] PokéAPI responses: English-only text (`language.name === 'en'`) before returning; missing entries surface as `null`
+- [ ] Cache keys include `identifier` after normalization (lowercase, hyphenated); TTL from `getServerConfig().cacheTtlSeconds`
+- [ ] `bun run devcheck` passes
