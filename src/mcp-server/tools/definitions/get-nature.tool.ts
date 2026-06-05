@@ -4,7 +4,7 @@
  */
 
 import { tool, z } from '@cyanheads/mcp-ts-core';
-import { JsonRpcErrorCode } from '@cyanheads/mcp-ts-core/errors';
+import { JsonRpcErrorCode, McpError } from '@cyanheads/mcp-ts-core/errors';
 import { getPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 
 const NatureSchema = z.object({
@@ -63,8 +63,19 @@ export const getNature = tool('pokeapi_get_nature', {
       return { natures, isListAll: true };
     }
     ctx.log.info('Getting nature details', { identifier: input.identifier });
-    const nature = await svc.getNatureDetails(input.identifier, ctx);
-    return { natures: [nature], isListAll: false };
+    try {
+      const nature = await svc.getNatureDetails(input.identifier, ctx);
+      return { natures: [nature], isListAll: false };
+    } catch (err) {
+      if (err instanceof McpError && err.code === JsonRpcErrorCode.NotFound) {
+        throw ctx.fail(
+          'not_found',
+          `Nature "${input.identifier}" not found — use a valid name (e.g. "modest", "jolly") or an ID between 1 and 25.`,
+          ctx.recoveryFor('not_found'),
+        );
+      }
+      throw err;
+    }
   },
 
   format: (result) => {

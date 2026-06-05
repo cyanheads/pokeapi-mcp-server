@@ -4,7 +4,7 @@
  */
 
 import { resource, z } from '@cyanheads/mcp-ts-core';
-import { JsonRpcErrorCode } from '@cyanheads/mcp-ts-core/errors';
+import { JsonRpcErrorCode, McpError } from '@cyanheads/mcp-ts-core/errors';
 import { getPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 
 const VALID_TYPES = [
@@ -50,7 +50,18 @@ export const typeResource = resource('pokeapi://type/{typeName}', {
   async handler(params, ctx) {
     ctx.log.debug('Fetching type resource', { typeName: params.typeName });
     const svc = getPokeApiService();
-    return svc.getTypeMatchups(params.typeName, ctx);
+    try {
+      return await svc.getTypeMatchups(params.typeName, ctx);
+    } catch (err) {
+      if (err instanceof McpError && err.code === JsonRpcErrorCode.NotFound) {
+        throw ctx.fail(
+          'not_found',
+          `Type "${params.typeName}" not found — use a valid Pokémon type name (fire, water, grass, etc.).`,
+          ctx.recoveryFor('not_found'),
+        );
+      }
+      throw err;
+    }
   },
 
   list: async () => ({

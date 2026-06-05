@@ -90,10 +90,19 @@ describe('getPokemon', () => {
     expect(result.isMythical).toBe(false);
   }, 15000);
 
-  it('throws McpError (NotFound) for unknown identifier', async () => {
+  it('throws McpError (NotFound) for unknown identifier with data.reason populated', async () => {
     const ctx = createMockContext({ errors: getPokemon.errors, tenantId: 'test-tenant' });
     const input = getPokemon.input.parse({ identifier: 'totally-fake-pokemon-xyz-999' });
-    await expect(getPokemon.handler(input, ctx)).rejects.toThrow(McpError);
+    let caught: unknown;
+    try {
+      await getPokemon.handler(input, ctx);
+    } catch (err) {
+      caught = err;
+    }
+    expect(caught).toBeInstanceOf(McpError);
+    const mcpErr = caught as McpError;
+    expect(mcpErr.code).toBe(-32001); // JsonRpcErrorCode.NotFound
+    expect((mcpErr.data as Record<string, unknown>)?.reason).toBe('not_found');
   }, 15000);
 
   it('formats output with key fields included', () => {

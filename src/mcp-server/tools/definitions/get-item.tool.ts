@@ -4,7 +4,7 @@
  */
 
 import { tool, z } from '@cyanheads/mcp-ts-core';
-import { JsonRpcErrorCode } from '@cyanheads/mcp-ts-core/errors';
+import { JsonRpcErrorCode, McpError } from '@cyanheads/mcp-ts-core/errors';
 import { getPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 
 export const getItem = tool('pokeapi_get_item', {
@@ -59,7 +59,18 @@ export const getItem = tool('pokeapi_get_item', {
   async handler(input, ctx) {
     ctx.log.info('Getting item details', { identifier: input.identifier });
     const svc = getPokeApiService();
-    return svc.getItemDetails(input.identifier, ctx);
+    try {
+      return await svc.getItemDetails(input.identifier, ctx);
+    } catch (err) {
+      if (err instanceof McpError && err.code === JsonRpcErrorCode.NotFound) {
+        throw ctx.fail(
+          'not_found',
+          `Item "${input.identifier}" not found — use a valid lowercase hyphenated name (e.g. "choice-specs") or numeric ID.`,
+          ctx.recoveryFor('not_found'),
+        );
+      }
+      throw err;
+    }
   },
 
   format: (result) => {

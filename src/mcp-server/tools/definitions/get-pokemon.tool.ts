@@ -4,7 +4,7 @@
  */
 
 import { tool, z } from '@cyanheads/mcp-ts-core';
-import { JsonRpcErrorCode } from '@cyanheads/mcp-ts-core/errors';
+import { JsonRpcErrorCode, McpError } from '@cyanheads/mcp-ts-core/errors';
 import { getPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 
 const StatSchema = z.object({
@@ -161,13 +161,23 @@ export const getPokemon = tool('pokeapi_get_pokemon', {
   async handler(input, ctx) {
     ctx.log.info('Getting Pokémon dossier', { identifier: input.identifier });
     const svc = getPokeApiService();
-    const dossier = await svc.getPokemonDossier(
-      input.identifier,
-      input.include_moves,
-      input.game_version,
-      ctx,
-    );
-    return dossier;
+    try {
+      return await svc.getPokemonDossier(
+        input.identifier,
+        input.include_moves,
+        input.game_version,
+        ctx,
+      );
+    } catch (err) {
+      if (err instanceof McpError && err.code === JsonRpcErrorCode.NotFound) {
+        throw ctx.fail(
+          'not_found',
+          `Pokémon "${input.identifier}" not found — check spelling or use a numeric Pokédex number.`,
+          ctx.recoveryFor('not_found'),
+        );
+      }
+      throw err;
+    }
   },
 
   format: (result) => {

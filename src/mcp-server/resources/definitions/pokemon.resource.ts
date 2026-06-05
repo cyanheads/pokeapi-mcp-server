@@ -4,7 +4,7 @@
  */
 
 import { resource, z } from '@cyanheads/mcp-ts-core';
-import { JsonRpcErrorCode } from '@cyanheads/mcp-ts-core/errors';
+import { JsonRpcErrorCode, McpError } from '@cyanheads/mcp-ts-core/errors';
 import { getPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 
 export const pokemonResource = resource('pokeapi://pokemon/{identifier}', {
@@ -31,7 +31,18 @@ export const pokemonResource = resource('pokeapi://pokemon/{identifier}', {
   async handler(params, ctx) {
     ctx.log.debug('Fetching Pokémon resource', { identifier: params.identifier });
     const svc = getPokeApiService();
-    return svc.getPokemonDossier(params.identifier, false, undefined, ctx);
+    try {
+      return await svc.getPokemonDossier(params.identifier, false, undefined, ctx);
+    } catch (err) {
+      if (err instanceof McpError && err.code === JsonRpcErrorCode.NotFound) {
+        throw ctx.fail(
+          'not_found',
+          `Pokémon "${params.identifier}" not found — use a valid lowercase name or numeric Pokédex number.`,
+          ctx.recoveryFor('not_found'),
+        );
+      }
+      throw err;
+    }
   },
 
   list: async () => ({

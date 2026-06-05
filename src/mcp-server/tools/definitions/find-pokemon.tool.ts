@@ -4,7 +4,7 @@
  */
 
 import { tool, z } from '@cyanheads/mcp-ts-core';
-import { JsonRpcErrorCode } from '@cyanheads/mcp-ts-core/errors';
+import { JsonRpcErrorCode, McpError } from '@cyanheads/mcp-ts-core/errors';
 import { getPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 import type { PokemonListEntry } from '@/services/pokeapi/types.js';
 
@@ -71,13 +71,6 @@ export const findPokemon = tool('pokeapi_find_pokemon', {
 
   errors: [
     {
-      reason: 'no_results',
-      code: JsonRpcErrorCode.NotFound,
-      when: 'Filter values are valid but yield no matching Pokémon.',
-      recovery:
-        'Broaden the filters by removing one or more criteria, or check filter values (generation, type, pokedex, egg_group) for typos.',
-    },
-    {
       reason: 'invalid_filter',
       code: JsonRpcErrorCode.InvalidParams,
       when: 'An unrecognized generation, type, pokédex, or egg-group name was provided.',
@@ -93,32 +86,43 @@ export const findPokemon = tool('pokeapi_find_pokemon', {
     const candidateSets: PokemonListEntry[][] = [];
     let hasFilter = false;
 
-    if (input.generation?.trim()) {
-      hasFilter = true;
-      const gen = svc.normalizeIdentifier(input.generation);
-      const entries = await svc.getPokemonByGeneration(gen, ctx);
-      candidateSets.push(entries);
-    }
+    try {
+      if (input.generation?.trim()) {
+        hasFilter = true;
+        const gen = svc.normalizeIdentifier(input.generation);
+        const entries = await svc.getPokemonByGeneration(gen, ctx);
+        candidateSets.push(entries);
+      }
 
-    if (input.type?.trim()) {
-      hasFilter = true;
-      const typeName = svc.normalizeIdentifier(input.type);
-      const entries = await svc.getPokemonByType(typeName, ctx);
-      candidateSets.push(entries);
-    }
+      if (input.type?.trim()) {
+        hasFilter = true;
+        const typeName = svc.normalizeIdentifier(input.type);
+        const entries = await svc.getPokemonByType(typeName, ctx);
+        candidateSets.push(entries);
+      }
 
-    if (input.pokedex?.trim()) {
-      hasFilter = true;
-      const dex = svc.normalizeIdentifier(input.pokedex);
-      const entries = await svc.getPokemonByPokedex(dex, ctx);
-      candidateSets.push(entries);
-    }
+      if (input.pokedex?.trim()) {
+        hasFilter = true;
+        const dex = svc.normalizeIdentifier(input.pokedex);
+        const entries = await svc.getPokemonByPokedex(dex, ctx);
+        candidateSets.push(entries);
+      }
 
-    if (input.egg_group?.trim()) {
-      hasFilter = true;
-      const eggGroup = svc.normalizeIdentifier(input.egg_group);
-      const entries = await svc.getPokemonByEggGroup(eggGroup, ctx);
-      candidateSets.push(entries);
+      if (input.egg_group?.trim()) {
+        hasFilter = true;
+        const eggGroup = svc.normalizeIdentifier(input.egg_group);
+        const entries = await svc.getPokemonByEggGroup(eggGroup, ctx);
+        candidateSets.push(entries);
+      }
+    } catch (err) {
+      if (err instanceof McpError && err.code === JsonRpcErrorCode.NotFound) {
+        throw ctx.fail(
+          'invalid_filter',
+          `One of the provided filter values was not recognized by PokéAPI. Use valid lowercase PokéAPI names (e.g. "generation-i", "fire", "kanto", "monster").`,
+          ctx.recoveryFor('invalid_filter'),
+        );
+      }
+      throw err;
     }
 
     // Intersect all candidate sets (AND logic)

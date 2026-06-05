@@ -4,7 +4,7 @@
  */
 
 import { tool, z } from '@cyanheads/mcp-ts-core';
-import { JsonRpcErrorCode } from '@cyanheads/mcp-ts-core/errors';
+import { JsonRpcErrorCode, McpError } from '@cyanheads/mcp-ts-core/errors';
 import { getPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 
 export const getAbility = tool('pokeapi_get_ability', {
@@ -59,7 +59,18 @@ export const getAbility = tool('pokeapi_get_ability', {
   async handler(input, ctx) {
     ctx.log.info('Getting ability details', { identifier: input.identifier });
     const svc = getPokeApiService();
-    return svc.getAbilityDetails(input.identifier, ctx);
+    try {
+      return await svc.getAbilityDetails(input.identifier, ctx);
+    } catch (err) {
+      if (err instanceof McpError && err.code === JsonRpcErrorCode.NotFound) {
+        throw ctx.fail(
+          'not_found',
+          `Ability "${input.identifier}" not found — use a valid lowercase hyphenated name or numeric ID.`,
+          ctx.recoveryFor('not_found'),
+        );
+      }
+      throw err;
+    }
   },
 
   format: (result) => {

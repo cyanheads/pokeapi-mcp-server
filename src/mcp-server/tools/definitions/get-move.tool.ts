@@ -4,7 +4,7 @@
  */
 
 import { tool, z } from '@cyanheads/mcp-ts-core';
-import { JsonRpcErrorCode } from '@cyanheads/mcp-ts-core/errors';
+import { JsonRpcErrorCode, McpError } from '@cyanheads/mcp-ts-core/errors';
 import { getPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 
 export const getMove = tool('pokeapi_get_move', {
@@ -86,11 +86,19 @@ export const getMove = tool('pokeapi_get_move', {
   async handler(input, ctx) {
     ctx.log.info('Getting move details', { identifier: input.identifier });
     const svc = getPokeApiService();
-    const move = await svc.getMoveDetails(input.identifier, ctx);
-    return {
-      ...move,
-      learnedByPokemon: input.include_learners ? move.learnedByPokemon : [],
-    };
+    try {
+      const move = await svc.getMoveDetails(input.identifier, ctx);
+      return { ...move, learnedByPokemon: input.include_learners ? move.learnedByPokemon : [] };
+    } catch (err) {
+      if (err instanceof McpError && err.code === JsonRpcErrorCode.NotFound) {
+        throw ctx.fail(
+          'not_found',
+          `Move "${input.identifier}" not found — check spelling or use a numeric ID.`,
+          ctx.recoveryFor('not_found'),
+        );
+      }
+      throw err;
+    }
   },
 
   format: (result) => {

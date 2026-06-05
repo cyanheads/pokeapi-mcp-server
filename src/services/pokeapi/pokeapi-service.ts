@@ -64,7 +64,7 @@ export class PokeApiService {
   // ---------------------------------------------------------------------------
 
   private async fetchRaw<T>(path: string, ctx: Context, cacheKey?: string): Promise<T> {
-    const key = cacheKey ?? `pokeapi:${path}`;
+    const key = cacheKey ?? `pokeapi/${path}`;
     const cached = (await ctx.state.get(key)) as T | null;
     if (cached !== null) return cached;
 
@@ -140,7 +140,13 @@ export class PokeApiService {
   }
 
   async fetchEvolutionChain(url: string, ctx: Context): Promise<RawEvolutionChain> {
-    return this.fetchRaw<RawEvolutionChain>(url, ctx, `pokeapi:evolution-chain:${url}`);
+    // Derive a storage-safe cache key from the URL path (e.g. ".../evolution-chain/1/" → "pokeapi/evolution-chain/1")
+    const pathPart = url
+      .replace(/^https?:\/\/[^/]+/, '')
+      .replace(/\/+$/, '')
+      .replace(/^\//, '');
+    const cacheKey = `pokeapi/${pathPart}`;
+    return this.fetchRaw<RawEvolutionChain>(url, ctx, cacheKey);
   }
 
   async fetchAbility(identifier: string | number, ctx: Context): Promise<RawAbility> {
@@ -173,7 +179,7 @@ export class PokeApiService {
     const list = await this.fetchRaw<{ count: number; results: NamedResource[] }>(
       'nature?limit=25',
       ctx,
-      'pokeapi:nature:list',
+      'pokeapi/nature/list',
     );
     const natures = await Promise.all(list.results.map((r) => this.fetchNature(r.name, ctx)));
     return natures;

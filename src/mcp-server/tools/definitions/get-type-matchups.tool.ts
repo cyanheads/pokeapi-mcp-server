@@ -4,7 +4,7 @@
  */
 
 import { tool, z } from '@cyanheads/mcp-ts-core';
-import { JsonRpcErrorCode } from '@cyanheads/mcp-ts-core/errors';
+import { JsonRpcErrorCode, McpError } from '@cyanheads/mcp-ts-core/errors';
 import { getPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 
 const TypeRelationsSchema = z.object({
@@ -60,7 +60,7 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
     composedMultipliers: z
       .record(z.string(), z.number())
       .describe(
-        'Raw multiplier for each attacking type (0, 0.25, 0.5, 1, 2, 4). Present for all queries.',
+        'Multiplier for each non-neutral attacking type (0, 0.25, 0.5, 1, 2, 4). Types absent from this map deal 1× damage.',
       ),
   }),
 
@@ -89,53 +89,66 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
       });
     }
 
-    if (input.type) {
-      // Single-type query
-      const typeName = svc.normalizeIdentifier(input.type);
-      ctx.log.info('Getting type matchups', { type: typeName });
-      const matchups = await svc.getTypeMatchups(typeName, ctx);
+    try {
+      if (input.type) {
+        // Single-type query
+        const typeName = svc.normalizeIdentifier(input.type);
+        ctx.log.info('Getting type matchups', { type: typeName });
+        const matchups = await svc.getTypeMatchups(typeName, ctx);
 
-      const multipliers: Record<string, number> = {};
-      for (const t of matchups.defensiveRelations.immuneTo) multipliers[t] = 0;
-      for (const t of matchups.defensiveRelations.resists) multipliers[t] = 0.5;
-      for (const t of matchups.defensiveRelations.weakTo) multipliers[t] = 2;
+        const multipliers: Record<string, number> = {};
+        for (const t of matchups.defensiveRelations.immuneTo) multipliers[t] = 0;
+        for (const t of matchups.defensiveRelations.resists) multipliers[t] = 0.5;
+        for (const t of matchups.defensiveRelations.weakTo) multipliers[t] = 2;
+
+        return {
+          queryType: 'type',
+          resolvedTypes: [matchups.typeName],
+          offensiveRelations: matchups.offensiveRelations,
+          defensiveMatchups: matchups.defensiveRelations,
+          composedMultipliers: multipliers,
+        };
+      }
+
+      // Pokémon query
+      const pokemonId = svc.normalizeIdentifier(input.pokemon!);
+      ctx.log.info('Getting type matchups for Pokémon', { pokemon: pokemonId });
+      const rawPokemon = await svc.fetchPokemon(pokemonId, ctx);
+      const types = rawPokemon.types.sort((a, b) => a.slot - b.slot).map((t) => t.type.name);
+
+      const composedMultipliers = await svc.getDualTypeDefensive(types, ctx);
+
+      const weakTo = Object.entries(composedMultipliers)
+        .filter(([, m]) => m >= 2)
+        .map(([t]) => t);
+      const resists = Object.entries(composedMultipliers)
+        .filter(([, m]) => m > 0 && m < 1)
+        .map(([t]) => t);
+      const immuneTo = Object.entries(composedMultipliers)
+        .filter(([, m]) => m === 0)
+        .map(([t]) => t);
 
       return {
-        queryType: 'type',
-        resolvedTypes: [matchups.typeName],
-        offensiveRelations: matchups.offensiveRelations,
-        defensiveMatchups: matchups.defensiveRelations,
-        composedMultipliers: multipliers,
+        queryType: 'pokemon',
+        resolvedTypes: types,
+        offensiveRelations:
+          types.length === 1
+            ? (await svc.getTypeMatchups(types[0]!, ctx)).offensiveRelations
+            : null,
+        defensiveMatchups: { weakTo, resists, immuneTo },
+        composedMultipliers,
       };
+    } catch (err) {
+      if (err instanceof McpError && err.code === JsonRpcErrorCode.NotFound) {
+        const subject = input.type ?? input.pokemon ?? 'identifier';
+        throw ctx.fail(
+          'not_found',
+          `"${subject}" not found — verify it is a valid type name (e.g. "fire") or Pokémon name/number.`,
+          ctx.recoveryFor('not_found'),
+        );
+      }
+      throw err;
     }
-
-    // Pokémon query
-    const pokemonId = svc.normalizeIdentifier(input.pokemon!);
-    ctx.log.info('Getting type matchups for Pokémon', { pokemon: pokemonId });
-    const rawPokemon = await svc.fetchPokemon(pokemonId, ctx);
-    const types = rawPokemon.types.sort((a, b) => a.slot - b.slot).map((t) => t.type.name);
-
-    const composedMultipliers = await svc.getDualTypeDefensive(types, ctx);
-
-    // Compose defensive matchups from multipliers
-    const weakTo = Object.entries(composedMultipliers)
-      .filter(([, m]) => m >= 2)
-      .map(([t]) => t);
-    const resists = Object.entries(composedMultipliers)
-      .filter(([, m]) => m > 0 && m < 1)
-      .map(([t]) => t);
-    const immuneTo = Object.entries(composedMultipliers)
-      .filter(([, m]) => m === 0)
-      .map(([t]) => t);
-
-    return {
-      queryType: 'pokemon',
-      resolvedTypes: types,
-      offensiveRelations:
-        types.length === 1 ? (await svc.getTypeMatchups(types[0]!, ctx)).offensiveRelations : null,
-      defensiveMatchups: { weakTo, resists, immuneTo },
-      composedMultipliers,
-    };
   },
 
   format: (result) => {
