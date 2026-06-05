@@ -55,8 +55,8 @@ export class PokeApiService {
   // ---------------------------------------------------------------------------
 
   normalizeIdentifier(identifier: string | number): string {
-    if (typeof identifier === 'number') return String(identifier);
-    return identifier.trim().toLowerCase().replace(/\s+/g, '-');
+    if (typeof identifier === 'number') return encodeURIComponent(String(identifier));
+    return encodeURIComponent(identifier.trim().toLowerCase().replace(/\s+/g, '-'));
   }
 
   // ---------------------------------------------------------------------------
