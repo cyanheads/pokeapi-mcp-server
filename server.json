@@ -1,9 +1,9 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "pokeapi-mcp-server",
-  "description": "",
+  "name": "cyanheads/pokeapi-mcp-server",
+  "description": "MCP server for PokéAPI v2 — keyless, read-only access to Pokémon game data through Generation IX.",
   "repository": {
-    "url": "",
+    "url": "https://github.com/cyanheads/pokeapi-mcp-server",
     "source": "github"
   },
   "version": "0.1.0",
