@@ -84,9 +84,11 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
     const svc = getPokeApiService();
 
     if (!input.type && !input.pokemon) {
-      throw ctx.fail('invalid_input', 'Provide either type or pokemon — exactly one is required.', {
-        ...ctx.recoveryFor('invalid_input'),
-      });
+      throw ctx.fail(
+        'invalid_input',
+        'Provide either type or pokemon — exactly one is required.',
+        ctx.recoveryFor('invalid_input'),
+      );
     }
 
     try {

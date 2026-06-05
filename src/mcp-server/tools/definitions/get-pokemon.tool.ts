@@ -256,17 +256,7 @@ export const getPokemon = tool('pokeapi_get_pokemon', {
   },
 });
 
-function renderEvolutionStep(
-  step: {
-    species: string;
-    trigger: string;
-    minLevel: number | null;
-    item: unknown;
-    condition: string | null;
-    evolvesTo: unknown[];
-  },
-  depth: number,
-): string {
+function renderEvolutionStep(step: EvolutionStepType, depth: number): string {
   const indent = '  '.repeat(depth);
   const parts: string[] = [`${indent}→ **${step.species}**`];
   if (step.trigger !== 'base') {
@@ -275,8 +265,6 @@ function renderEvolutionStep(
     parts.push(` *(${details.join(', ')})*`);
   }
   const line = parts.join('');
-  const children = (step.evolvesTo as (typeof step)[]).map((child) =>
-    renderEvolutionStep(child, depth + 1),
-  );
+  const children = step.evolvesTo.map((child) => renderEvolutionStep(child, depth + 1));
   return [line, ...children].join('\n');
 }

@@ -130,7 +130,6 @@ export const findPokemon = tool('pokeapi_find_pokemon', {
     if (candidateSets.length === 0) {
       // No category filter — start with empty; query filter below requires at least one category
       results = [];
-      hasFilter = false;
     } else if (candidateSets.length === 1) {
       results = candidateSets[0]!;
     } else {

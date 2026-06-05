@@ -75,13 +75,8 @@ export class PokeApiService {
         const url = path.startsWith('http') ? path : `${baseUrl}/${path}`;
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), timeoutMs);
-        // Compose with the handler's abort signal
-        const signal = ctx.signal.aborted
-          ? controller.signal
-          : ((AbortSignal as unknown as { any: (signals: AbortSignal[]) => AbortSignal }).any?.([
-              ctx.signal,
-              controller.signal,
-            ]) ?? controller.signal);
+        // Compose with the handler's abort signal (AbortSignal.any is available in Node 18+)
+        const signal = AbortSignal.any([ctx.signal, controller.signal]);
 
         let response: Response;
         try {
