@@ -78,6 +78,14 @@ describe('getTypeMatchups', () => {
     });
   });
 
+  it('throws invalid_input when both type and pokemon are provided', async () => {
+    const ctx = createMockContext({ errors: getTypeMatchups.errors, tenantId: 'test-tenant' });
+    const input = getTypeMatchups.input.parse({ type: 'fire', pokemon: 'charizard' });
+    await expect(getTypeMatchups.handler(input, ctx)).rejects.toMatchObject({
+      data: { reason: 'invalid_input' },
+    });
+  });
+
   it('throws not_found for an unrecognized type', async () => {
     const ctx = createMockContext({ errors: getTypeMatchups.errors, tenantId: 'test-tenant' });
     const input = getTypeMatchups.input.parse({ type: 'faketype-xyz-999' });
