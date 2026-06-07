@@ -182,7 +182,7 @@ export const findPokemon = tool('pokeapi_find_pokemon', {
     lines.push(`**Total matches:** ${result.totalCount} | **Showing:** ${result.shown}`);
 
     if (result.pokemon.length === 0) {
-      lines.push('\n*(No results matched the filters.)*');
+      lines.push('\n*(No results matched the filters. Try relaxing one or more filter values.)*');
     } else {
       lines.push('\n| # | Name |');
       lines.push('|---|------|');

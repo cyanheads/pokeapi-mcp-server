@@ -122,11 +122,13 @@ describe('findPokemon', () => {
     expect(text).toContain('squirtle');
   });
 
-  it('formats empty results gracefully', () => {
+  it('formats empty results with actionable guidance mirroring the enrichment notice', () => {
     const result = findPokemon.output.parse({ pokemon: [], totalCount: 0, shown: 0 });
 
     const blocks = findPokemon.format!(result);
     const text = (blocks[0] as { text: string }).text;
     expect(text).toContain('No results');
+    // Actionable guidance must appear in content[] so clients that only read content[] get it
+    expect(text).toContain('relaxing');
   });
 });
