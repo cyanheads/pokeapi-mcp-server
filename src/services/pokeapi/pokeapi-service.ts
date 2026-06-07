@@ -208,11 +208,13 @@ export class PokeApiService {
   ): Promise<PokemonDossier> {
     const id = this.normalizeIdentifier(identifier);
 
-    // Tier 1: fetch pokemon + species in parallel
-    const [pokemon, species] = await Promise.all([
-      this.fetchPokemon(id, ctx),
-      this.fetchSpecies(id, ctx),
-    ]);
+    // Tier 1: fetch the pokemon entry first to resolve the canonical species name.
+    // For variant forms (e.g. "pikachu-rock-star"), pokemon.species.name is the base
+    // species ("pikachu") while pokemon-species/{form} returns 404. Fetch species by
+    // the name the pokemon endpoint itself reports to handle both base species and
+    // variant forms correctly.
+    const pokemon = await this.fetchPokemon(id, ctx);
+    const species = await this.fetchSpecies(pokemon.species.name, ctx);
 
     // Tier 2: evolution chain + ability details in parallel
     const [evolutionChain, ...abilityDetails] = await Promise.all([

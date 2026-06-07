@@ -90,6 +90,21 @@ describe('getPokemon', () => {
     expect(result.isMythical).toBe(false);
   }, 15000);
 
+  it('resolves a variety/form name that is listed in varieties[]', async () => {
+    // pikachu-rock-star is a variant form listed in pikachu's varieties[].
+    // The pokemon-species endpoint does not exist for the form name — the fix
+    // must derive the species from pokemon.species.name ("pikachu") instead.
+    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const input = getPokemon.input.parse({ identifier: 'pikachu-rock-star' });
+    const result = await getPokemon.handler(input, ctx);
+
+    expect(result.name).toBe('pikachu-rock-star');
+    // Species data comes from the base species (pikachu)
+    expect(result.generation).toBe('generation-i');
+    expect(result.captureRate).toBeGreaterThan(0);
+    expect(result.varieties.length).toBeGreaterThan(1); // pikachu has many forms
+  }, 20000);
+
   it('throws McpError (NotFound) for unknown identifier with data.reason populated', async () => {
     const ctx = createMockContext({ errors: getPokemon.errors, tenantId: 'test-tenant' });
     const input = getPokemon.input.parse({ identifier: 'totally-fake-pokemon-xyz-999' });
