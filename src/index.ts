@@ -17,6 +17,8 @@ import { getTypeMatchups } from './mcp-server/tools/definitions/get-type-matchup
 import { initPokeApiService } from './services/pokeapi/pokeapi-service.js';
 
 await createApp({
+  name: 'pokeapi-mcp-server',
+  title: 'pokeapi-mcp-server',
   tools: [getPokemon, getTypeMatchups, getMove, getAbility, getItem, getNature, findPokemon],
   resources: [pokemonResource, typeResource],
   prompts: [],
