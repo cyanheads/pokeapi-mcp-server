@@ -72,7 +72,7 @@ export const findPokemon = tool('pokeapi_find_pokemon', {
   errors: [
     {
       reason: 'invalid_filter',
-      code: JsonRpcErrorCode.InvalidParams,
+      code: JsonRpcErrorCode.ValidationError,
       when: 'An unrecognized generation, type, pokédex, or egg-group name was provided.',
       recovery:
         'Use a valid lowercase PokéAPI name (e.g. "generation-i", "fire", "kanto", "monster").',

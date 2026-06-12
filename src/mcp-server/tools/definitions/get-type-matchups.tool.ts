@@ -74,7 +74,7 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
     },
     {
       reason: 'invalid_input',
-      code: JsonRpcErrorCode.InvalidParams,
+      code: JsonRpcErrorCode.ValidationError,
       when: 'Neither type nor pokemon was provided, or both were provided simultaneously.',
       recovery: 'Provide either a type name or a Pokémon identifier — exactly one is required.',
     },
