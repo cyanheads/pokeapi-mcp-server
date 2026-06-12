@@ -1,6 +1,6 @@
 # pokeapi-mcp-server - Directory Structure
 
-Generated on: 2026-06-05 12:35:25
+Generated on: 2026-06-12 08:26:31
 
 ```text
 pokeapi-mcp-server/
@@ -31,6 +31,7 @@ pokeapi-mcp-server/
 │   ├── check-framework-antipatterns.ts
 │   ├── check-skill-versions.ts
 │   ├── check-skills-sync.ts
+│   ├── clean-mcpb.ts
 │   ├── clean.ts
 │   ├── devcheck.ts
 │   ├── lint-mcp.ts
@@ -116,6 +117,10 @@ pokeapi-mcp-server/
 │   ├── security-pass/
 │   │   └── SKILL.md
 │   ├── setup/
+│   │   └── SKILL.md
+│   ├── techniques/
+│   │   ├── references/
+│   │   │   └── outline-on-overflow.md
 │   │   └── SKILL.md
 │   └── tool-defs-analysis/
 │       └── SKILL.md
