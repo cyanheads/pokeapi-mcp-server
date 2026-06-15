@@ -1,25 +1,25 @@
 {
-  "name": "pokeapi-mcp-server",
+  "name": "@cyanheads/pokeapi-mcp-server",
   "version": "0.1.5",
-  "description": "",
+  "description": "Look up Pokémon, moves, abilities, items, natures, and type matchups from PokéAPI v2 via MCP. STDIO or Streamable HTTP.",
   "author": {
-    "name": "",
-    "email": "",
-    "url": ""
+    "name": "cyanheads",
+    "email": "casey@caseyjhand.com",
+    "url": "https://github.com/cyanheads"
   },
-  "homepage": "",
-  "repository": "",
+  "homepage": "https://github.com/cyanheads/pokeapi-mcp-server#readme",
+  "repository": "git+https://github.com/cyanheads/pokeapi-mcp-server.git",
   "license": "Apache-2.0",
-  "keywords": ["mcp", "mcp-server", "model-context-protocol"],
+  "keywords": ["pokemon", "pokeapi", "game-data", "mcp", "mcp-server", "model-context-protocol", "typescript", "bun", "stdio", "streamable-http", "ai-agent"],
   "mcpServers": "./.codex-plugin/mcp.json",
   "interface": {
     "displayName": "pokeapi-mcp-server",
-    "shortDescription": "",
-    "longDescription": "",
-    "developerName": "",
-    "category": "",
+    "shortDescription": "Look up Pokémon, moves, abilities, items, natures, and type matchups from PokéAPI v2 via MCP.",
+    "longDescription": "Look up Pokémon game data from PokéAPI v2 through Generation IX. Supports Pokémon profiles, moves, abilities, items, natures, and type-matchup calculation. Deployable as stdio or streamable HTTP.",
+    "developerName": "cyanheads",
+    "category": "games",
     "capabilities": ["Read"],
-    "websiteURL": "",
+    "websiteURL": "https://github.com/cyanheads/pokeapi-mcp-server",
     "defaultPrompt": []
   }
 }
