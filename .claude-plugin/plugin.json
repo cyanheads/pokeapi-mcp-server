@@ -1,5 +1,5 @@
 {
-  "name": "@cyanheads/pokeapi-mcp-server",
+  "name": "pokeapi-mcp-server",
   "version": "0.1.5",
   "description": "Look up Pokémon, moves, abilities, items, natures, and type matchups from PokéAPI v2 via MCP. STDIO or Streamable HTTP.",
   "author": {
@@ -9,7 +9,7 @@
   "repository": "git+https://github.com/cyanheads/pokeapi-mcp-server.git",
   "license": "Apache-2.0",
   "mcpServers": {
-    "@cyanheads/pokeapi-mcp-server": {
+    "pokeapi-mcp-server": {
       "command": "npx",
       "args": [
         "-y",
