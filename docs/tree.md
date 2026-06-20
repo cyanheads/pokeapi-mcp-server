@@ -1,6 +1,6 @@
 # pokeapi-mcp-server - Directory Structure
 
-Generated on: 2026-06-12 08:26:31
+Generated on: 2026-06-20 17:58:44
 
 ```text
 pokeapi-mcp-server/
@@ -27,6 +27,7 @@ pokeapi-mcp-server/
 ├── scripts/
 │   ├── build-changelog.ts
 │   ├── build.ts
+│   ├── check-dependency-specifiers.ts
 │   ├── check-docs-sync.ts
 │   ├── check-framework-antipatterns.ts
 │   ├── check-skill-versions.ts
