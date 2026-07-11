@@ -60,7 +60,7 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
     composedMultipliers: z
       .record(z.string(), z.number())
       .describe(
-        'Multiplier for each non-neutral attacking type (0, 0.25, 0.5, 1, 2, 4). Types absent from this map deal 1× damage.',
+        'Multiplier (0, 0.25, 0.5, 1, 2, 4) for every attacking type touched by at least one of the resolved defending type(s), including net-neutral 1× entries where a dual type composes to a cancellation (e.g. Fire/Flying vs Ice: 0.5× then 2× = 1×). A type absent from this map relates to neither defending type and also deals 1× damage.',
       ),
   }),
 
@@ -120,8 +120,16 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
         };
       }
 
-      // Pokémon query
-      const pokemonId = svc.normalizeIdentifier(input.pokemon!);
+      // Pokémon query. The guards above ensure exactly one of type/pokemon is set;
+      // narrow input.pokemon for the type-checker before use.
+      if (!input.pokemon) {
+        throw ctx.fail(
+          'invalid_input',
+          'Provide either type or pokemon — exactly one is required.',
+          ctx.recoveryFor('invalid_input'),
+        );
+      }
+      const pokemonId = svc.normalizeIdentifier(input.pokemon);
       ctx.log.info('Getting type matchups for Pokémon', { pokemon: pokemonId });
       const rawPokemon = await svc.fetchPokemon(pokemonId, ctx);
       const types = rawPokemon.types.sort((a, b) => a.slot - b.slot).map((t) => t.type.name);
@@ -138,13 +146,17 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
         .filter(([, m]) => m === 0)
         .map(([t]) => t);
 
+      // Single-type Pokémon expose a clean offensive breakdown; dual-type does not compose.
+      const [firstType] = types;
+      const offensiveRelations =
+        types.length === 1 && firstType
+          ? (await svc.getTypeMatchups(firstType, ctx)).offensiveRelations
+          : null;
+
       return {
         queryType: 'pokemon',
         resolvedTypes: types,
-        offensiveRelations:
-          types.length === 1
-            ? (await svc.getTypeMatchups(types[0]!, ctx)).offensiveRelations
-            : null,
+        offensiveRelations,
         defensiveMatchups: { weakTo, resists, immuneTo },
         composedMultipliers,
       };
@@ -190,6 +202,7 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
       lines.push(`**Weak To:** ${result.defensiveMatchups.weakTo.join(', ')}`);
 
     lines.push('\n## Composed Multipliers');
+    lines.push('*Includes net-neutral 1× cancellations; types not listed deal 1×.*');
     const sorted = Object.entries(result.composedMultipliers).sort(([, a], [, b]) => b - a);
     for (const [type, mult] of sorted) {
       lines.push(`**${type}:** ${mult}×`);

@@ -67,7 +67,17 @@ describe('getTypeMatchups', () => {
     const result = await getTypeMatchups.handler(input, ctx);
 
     // Fire and Flying are both weak to Rock — should compose to 4×
-    expect(result.composedMultipliers['rock']).toBe(4);
+    expect(result.composedMultipliers.rock).toBe(4);
+  }, 15000);
+
+  it('keeps net-neutral 1× cancellations in composedMultipliers (Charizard vs Ice) (#5)', async () => {
+    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const input = getTypeMatchups.input.parse({ pokemon: 'charizard' });
+    const result = await getTypeMatchups.handler(input, ctx);
+
+    // Fire resists Ice (0.5×), Flying is weak to Ice (2×) → composes to exactly 1×. The entry
+    // is kept, not filtered, so "touched but canceled to neutral" stays distinct from "absent".
+    expect(result.composedMultipliers.ice).toBe(1);
   }, 15000);
 
   it('throws invalid_input when neither type nor pokemon provided', async () => {
