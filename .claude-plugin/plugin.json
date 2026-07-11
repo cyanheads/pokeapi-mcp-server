@@ -1,6 +1,6 @@
 {
   "name": "pokeapi-mcp-server",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Look up Pokémon, moves, abilities, items, natures, and type matchups from PokéAPI v2 via MCP. STDIO or Streamable HTTP.",
   "author": {
     "name": "cyanheads"

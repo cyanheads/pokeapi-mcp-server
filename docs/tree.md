@@ -1,6 +1,6 @@
 # pokeapi-mcp-server - Directory Structure
 
-Generated on: 2026-06-20 17:58:44
+Generated on: 2026-07-11 17:00:32
 
 ```text
 pokeapi-mcp-server/
@@ -11,10 +11,12 @@ pokeapi-mcp-server/
 │   ├── mcp.json
 │   └── plugin.json
 ├── .github/
-│   └── ISSUE_TEMPLATE/
-│       ├── bug_report.yml
-│       ├── config.yml
-│       └── feature_request.yml
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── bug_report.yml
+│   │   ├── config.yml
+│   │   └── feature_request.yml
+│   ├── FUNDING.yml
+│   └── SECURITY.md
 ├── .vscode/
 │   ├── extensions.json
 │   └── settings.json
@@ -164,6 +166,7 @@ pokeapi-mcp-server/
 │       └── get-type-matchups.tool.test.ts
 ├── .dockerignore
 ├── .env.example
+├── .gitattributes
 ├── .gitignore
 ├── .mcpbignore
 ├── AGENTS.md

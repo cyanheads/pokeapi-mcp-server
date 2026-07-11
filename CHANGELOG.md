@@ -2,6 +2,10 @@
 
 All notable changes to this project. Each entry links to its full per-version file in [changelog/](changelog/).
 
+## [0.1.7](changelog/0.1.x/0.1.7.md) — 2026-07-11
+
+Patch release: adopts mcp-ts-core 0.10.14 and Bun supply-chain hardening (minimumReleaseAge, Socket scanner); fixes find-pokemon negative pagination (#7) and query-only notice rendering (#6), and get-type-matchups composed-multiplier documentation (#5).
+
 ## [0.1.6](changelog/0.1.x/0.1.6.md) — 2026-06-20
 
 Maintenance: adopt mcp-ts-core ^0.10.9, re-sync framework scripts + vendored skills, add the check-dependency-specifiers devcheck step and plugin-manifest packaging checks. No tool or behavior changes.
