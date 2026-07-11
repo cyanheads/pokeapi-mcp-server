@@ -93,7 +93,8 @@ export const getNature = tool('pokeapi_get_nature', {
         lines.push(`| ${n.id} | ${n.name} | ${boosts} | ${lowers} | ${likes} | ${hates} |`);
       }
     } else {
-      const n = result.natures[0]!;
+      const [n] = result.natures;
+      if (!n) return [{ type: 'text', text: '# Nature\n\n*(No nature data available.)*' }];
       lines.push(`# ${n.name} (Nature #${n.id})`);
       if (n.increasedStat || n.decreasedStat) {
         lines.push(`**Boosts:** ${n.increasedStat ?? '—'} (+10%)`);

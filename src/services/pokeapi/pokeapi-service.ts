@@ -124,17 +124,17 @@ export class PokeApiService {
   // Resource-specific fetchers
   // ---------------------------------------------------------------------------
 
-  async fetchPokemon(identifier: string | number, ctx: Context): Promise<RawPokemon> {
+  fetchPokemon(identifier: string | number, ctx: Context): Promise<RawPokemon> {
     const id = this.normalizeIdentifier(identifier);
     return this.fetchRaw<RawPokemon>(`pokemon/${id}`, ctx);
   }
 
-  async fetchSpecies(identifier: string | number, ctx: Context): Promise<RawPokemonSpecies> {
+  fetchSpecies(identifier: string | number, ctx: Context): Promise<RawPokemonSpecies> {
     const id = this.normalizeIdentifier(identifier);
     return this.fetchRaw<RawPokemonSpecies>(`pokemon-species/${id}`, ctx);
   }
 
-  async fetchEvolutionChain(url: string, ctx: Context): Promise<RawEvolutionChain> {
+  fetchEvolutionChain(url: string, ctx: Context): Promise<RawEvolutionChain> {
     // Derive a storage-safe cache key from the URL path (e.g. ".../evolution-chain/1/" → "pokeapi/evolution-chain/1")
     const pathPart = url
       .replace(/^https?:\/\/[^/]+/, '')
@@ -144,27 +144,27 @@ export class PokeApiService {
     return this.fetchRaw<RawEvolutionChain>(url, ctx, cacheKey);
   }
 
-  async fetchAbility(identifier: string | number, ctx: Context): Promise<RawAbility> {
+  fetchAbility(identifier: string | number, ctx: Context): Promise<RawAbility> {
     const id = this.normalizeIdentifier(identifier);
     return this.fetchRaw<RawAbility>(`ability/${id}`, ctx);
   }
 
-  async fetchType(identifier: string | number, ctx: Context): Promise<RawType> {
+  fetchType(identifier: string | number, ctx: Context): Promise<RawType> {
     const id = this.normalizeIdentifier(identifier);
     return this.fetchRaw<RawType>(`type/${id}`, ctx);
   }
 
-  async fetchMove(identifier: string | number, ctx: Context): Promise<RawMove> {
+  fetchMove(identifier: string | number, ctx: Context): Promise<RawMove> {
     const id = this.normalizeIdentifier(identifier);
     return this.fetchRaw<RawMove>(`move/${id}`, ctx);
   }
 
-  async fetchItem(identifier: string | number, ctx: Context): Promise<RawItem> {
+  fetchItem(identifier: string | number, ctx: Context): Promise<RawItem> {
     const id = this.normalizeIdentifier(identifier);
     return this.fetchRaw<RawItem>(`item/${id}`, ctx);
   }
 
-  async fetchNature(identifier: string | number, ctx: Context): Promise<RawNature> {
+  fetchNature(identifier: string | number, ctx: Context): Promise<RawNature> {
     const id = this.normalizeIdentifier(identifier);
     return this.fetchRaw<RawNature>(`nature/${id}`, ctx);
   }
@@ -180,17 +180,17 @@ export class PokeApiService {
     return natures;
   }
 
-  async fetchGeneration(identifier: string | number, ctx: Context): Promise<RawGeneration> {
+  fetchGeneration(identifier: string | number, ctx: Context): Promise<RawGeneration> {
     const id = this.normalizeIdentifier(identifier);
     return this.fetchRaw<RawGeneration>(`generation/${id}`, ctx);
   }
 
-  async fetchPokedex(identifier: string | number, ctx: Context): Promise<RawPokedex> {
+  fetchPokedex(identifier: string | number, ctx: Context): Promise<RawPokedex> {
     const id = this.normalizeIdentifier(identifier);
     return this.fetchRaw<RawPokedex>(`pokedex/${id}`, ctx);
   }
 
-  async fetchEggGroup(identifier: string | number, ctx: Context): Promise<RawEggGroup> {
+  fetchEggGroup(identifier: string | number, ctx: Context): Promise<RawEggGroup> {
     const id = this.normalizeIdentifier(identifier);
     return this.fetchRaw<RawEggGroup>(`egg-group/${id}`, ctx);
   }

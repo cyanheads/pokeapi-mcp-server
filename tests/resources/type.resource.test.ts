@@ -26,7 +26,7 @@ describe('typeResource', () => {
     expect(r).toHaveProperty('typeName', 'water');
     expect(r).toHaveProperty('offensiveRelations');
     expect(r).toHaveProperty('defensiveRelations');
-    const defensive = r['defensiveRelations'] as Record<string, unknown>;
+    const defensive = r.defensiveRelations as Record<string, unknown>;
     expect(defensive).toHaveProperty('weakTo');
     expect(defensive).toHaveProperty('resists');
     expect(defensive).toHaveProperty('immuneTo');
@@ -37,8 +37,8 @@ describe('typeResource', () => {
     const params = typeResource.params.parse({ typeName: 'water' });
     const result = await typeResource.handler(params, ctx);
 
-    const defensive = (result as Record<string, Record<string, string[]>>)['defensiveRelations']!;
-    expect(defensive['weakTo']).toContain('electric');
+    const defensive = (result as Record<string, Record<string, string[]>>).defensiveRelations!;
+    expect(defensive.weakTo).toContain('electric');
   }, 15000);
 
   it('normal type is immune to ghost', async () => {
@@ -46,8 +46,8 @@ describe('typeResource', () => {
     const params = typeResource.params.parse({ typeName: 'normal' });
     const result = await typeResource.handler(params, ctx);
 
-    const defensive = (result as Record<string, Record<string, string[]>>)['defensiveRelations']!;
-    expect(defensive['immuneTo']).toContain('ghost');
+    const defensive = (result as Record<string, Record<string, string[]>>).defensiveRelations!;
+    expect(defensive.immuneTo).toContain('ghost');
   }, 15000);
 
   it('throws McpError for an unknown type name', async () => {
