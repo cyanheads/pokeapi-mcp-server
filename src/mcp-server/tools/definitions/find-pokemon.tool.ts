@@ -45,11 +45,20 @@ export const findPokemon = tool('pokeapi_find_pokemon', {
       .describe(
         'Strict token match on name. "chu" matches "pikachu" and "raichu". Case-insensitive.',
       ),
-    limit: z.number().default(50).describe('Maximum results to return. Defaults to 50.'),
+    limit: z
+      .number()
+      .int()
+      .positive()
+      .default(50)
+      .describe('Maximum results to return. Positive integer; defaults to 50.'),
     offset: z
       .number()
+      .int()
+      .nonnegative()
       .default(0)
-      .describe('Offset into the filtered result set for pagination. Defaults to 0.'),
+      .describe(
+        'Offset into the filtered result set for pagination. Non-negative integer; defaults to 0.',
+      ),
   }),
   output: z.object({
     pokemon: z
@@ -125,29 +134,22 @@ export const findPokemon = tool('pokeapi_find_pokemon', {
       throw err;
     }
 
-    // Intersect all candidate sets (AND logic)
-    let results: PokemonListEntry[];
-    if (candidateSets.length === 0) {
-      // No category filter — start with empty; query filter below requires at least one category
-      results = [];
-    } else if (candidateSets.length === 1) {
-      results = candidateSets[0]!;
-    } else {
-      // Intersect by name
-      results = candidateSets[0]!;
-      for (let i = 1; i < candidateSets.length; i++) {
-        const nextSet = new Set(candidateSets[i]!.map((e) => e.name));
-        results = results.filter((e) => nextSet.has(e.name));
-      }
+    // Intersect all candidate sets by name (AND logic). An empty candidate list means
+    // no category filter was provided; the query filter below requires at least one.
+    const [firstSet, ...otherSets] = candidateSets;
+    let results: PokemonListEntry[] = firstSet ?? [];
+    for (const set of otherSets) {
+      const nextSet = new Set(set.map((e) => e.name));
+      results = results.filter((e) => nextSet.has(e.name));
     }
 
     // Apply query filter (token match on name)
     if (input.query?.trim()) {
       if (!hasFilter) {
         // No category filter provided — can't do name-only search without a bounded set
-        ctx.enrich({
-          notice: `No category filters were provided. Use at least one of generation, type, pokedex, or egg_group along with query to search Pokémon by name.`,
-        });
+        ctx.enrich.notice(
+          `No category filters were provided. Use at least one of generation, type, pokedex, or egg_group along with query to search Pokémon by name.`,
+        );
         return { pokemon: [], totalCount: 0, shown: 0 };
       }
       const tokens = input.query.trim().toLowerCase().split(/\s+/).filter(Boolean);
@@ -155,9 +157,9 @@ export const findPokemon = tool('pokeapi_find_pokemon', {
     }
 
     if (results.length === 0) {
-      ctx.enrich({
-        notice: 'No Pokémon matched the provided filters. Try relaxing one or more filter values.',
-      });
+      ctx.enrich.notice(
+        'No Pokémon matched the provided filters. Try relaxing one or more filter values.',
+      );
       return { pokemon: [], totalCount: 0, shown: 0 };
     }
 

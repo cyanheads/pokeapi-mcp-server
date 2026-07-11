@@ -4,7 +4,7 @@
  */
 
 import { McpError } from '@cyanheads/mcp-ts-core/errors';
-import { createMockContext } from '@cyanheads/mcp-ts-core/testing';
+import { createMockContext, getEnrichment } from '@cyanheads/mcp-ts-core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { findPokemon } from '@/mcp-server/tools/definitions/find-pokemon.tool.js';
 import { initPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
@@ -61,6 +61,12 @@ describe('findPokemon', () => {
     expect(result.pokemon).toHaveLength(0);
     expect(result.totalCount).toBe(0);
     expect(result.shown).toBe(0);
+
+    // The query-only path enriches a category-filter-required notice. The framework appends
+    // any populated enrichment field to content[] as a trailer, so content-only clients get
+    // it too (#6). Assert the notice text carries the query-only-specific guidance.
+    const enrichment = getEnrichment(ctx);
+    expect(enrichment.notice).toContain('No category filters were provided');
   });
 
   it('applies pagination with offset and limit', async () => {
@@ -80,6 +86,18 @@ describe('findPokemon', () => {
       expect(page1Names.has(name)).toBe(false);
     }
   }, 20000);
+
+  it('rejects a negative limit at input validation (#7)', () => {
+    // limit must be a positive integer — negatives previously reached Array.slice and
+    // returned misleading successes. A Zod failure on the input schema surfaces to the
+    // client as ValidationError (-32007) via the framework's ZodError auto-classification.
+    expect(() => findPokemon.input.parse({ generation: 'generation-i', limit: -5 })).toThrow();
+  });
+
+  it('rejects a negative offset at input validation (#7)', () => {
+    // offset must be a non-negative integer — negatives previously reached Array.slice.
+    expect(() => findPokemon.input.parse({ generation: 'generation-i', offset: -5 })).toThrow();
+  });
 
   it('throws McpError for an invalid generation name', async () => {
     const ctx = createMockContext({ errors: findPokemon.errors, tenantId: 'test-tenant' });
