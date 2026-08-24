@@ -4,13 +4,13 @@
  */
 
 import { McpError } from '@cyanheads/mcp-ts-core/errors';
-import { createMockContext } from '@cyanheads/mcp-ts-core/testing';
+import { createInMemoryStorage, createMockContext } from '@cyanheads/mcp-ts-core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { typeResource } from '@/mcp-server/resources/definitions/type.resource.js';
 import { initPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 
 const mockAppConfig = {} as Parameters<typeof initPokeApiService>[0];
-const mockStorage = {} as Parameters<typeof initPokeApiService>[1];
+const mockStorage = createInMemoryStorage();
 
 describe('typeResource', () => {
   beforeEach(() => {
@@ -18,8 +18,8 @@ describe('typeResource', () => {
   });
 
   it('returns type matchup data for a valid type', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
-    const params = typeResource.params.parse({ typeName: 'water' });
+    const ctx = createMockContext({ errors: typeResource.errors, tenantId: 'test-tenant' });
+    const params = typeResource.params!.parse({ typeName: 'water' });
     const result = await typeResource.handler(params, ctx);
 
     const r = result as Record<string, unknown>;
@@ -33,8 +33,8 @@ describe('typeResource', () => {
   }, 15000);
 
   it('water type is weak to electric', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
-    const params = typeResource.params.parse({ typeName: 'water' });
+    const ctx = createMockContext({ errors: typeResource.errors, tenantId: 'test-tenant' });
+    const params = typeResource.params!.parse({ typeName: 'water' });
     const result = await typeResource.handler(params, ctx);
 
     const defensive = (result as Record<string, Record<string, string[]>>).defensiveRelations!;
@@ -42,8 +42,8 @@ describe('typeResource', () => {
   }, 15000);
 
   it('normal type is immune to ghost', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
-    const params = typeResource.params.parse({ typeName: 'normal' });
+    const ctx = createMockContext({ errors: typeResource.errors, tenantId: 'test-tenant' });
+    const params = typeResource.params!.parse({ typeName: 'normal' });
     const result = await typeResource.handler(params, ctx);
 
     const defensive = (result as Record<string, Record<string, string[]>>).defensiveRelations!;
@@ -52,12 +52,14 @@ describe('typeResource', () => {
 
   it('throws McpError for an unknown type name', async () => {
     const ctx = createMockContext({ errors: typeResource.errors, tenantId: 'test-tenant' });
-    const params = typeResource.params.parse({ typeName: 'faketype-xyz-999' });
+    const params = typeResource.params!.parse({ typeName: 'faketype-xyz-999' });
     await expect(typeResource.handler(params, ctx)).rejects.toThrow(McpError);
   }, 15000);
 
   it('lists all 18 standard type resources', async () => {
-    const listing = await typeResource.list!();
+    const listing = await typeResource.list!(
+      {} as Parameters<NonNullable<typeof typeResource.list>>[0],
+    );
     expect(listing.resources).toBeInstanceOf(Array);
     expect(listing.resources.length).toBe(18);
     for (const r of listing.resources) {

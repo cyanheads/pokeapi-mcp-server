@@ -4,13 +4,13 @@
  */
 
 import { McpError } from '@cyanheads/mcp-ts-core/errors';
-import { createMockContext } from '@cyanheads/mcp-ts-core/testing';
+import { createInMemoryStorage, createMockContext } from '@cyanheads/mcp-ts-core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { getTypeMatchups } from '@/mcp-server/tools/definitions/get-type-matchups.tool.js';
 import { initPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 
 const mockAppConfig = {} as Parameters<typeof initPokeApiService>[0];
-const mockStorage = {} as Parameters<typeof initPokeApiService>[1];
+const mockStorage = createInMemoryStorage();
 
 describe('getTypeMatchups', () => {
   beforeEach(() => {
@@ -18,7 +18,7 @@ describe('getTypeMatchups', () => {
   });
 
   it('returns offensive and defensive matchups for a single type', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: getTypeMatchups.errors, tenantId: 'test-tenant' });
     const input = getTypeMatchups.input.parse({ type: 'fire' });
     const result = await getTypeMatchups.handler(input, ctx);
 
@@ -33,7 +33,7 @@ describe('getTypeMatchups', () => {
   }, 15000);
 
   it('fire type is super effective against grass', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: getTypeMatchups.errors, tenantId: 'test-tenant' });
     const input = getTypeMatchups.input.parse({ type: 'fire' });
     const result = await getTypeMatchups.handler(input, ctx);
 
@@ -41,7 +41,7 @@ describe('getTypeMatchups', () => {
   }, 15000);
 
   it('fire type is weak to water defensively', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: getTypeMatchups.errors, tenantId: 'test-tenant' });
     const input = getTypeMatchups.input.parse({ type: 'fire' });
     const result = await getTypeMatchups.handler(input, ctx);
 
@@ -49,7 +49,7 @@ describe('getTypeMatchups', () => {
   }, 15000);
 
   it('resolves matchups for a Pokémon identifier', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: getTypeMatchups.errors, tenantId: 'test-tenant' });
     // Charizard is Fire/Flying
     const input = getTypeMatchups.input.parse({ pokemon: 'charizard' });
     const result = await getTypeMatchups.handler(input, ctx);
@@ -62,7 +62,7 @@ describe('getTypeMatchups', () => {
   }, 15000);
 
   it('computes 4× weakness for dual-type Pokémon (Charizard vs Rock)', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: getTypeMatchups.errors, tenantId: 'test-tenant' });
     const input = getTypeMatchups.input.parse({ pokemon: 'charizard' });
     const result = await getTypeMatchups.handler(input, ctx);
 
@@ -71,7 +71,7 @@ describe('getTypeMatchups', () => {
   }, 15000);
 
   it('keeps net-neutral 1× cancellations in composedMultipliers (Charizard vs Ice) (#5)', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: getTypeMatchups.errors, tenantId: 'test-tenant' });
     const input = getTypeMatchups.input.parse({ pokemon: 'charizard' });
     const result = await getTypeMatchups.handler(input, ctx);
 
@@ -125,5 +125,23 @@ describe('getTypeMatchups', () => {
     expect(text).toContain('fire');
     expect(text).toContain('grass');
     expect(text).toContain('water');
+  });
+
+  it('formats unavailable offensive relations explicitly for dual-type queries', () => {
+    const result = getTypeMatchups.output.parse({
+      queryType: 'pokemon',
+      resolvedTypes: ['fire', 'flying'],
+      offensiveRelations: null,
+      defensiveMatchups: {
+        weakTo: ['water', 'electric', 'rock'],
+        resists: ['fire', 'grass', 'fighting', 'bug', 'steel', 'fairy'],
+        immuneTo: ['ground'],
+      },
+      composedMultipliers: { rock: 4, electric: 2, ground: 0 },
+    });
+
+    const blocks = getTypeMatchups.format!(result);
+    const text = (blocks[0] as { text: string }).text;
+    expect(text).toContain('Offensive breakdown unavailable for dual-type Pokémon queries.');
   });
 });

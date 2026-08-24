@@ -4,14 +4,14 @@
  */
 
 import { McpError } from '@cyanheads/mcp-ts-core/errors';
-import { createMockContext } from '@cyanheads/mcp-ts-core/testing';
+import { createInMemoryStorage, createMockContext } from '@cyanheads/mcp-ts-core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { getPokemon } from '@/mcp-server/tools/definitions/get-pokemon.tool.js';
 import { initPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 
 // Use a mock AppConfig — the service only reads server config from env vars
 const mockAppConfig = {} as Parameters<typeof initPokeApiService>[0];
-const mockStorage = { type: 'in-memory' } as Parameters<typeof initPokeApiService>[1];
+const mockStorage = createInMemoryStorage();
 
 describe('getPokemon', () => {
   beforeEach(() => {
@@ -19,7 +19,7 @@ describe('getPokemon', () => {
   });
 
   it('returns dossier for a well-known Pokémon by name', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: getPokemon.errors, tenantId: 'test-tenant' });
     const input = getPokemon.input.parse({ identifier: 'bulbasaur' });
     const result = await getPokemon.handler(input, ctx);
 
@@ -40,7 +40,7 @@ describe('getPokemon', () => {
   }, 15000);
 
   it('accepts Pokédex number as a string identifier', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: getPokemon.errors, tenantId: 'test-tenant' });
     const input = getPokemon.input.parse({ identifier: '25' });
     const result = await getPokemon.handler(input, ctx);
 
@@ -49,7 +49,7 @@ describe('getPokemon', () => {
   }, 15000);
 
   it('returns move list when include_moves is true', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: getPokemon.errors, tenantId: 'test-tenant' });
     const input = getPokemon.input.parse({ identifier: 'charmander', include_moves: true });
     const result = await getPokemon.handler(input, ctx);
 
@@ -60,7 +60,7 @@ describe('getPokemon', () => {
   }, 15000);
 
   it('resolves flavor text for a specific game_version', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: getPokemon.errors, tenantId: 'test-tenant' });
     const input = getPokemon.input.parse({ identifier: 'bulbasaur', game_version: 'red' });
     const result = await getPokemon.handler(input, ctx);
 
@@ -70,7 +70,7 @@ describe('getPokemon', () => {
   }, 15000);
 
   it('falls back to most recent English flavor text when game_version not found', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: getPokemon.errors, tenantId: 'test-tenant' });
     const input = getPokemon.input.parse({
       identifier: 'bulbasaur',
       game_version: 'nonexistent-version-xyz',
@@ -82,7 +82,7 @@ describe('getPokemon', () => {
   }, 15000);
 
   it('handles legendary Pokémon correctly', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: getPokemon.errors, tenantId: 'test-tenant' });
     const input = getPokemon.input.parse({ identifier: 'mewtwo' });
     const result = await getPokemon.handler(input, ctx);
 
@@ -94,7 +94,7 @@ describe('getPokemon', () => {
     // pikachu-rock-star is a variant form listed in pikachu's varieties[].
     // The pokemon-species endpoint does not exist for the form name — the fix
     // must derive the species from pokemon.species.name ("pikachu") instead.
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: getPokemon.errors, tenantId: 'test-tenant' });
     const input = getPokemon.input.parse({ identifier: 'pikachu-rock-star' });
     const result = await getPokemon.handler(input, ctx);
 
@@ -175,6 +175,8 @@ describe('getPokemon', () => {
     expect(text).toContain('overgrow');
     expect(text).toContain('80'); // moveCount
     expect(text).toContain('Seed Pokémon');
+    expect(text).toContain('**Legendary:** No');
+    expect(text).toContain('**Mythical:** No');
   });
 
   it('formats evolution chain correctly', () => {

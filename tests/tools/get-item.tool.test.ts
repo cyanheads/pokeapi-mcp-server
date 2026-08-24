@@ -4,13 +4,13 @@
  */
 
 import { McpError } from '@cyanheads/mcp-ts-core/errors';
-import { createMockContext } from '@cyanheads/mcp-ts-core/testing';
+import { createInMemoryStorage, createMockContext } from '@cyanheads/mcp-ts-core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { getItem } from '@/mcp-server/tools/definitions/get-item.tool.js';
 import { initPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 
 const mockAppConfig = {} as Parameters<typeof initPokeApiService>[0];
-const mockStorage = {} as Parameters<typeof initPokeApiService>[1];
+const mockStorage = createInMemoryStorage();
 
 describe('getItem', () => {
   beforeEach(() => {
@@ -18,7 +18,7 @@ describe('getItem', () => {
   });
 
   it('returns item details for a well-known held item', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: getItem.errors, tenantId: 'test-tenant' });
     const input = getItem.input.parse({ identifier: 'leftovers' });
     const result = await getItem.handler(input, ctx);
 
@@ -31,7 +31,7 @@ describe('getItem', () => {
   }, 15000);
 
   it('returns item by numeric ID string', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: getItem.errors, tenantId: 'test-tenant' });
     // Poke Ball is item ID 4
     const input = getItem.input.parse({ identifier: '4' });
     const result = await getItem.handler(input, ctx);
@@ -41,7 +41,7 @@ describe('getItem', () => {
   }, 15000);
 
   it('returns choice-specs with correct category', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: getItem.errors, tenantId: 'test-tenant' });
     const input = getItem.input.parse({ identifier: 'choice-specs' });
     const result = await getItem.handler(input, ctx);
 

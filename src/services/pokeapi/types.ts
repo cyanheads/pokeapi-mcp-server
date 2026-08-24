@@ -233,7 +233,7 @@ export interface RawItem {
   attributes: NamedResource[];
   baby_trigger_for?: { url: string } | null;
   category: NamedResource;
-  cost: number;
+  cost: number | null;
   effect_entries: Array<{
     effect: string;
     short_effect: string;

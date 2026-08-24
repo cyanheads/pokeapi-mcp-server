@@ -4,13 +4,17 @@
  */
 
 import { McpError } from '@cyanheads/mcp-ts-core/errors';
-import { createMockContext, getEnrichment } from '@cyanheads/mcp-ts-core/testing';
+import {
+  createInMemoryStorage,
+  createMockContext,
+  getEnrichment,
+} from '@cyanheads/mcp-ts-core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { findPokemon } from '@/mcp-server/tools/definitions/find-pokemon.tool.js';
 import { initPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 
 const mockAppConfig = {} as Parameters<typeof initPokeApiService>[0];
-const mockStorage = {} as Parameters<typeof initPokeApiService>[1];
+const mockStorage = createInMemoryStorage();
 
 describe('findPokemon', () => {
   beforeEach(() => {
@@ -18,7 +22,7 @@ describe('findPokemon', () => {
   });
 
   it('filters Pokémon by generation', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: findPokemon.errors, tenantId: 'test-tenant' });
     const input = findPokemon.input.parse({ generation: 'generation-i' });
     const result = await findPokemon.handler(input, ctx);
 
@@ -31,7 +35,7 @@ describe('findPokemon', () => {
   }, 20000);
 
   it('filters Pokémon by type', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: findPokemon.errors, tenantId: 'test-tenant' });
     const input = findPokemon.input.parse({ type: 'dragon', limit: 20 });
     const result = await findPokemon.handler(input, ctx);
 
@@ -40,7 +44,7 @@ describe('findPokemon', () => {
   }, 20000);
 
   it('applies query filter within a generation', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: findPokemon.errors, tenantId: 'test-tenant' });
     // "chu" should match pikachu and raichu within generation-i
     const input = findPokemon.input.parse({ generation: 'generation-i', query: 'chu' });
     const result = await findPokemon.handler(input, ctx);
@@ -53,7 +57,7 @@ describe('findPokemon', () => {
   }, 20000);
 
   it('returns empty results with enrichment notice when no category filter and query only', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: findPokemon.errors, tenantId: 'test-tenant' });
     // query without any category filter — should return empty with enrichment notice
     const input = findPokemon.input.parse({ query: 'pikachu' });
     const result = await findPokemon.handler(input, ctx);
@@ -70,7 +74,7 @@ describe('findPokemon', () => {
   });
 
   it('applies pagination with offset and limit', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: findPokemon.errors, tenantId: 'test-tenant' });
     const inputPage1 = findPokemon.input.parse({ generation: 'generation-i', limit: 5, offset: 0 });
     const inputPage2 = findPokemon.input.parse({ generation: 'generation-i', limit: 5, offset: 5 });
 
@@ -106,7 +110,7 @@ describe('findPokemon', () => {
   }, 15000);
 
   it('returns empty results with notice for valid filters that yield no matches (AND intersection)', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: findPokemon.errors, tenantId: 'test-tenant' });
     // Generation-i + ice type — unlikely to have many, test intersection
     const input = findPokemon.input.parse({
       generation: 'generation-i',

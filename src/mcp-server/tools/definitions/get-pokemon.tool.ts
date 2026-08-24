@@ -205,8 +205,8 @@ export const getPokemon = tool('pokeapi_get_pokemon', {
             ? 'Always female'
             : `${((result.genderRate / 8) * 100).toFixed(0)}% female`;
     lines.push(`**Gender Rate:** ${genderLabel} (raw: ${result.genderRate})`);
-    if (result.isLegendary) lines.push('**Legendary:** Yes');
-    if (result.isMythical) lines.push('**Mythical:** Yes');
+    lines.push(`**Legendary:** ${result.isLegendary ? 'Yes' : 'No'}`);
+    lines.push(`**Mythical:** ${result.isMythical ? 'Yes' : 'No'}`);
     lines.push(`**Egg Groups:** ${result.eggGroups.join(', ')}`);
 
     lines.push('\n## Base Stats');

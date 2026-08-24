@@ -191,6 +191,9 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
         );
       if (result.offensiveRelations.noEffectTo.length > 0)
         lines.push(`**No Effect (0×):** ${result.offensiveRelations.noEffectTo.join(', ')}`);
+    } else {
+      lines.push('\n## Offensive Relations');
+      lines.push('*(Offensive breakdown unavailable for dual-type Pokémon queries.)*');
     }
 
     lines.push('\n## Defensive Matchups');

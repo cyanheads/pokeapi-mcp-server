@@ -4,13 +4,13 @@
  */
 
 import { McpError } from '@cyanheads/mcp-ts-core/errors';
-import { createMockContext } from '@cyanheads/mcp-ts-core/testing';
+import { createInMemoryStorage, createMockContext } from '@cyanheads/mcp-ts-core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { pokemonResource } from '@/mcp-server/resources/definitions/pokemon.resource.js';
 import { initPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 
 const mockAppConfig = {} as Parameters<typeof initPokeApiService>[0];
-const mockStorage = {} as Parameters<typeof initPokeApiService>[1];
+const mockStorage = createInMemoryStorage();
 
 describe('pokemonResource', () => {
   beforeEach(() => {
@@ -18,8 +18,8 @@ describe('pokemonResource', () => {
   });
 
   it('returns Pokémon dossier for a valid name', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
-    const params = pokemonResource.params.parse({ identifier: 'pikachu' });
+    const ctx = createMockContext({ errors: pokemonResource.errors, tenantId: 'test-tenant' });
+    const params = pokemonResource.params!.parse({ identifier: 'pikachu' });
     const result = await pokemonResource.handler(params, ctx);
 
     expect(result).toHaveProperty('id', 25);
@@ -29,8 +29,8 @@ describe('pokemonResource', () => {
   }, 15000);
 
   it('returns Pokémon dossier by dex number', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
-    const params = pokemonResource.params.parse({ identifier: '1' });
+    const ctx = createMockContext({ errors: pokemonResource.errors, tenantId: 'test-tenant' });
+    const params = pokemonResource.params!.parse({ identifier: '1' });
     const result = await pokemonResource.handler(params, ctx);
 
     expect(result).toHaveProperty('id', 1);
@@ -38,8 +38,8 @@ describe('pokemonResource', () => {
   }, 15000);
 
   it('does not include moves (resource returns dossier without move details)', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
-    const params = pokemonResource.params.parse({ identifier: 'bulbasaur' });
+    const ctx = createMockContext({ errors: pokemonResource.errors, tenantId: 'test-tenant' });
+    const params = pokemonResource.params!.parse({ identifier: 'bulbasaur' });
     const result = await pokemonResource.handler(params, ctx);
 
     // moves should be empty array (include_moves = false)
@@ -51,12 +51,14 @@ describe('pokemonResource', () => {
 
   it('throws not_found for unknown identifier (HTTP 404 with empty body)', async () => {
     const ctx = createMockContext({ errors: pokemonResource.errors, tenantId: 'test-tenant' });
-    const params = pokemonResource.params.parse({ identifier: 'totally-fake-pokemon-xyz-abc' });
+    const params = pokemonResource.params!.parse({ identifier: 'totally-fake-pokemon-xyz-abc' });
     await expect(pokemonResource.handler(params, ctx)).rejects.toThrow(McpError);
   }, 15000);
 
   it('lists static sample resources', async () => {
-    const listing = await pokemonResource.list!();
+    const listing = await pokemonResource.list!(
+      {} as Parameters<NonNullable<typeof pokemonResource.list>>[0],
+    );
     expect(listing.resources).toBeInstanceOf(Array);
     expect(listing.resources.length).toBeGreaterThan(0);
     for (const r of listing.resources) {

@@ -5,9 +5,9 @@
 
 import type { Context } from '@cyanheads/mcp-ts-core';
 import type { AppConfig } from '@cyanheads/mcp-ts-core/config';
-import { notFound, serviceUnavailable } from '@cyanheads/mcp-ts-core/errors';
+import { serviceUnavailable } from '@cyanheads/mcp-ts-core/errors';
 import type { StorageService } from '@cyanheads/mcp-ts-core/storage';
-import { withRetry } from '@cyanheads/mcp-ts-core/utils';
+import { fetchWithTimeout, withRetry } from '@cyanheads/mcp-ts-core/utils';
 import { getServerConfig } from '../../config/server-config.js';
 import type {
   AbilityDetails,
@@ -73,31 +73,11 @@ export class PokeApiService {
     const result = await withRetry(
       async () => {
         const url = path.startsWith('http') ? path : `${baseUrl}/${path}`;
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), timeoutMs);
-        // Compose with the handler's abort signal (AbortSignal.any is available in Node 18+)
-        const signal = AbortSignal.any([ctx.signal, controller.signal]);
-
-        let response: Response;
-        try {
-          response = await fetch(url, {
-            signal,
-            headers: { Accept: 'application/json' },
-          });
-        } finally {
-          clearTimeout(timer);
-        }
-
-        // PokéAPI 404 returns an empty body — check status before parsing
-        if (response.status === 404) {
-          throw notFound(`PokéAPI returned 404 for ${path}`, { path });
-        }
-        if (!response.ok) {
-          throw serviceUnavailable(`PokéAPI returned HTTP ${response.status} for ${path}`, {
-            status: response.status,
-            path,
-          });
-        }
+        const response = await fetchWithTimeout(url, timeoutMs, ctx, {
+          signal: ctx.signal,
+          headers: { Accept: 'application/json' },
+          expectedStatuses: [404],
+        });
 
         const text = await response.text();
         if (/^\s*<(!DOCTYPE\s+html|html[\s>])/i.test(text)) {
@@ -112,6 +92,7 @@ export class PokeApiService {
       {
         operation: `PokeApiService.fetch:${path}`,
         baseDelayMs: 500,
+        context: ctx,
         signal: ctx.signal,
       },
     );
@@ -391,7 +372,7 @@ export class PokeApiService {
       id: raw.id,
       name: raw.name,
       category: raw.category.name,
-      cost: raw.cost,
+      cost: raw.cost ?? 0,
       flingPower: raw.fling_power ?? null,
       effectText: en?.effect ?? null,
       shortEffectText: en?.short_effect ?? null,

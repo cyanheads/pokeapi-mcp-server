@@ -4,13 +4,13 @@
  */
 
 import { McpError } from '@cyanheads/mcp-ts-core/errors';
-import { createMockContext } from '@cyanheads/mcp-ts-core/testing';
+import { createInMemoryStorage, createMockContext } from '@cyanheads/mcp-ts-core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { getNature } from '@/mcp-server/tools/definitions/get-nature.tool.js';
 import { initPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 
 const mockAppConfig = {} as Parameters<typeof initPokeApiService>[0];
-const mockStorage = {} as Parameters<typeof initPokeApiService>[1];
+const mockStorage = createInMemoryStorage();
 
 describe('getNature', () => {
   beforeEach(() => {
@@ -18,7 +18,7 @@ describe('getNature', () => {
   });
 
   it('returns details for a specific nature by name', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: getNature.errors, tenantId: 'test-tenant' });
     const input = getNature.input.parse({ identifier: 'modest' });
     const result = await getNature.handler(input, ctx);
 
@@ -33,7 +33,7 @@ describe('getNature', () => {
   }, 15000);
 
   it('returns all 25 natures when identifier is omitted', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: getNature.errors, tenantId: 'test-tenant' });
     const input = getNature.input.parse({});
     const result = await getNature.handler(input, ctx);
 
@@ -47,7 +47,7 @@ describe('getNature', () => {
   }, 15000);
 
   it('returns neutral nature with null stat modifiers', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: getNature.errors, tenantId: 'test-tenant' });
     // Hardy is a neutral nature (ID 1)
     const input = getNature.input.parse({ identifier: 'hardy' });
     const result = await getNature.handler(input, ctx);
@@ -61,7 +61,7 @@ describe('getNature', () => {
   }, 15000);
 
   it('accepts numeric ID string', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: getNature.errors, tenantId: 'test-tenant' });
     // Hardy is ID 1 in PokéAPI (verified)
     const input = getNature.input.parse({ identifier: '1' });
     const result = await getNature.handler(input, ctx);

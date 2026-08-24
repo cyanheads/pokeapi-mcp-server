@@ -4,13 +4,13 @@
  */
 
 import { McpError } from '@cyanheads/mcp-ts-core/errors';
-import { createMockContext } from '@cyanheads/mcp-ts-core/testing';
+import { createInMemoryStorage, createMockContext } from '@cyanheads/mcp-ts-core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { getMove } from '@/mcp-server/tools/definitions/get-move.tool.js';
 import { initPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 
 const mockAppConfig = {} as Parameters<typeof initPokeApiService>[0];
-const mockStorage = {} as Parameters<typeof initPokeApiService>[1];
+const mockStorage = createInMemoryStorage();
 
 describe('getMove', () => {
   beforeEach(() => {
@@ -18,7 +18,7 @@ describe('getMove', () => {
   });
 
   it('returns move details for a well-known move', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: getMove.errors, tenantId: 'test-tenant' });
     const input = getMove.input.parse({ identifier: 'flamethrower' });
     const result = await getMove.handler(input, ctx);
 
@@ -35,7 +35,7 @@ describe('getMove', () => {
   }, 15000);
 
   it('returns learner list when include_learners is true', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: getMove.errors, tenantId: 'test-tenant' });
     const input = getMove.input.parse({ identifier: 'flamethrower', include_learners: true });
     const result = await getMove.handler(input, ctx);
 
@@ -44,7 +44,7 @@ describe('getMove', () => {
   }, 15000);
 
   it('handles a status move with null power and accuracy', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: getMove.errors, tenantId: 'test-tenant' });
     // Thunder Wave is a status move — power should be null
     const input = getMove.input.parse({ identifier: 'thunder-wave' });
     const result = await getMove.handler(input, ctx);
@@ -54,7 +54,7 @@ describe('getMove', () => {
   }, 15000);
 
   it('accepts numeric ID as string', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: getMove.errors, tenantId: 'test-tenant' });
     const input = getMove.input.parse({ identifier: '53' }); // flamethrower is ID 53
     const result = await getMove.handler(input, ctx);
 

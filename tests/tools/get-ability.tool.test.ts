@@ -4,13 +4,13 @@
  */
 
 import { McpError } from '@cyanheads/mcp-ts-core/errors';
-import { createMockContext } from '@cyanheads/mcp-ts-core/testing';
+import { createInMemoryStorage, createMockContext } from '@cyanheads/mcp-ts-core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { getAbility } from '@/mcp-server/tools/definitions/get-ability.tool.js';
 import { initPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 
 const mockAppConfig = {} as Parameters<typeof initPokeApiService>[0];
-const mockStorage = {} as Parameters<typeof initPokeApiService>[1];
+const mockStorage = createInMemoryStorage();
 
 describe('getAbility', () => {
   beforeEach(() => {
@@ -18,7 +18,7 @@ describe('getAbility', () => {
   });
 
   it('returns ability details by name', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: getAbility.errors, tenantId: 'test-tenant' });
     const input = getAbility.input.parse({ identifier: 'overgrow' });
     const result = await getAbility.handler(input, ctx);
 
@@ -33,7 +33,7 @@ describe('getAbility', () => {
   }, 15000);
 
   it('returns ability by numeric ID string', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: getAbility.errors, tenantId: 'test-tenant' });
     const input = getAbility.input.parse({ identifier: '65' }); // overgrow is ID 65
     const result = await getAbility.handler(input, ctx);
 
@@ -41,7 +41,7 @@ describe('getAbility', () => {
   }, 15000);
 
   it('includes effect text for a well-documented ability', async () => {
-    const ctx = createMockContext({ tenantId: 'test-tenant' });
+    const ctx = createMockContext({ errors: getAbility.errors, tenantId: 'test-tenant' });
     const input = getAbility.input.parse({ identifier: 'speed-boost' });
     const result = await getAbility.handler(input, ctx);
 
