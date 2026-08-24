@@ -1,10 +1,9 @@
 # pokeapi-mcp-server - Directory Structure
 
-Generated on: 2026-07-11 17:00:32
+Generated on: 2026-08-23 21:33:09
 
 ```text
 pokeapi-mcp-server/
-├── .claude/
 ├── .claude-plugin/
 │   └── plugin.json
 ├── .codex-plugin/
@@ -15,6 +14,8 @@ pokeapi-mcp-server/
 │   │   ├── bug_report.yml
 │   │   ├── config.yml
 │   │   └── feature_request.yml
+│   ├── CODE_OF_CONDUCT.md
+│   ├── CONTRIBUTING.md
 │   ├── FUNDING.yml
 │   └── SECURITY.md
 ├── .vscode/

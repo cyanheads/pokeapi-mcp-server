@@ -2,6 +2,10 @@
 
 All notable changes to this project. Each entry links to its full per-version file in [changelog/](changelog/).
 
+## [0.1.8](changelog/0.1.x/0.1.8.md) — 2026-08-23
+
+MCP SDK v2 and protocol 2026-07-28 support with stateless sessions, bounded PokéAPI requests, and formatter parity fixes.
+
 ## [0.1.7](changelog/0.1.x/0.1.7.md) — 2026-07-11
 
 Patch release: adopts mcp-ts-core 0.10.14 and Bun supply-chain hardening (minimumReleaseAge, Socket scanner); fixes find-pokemon negative pagination (#7) and query-only notice rendering (#6), and get-type-matchups composed-multiplier documentation (#5).

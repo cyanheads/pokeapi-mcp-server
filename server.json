@@ -6,7 +6,7 @@
     "url": "https://github.com/cyanheads/pokeapi-mcp-server",
     "source": "github"
   },
-  "version": "0.1.7",
+  "version": "0.1.8",
   "remotes": [
     {
       "type": "streamable-http",
@@ -19,7 +19,7 @@
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@cyanheads/pokeapi-mcp-server",
       "runtimeHint": "bun",
-      "version": "0.1.7",
+      "version": "0.1.8",
       "packageArguments": [
         {
           "type": "positional",
@@ -48,7 +48,7 @@
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@cyanheads/pokeapi-mcp-server",
       "runtimeHint": "bun",
-      "version": "0.1.7",
+      "version": "0.1.8",
       "packageArguments": [
         {
           "type": "positional",
@@ -87,6 +87,13 @@
           "format": "string",
           "isRequired": false,
           "default": "none"
+        },
+        {
+          "name": "MCP_SESSION_MODE",
+          "description": "Session mode to use: 'auto', 'stateful', or 'stateless'. The 'auto' schema default resolves to stateful.",
+          "format": "string",
+          "isRequired": false,
+          "default": "stateless"
         },
         {
           "name": "MCP_LOG_LEVEL",
