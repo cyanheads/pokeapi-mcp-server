@@ -2,6 +2,10 @@
 
 All notable changes to this project. Each entry links to its full per-version file in [changelog/](changelog/).
 
+## [0.1.9](changelog/0.1.x/0.1.9.md) — 2026-09-19
+
+Framework maintenance and stateless HTTP defaults.
+
 ## [0.1.8](changelog/0.1.x/0.1.8.md) — 2026-08-23
 
 MCP SDK v2 and protocol 2026-07-28 support with stateless sessions, bounded PokéAPI requests, and formatter parity fixes.
