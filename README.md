@@ -27,73 +27,117 @@
 
 ---
 
-## Tools
+## Overview
 
-Seven tools covering the full PokéAPI v2 surface — a flagship consolidation tool, a computed matchup tool, single-resource lookups, and a filter tool:
+Pokémon game data from PokéAPI v2 — Pokémon, moves, abilities, items, and natures, plus computed type-effectiveness matchups. Fetch a denormalized Pokémon dossier in a single call, filter Pokémon by generation, type, pokédex, or egg group, and compute dual-type matchups from any MCP client. Runs as a stdio process, a local Streamable HTTP server, or the public hosted endpoint above.
+
+### Tools
 
 | Tool | Description |
 |:-----|:------------|
-| `pokeapi_get_pokemon` | Denormalized Pokémon dossier in one call: base stats, types, abilities with effect text, height/weight, evolution chain, learnable moves, sprites, species flavor text, and variant list |
-| `pokeapi_get_type_matchups` | Computed offensive and defensive type effectiveness — for a type name or Pokémon identifier; correctly composes dual-type matchups |
-| `pokeapi_get_move` | Move details: type, damage class, power, accuracy, PP, priority, target, stat changes, status-effect chance, and full English effect text |
-| `pokeapi_get_ability` | Ability details: full and short English effect text, and the Pokémon that have it (with hidden-ability flag and slot) |
-| `pokeapi_get_item` | Item details: effect text, category, cost, fling power, attributes, and Pokémon that commonly hold it |
-| `pokeapi_get_nature` | Nature details: stat boost/penalty, preferred and disliked berry flavor. Returns all 25 natures when called without an identifier |
-| `pokeapi_find_pokemon` | Filter Pokémon by generation, type, pokédex, or egg group; also resolves fuzzy name queries to canonical entries |
+| `pokeapi_get_pokemon` | Denormalized Pokémon dossier in one call — stats, types, abilities, evolution chain, sprites, and species data |
+| `pokeapi_get_type_matchups` | Computed offensive and defensive type effectiveness for a type or Pokémon, with correctly composed dual-type matchups |
+| `pokeapi_get_move` | Move details — type, damage class, power, accuracy, PP, priority, stat changes, and effect text |
+| `pokeapi_get_ability` | Ability details — effect text and the Pokémon that have it, with hidden-ability flag and slot |
+| `pokeapi_get_item` | Item details — effect text, category, cost, fling power, attributes, and common holders |
+| `pokeapi_get_nature` | Nature details — stat boost/penalty and berry flavor preferences; lists all 25 when called without an identifier |
+| `pokeapi_find_pokemon` | Filter Pokémon by generation, type, pokédex, or egg group, with name-token matching and pagination |
 
-### `pokeapi_get_pokemon`
+### Resources
 
-The flagship tool — fans out across the PokéAPI resource graph in parallel and returns one denormalized dossier, replacing 10–30 sub-resource GETs.
-
-- Fetches `/pokemon`, `/pokemon-species`, `/evolution-chain`, and each `/ability` in a two-tier parallel fan-out
-- Includes sprites (with `official-artwork` high-quality art URL), `is_legendary`, `is_mythical`, `capture_rate`, `growth_rate`, `gender_rate`
-- `include_moves` (default `false`) — set to `true` for a summarized learnable-move list filtered to the latest generation
-- `game_version` string to select flavor text by game (e.g. `"sword"`, `"red"`) — silently falls back to first available when no match
-- Surfaces the variant list so callers can re-call with a specific form name (regional forms, Gigantamax, Mega, etc.)
-
----
-
-### `pokeapi_get_type_matchups`
-
-Computed type effectiveness — pass a type name or Pokémon identifier to get the full offensive and defensive breakdown with multiplier values.
-
-- For dual-type Pokémon: composes both type defensive relations correctly (immune in either type wins)
-- Returns `superEffective`, `resistant`, and `immune` lists for both offense and defense
-- Accepts either `type` (type name) or `pokemon` (name or dex number) — exactly one required
-
----
-
-### `pokeapi_find_pokemon`
-
-Filter Pokémon by multiple criteria — returns names and dex numbers for follow-up `pokeapi_get_pokemon` calls.
-
-- Filters: `generation` (e.g. `"generation-i"`), `type` (e.g. `"fire"`), `pokedex` (e.g. `"kanto"`), `egg_group` (e.g. `"fairy"`)
-- `query` parameter for fuzzy name search
-- Pagination via `limit` and `offset`
-
----
-
-## Resources and prompts
-
-| Type | Name | Description |
-|:-----|:-----|:------------|
-| Resource | `pokeapi://pokemon/{identifier}` | Pokémon dossier by name or dex number — same payload as `pokeapi_get_pokemon` without moves |
-| Resource | `pokeapi://type/{typeName}` | Type damage relations — raw multiplier table, offensive and defensive |
+| Resource | Description |
+|:---|:---|
+| `pokeapi://pokemon/{identifier}` | Pokémon dossier by name or dex number — same payload as `pokeapi_get_pokemon` without moves |
+| `pokeapi://type/{typeName}` | Type damage relations — raw multiplier table, offensive and defensive |
 
 All resource data is also reachable via tools.
 
 ---
 
+## Capability reference
+
+### `pokeapi_get_pokemon` <sub>tool</sub>
+
+- Accepts a lowercase-hyphenated name or numeric Pokédex number as `identifier`
+- `include_moves` (default `false`) adds the learnable-move summary (100–200+ entries); `moveCount` is always returned regardless
+- `game_version` selects flavor text by game (e.g. `"sword"`, `"red"`); falls back to the most recent English entry when the version isn't found
+- Fans out across `/pokemon`, `/pokemon-species`, `/evolution-chain`, and each `/ability` in a two-tier parallel fetch, returning stats, types, abilities (with effect text), sprites (including official artwork), evolution chain, varieties, capture rate, growth rate, gender rate, and legendary/mythical flags in one object
+- `not_found` when the identifier resolves to no PokéAPI entry
+
+---
+
+### `pokeapi_get_type_matchups` <sub>tool</sub>
+
+- Exactly one of `type` (type name) or `pokemon` (name or dex number) is required — providing both or neither is a validation error
+- `offensiveRelations` (super-effective / not-very-effective / no-effect lists) is null for dual-type Pokémon queries, since per-type offense doesn't compose
+- `defensiveMatchups` (weak-to / resists / immune-to) is always populated and correctly composes both types for dual-type Pokémon — immune in either type wins
+- `composedMultipliers` gives the full multiplier (0, 0.25, 0.5, 1, 2, 4) for every attacking type touched, including net-neutral 1× cancellations; a type absent from the map deals 1×
+- `not_found` when the type name or Pokémon identifier doesn't resolve
+
+---
+
+### `pokeapi_get_move` <sub>tool</sub>
+
+- Accepts a lowercase-hyphenated move name or numeric ID
+- Returns type, damage class, power, accuracy, PP, priority, target, stat changes, and secondary-effect chance, plus full and short English effect text
+- `include_learners` (default `false`) adds the list of Pokémon that can learn the move
+- `not_found` when the identifier resolves to no move
+
+---
+
+### `pokeapi_get_ability` <sub>tool</sub>
+
+- Accepts a lowercase-hyphenated ability name or numeric ID
+- Returns full and short English effect text, the generation introduced, and every Pokémon that has the ability, with its hidden-ability flag and slot
+- `not_found` when the identifier resolves to no ability
+
+---
+
+### `pokeapi_get_item` <sub>tool</sub>
+
+- Accepts a lowercase-hyphenated item name or numeric ID
+- Returns category, Pokédollar cost (`0` when not sold in shops), fling power, attributes (holdable, consumable, etc.), sprite URL, effect text, and Pokémon that commonly hold it
+- `not_found` when the identifier resolves to no item
+
+---
+
+### `pokeapi_get_nature` <sub>tool</sub>
+
+- `identifier` (name or ID 1–25) is optional — omit it to return all 25 natures at once (`isListAll: true`)
+- Each entry carries the boosted stat, reduced stat, and liked/disliked berry flavor — all null for the 5 neutral natures
+- `not_found` when a provided identifier resolves to no nature
+
+---
+
+### `pokeapi_find_pokemon` <sub>tool</sub>
+
+- Filters — `generation`, `type`, `pokedex`, `egg_group` — are all optional and combined with AND logic
+- `query` adds strict per-token name matching on top of at least one category filter; `query` alone with no category filter returns an empty result and a notice
+- `limit` (default 50) and `offset` (default 0) paginate the filtered set; `totalCount` reports the full match count before paging
+- Each entry carries just `id` and `name`, for follow-up `pokeapi_get_pokemon` calls
+- `invalid_filter` when a generation, type, pokédex, or egg-group name isn't recognized
+
+---
+
+### `pokeapi://pokemon/{identifier}` <sub>resource</sub>
+
+- Same payload as `pokeapi_get_pokemon` with `include_moves` fixed to `false`
+- `identifier` is a name or Pokédex number
+- `not_found` when no Pokémon matches the identifier
+
+---
+
+### `pokeapi://type/{typeName}` <sub>resource</sub>
+
+- Returns the raw offensive and defensive damage-relation multiplier table for one type
+- `typeName` is one of the 18 canonical Pokémon types
+- `not_found` when the type name doesn't exist in PokéAPI
+
+---
+
 ## Features
 
-Built on [`@cyanheads/mcp-ts-core`](https://www.npmjs.com/package/@cyanheads/mcp-ts-core):
-
-- Declarative tool and resource definitions — single file per primitive, framework handles registration and validation
-- Unified error handling — handlers throw, framework catches, classifies, and formats
-- Pluggable auth: `none`, `jwt`, `oauth`
-- Swappable storage backends: `in-memory`, `filesystem`, `Supabase`, `Cloudflare KV/R2/D1`
-- Structured logging with optional OpenTelemetry tracing
-- STDIO and Streamable HTTP transports
+Built on [`@cyanheads/mcp-ts-core`](https://github.com/cyanheads/mcp-ts-core): stdio and Streamable HTTP transports, pluggable auth (`none` / `jwt` / `oauth`), swappable storage (`in-memory`, `filesystem`, `Supabase`, `Cloudflare KV/R2/D1`), structured logging with optional OpenTelemetry tracing.
 
 PokéAPI-specific:
 
@@ -107,7 +151,7 @@ Agent-friendly output:
 
 - Dual-type composition — `pokeapi_get_type_matchups` computes the effective matchup matrix from raw damage relations, so agents get a direct answer rather than raw tables to multiply
 - Variant surface — `pokeapi_get_pokemon` lists all form variants so agents can identify and re-call with specific forms (Alolan, Galarian, Mega, Gigantamax)
-- Sparse-safe nullable fields — upstream absent fields surface as `null` rather than crashing or returning a fabricated default
+- Nullable details — absent move power, accuracy, and effect text remain `null` in structured results
 
 ---
 
@@ -193,7 +237,7 @@ MCP_TRANSPORT_TYPE=http MCP_HTTP_PORT=3010 bun run start:http
 
 ### Prerequisites
 
-- [Bun v1.3.0](https://bun.sh/) or higher (or Node.js v24+).
+- [Bun v1.4.0](https://bun.sh/) or higher (or Node.js v24+).
 - No API key required — PokéAPI is fully public.
 
 ### Installation
@@ -233,7 +277,7 @@ cp .env.example .env
 | `POKEAPI_CACHE_TTL_SECONDS` | How long to cache PokéAPI responses (seconds). | `21600` (6 h) |
 | `POKEAPI_REQUEST_TIMEOUT_MS` | Per-request timeout in milliseconds. | `10000` |
 | `MCP_TRANSPORT_TYPE` | Transport: `stdio` or `http`. | `stdio` |
-| `MCP_SESSION_MODE` | Session mode: `auto`, `stateful`, or `stateless`; `auto` is the framework schema default and resolves to stateful. | `stateless` |
+| `MCP_SESSION_MODE` | HTTP session mode: `auto`, `stateful`, or `stateless`. A meaningful env value overrides the app default. The framework schema defaults to `auto`, which resolves to stateful. Tenant-scoped caching works in every mode. | `stateless` |
 | `MCP_HTTP_PORT` | Port for HTTP server. | `3010` |
 | `MCP_AUTH_MODE` | Auth mode: `none`, `jwt`, or `oauth`. | `none` |
 | `MCP_LOG_LEVEL` | Log level (RFC 5424). | `info` |
@@ -300,14 +344,14 @@ See [`CLAUDE.md`](./CLAUDE.md) for development guidelines and architectural rule
 
 - Handlers throw, framework catches — catch typed upstream errors only to map a declared `errors[]` contract with `ctx.fail(...)`
 - Use `ctx.log` for request-scoped logging, `ctx.state` for tenant-scoped storage (and caching)
-- Register new tools and resources via the barrels in `src/mcp-server/*/definitions/index.ts`
+- Register new tools and resources in the `createApp()` arrays in `src/index.ts`
 - Wrap external API calls: validate raw → normalize to domain type → return output schema; never fabricate missing fields
 
 ---
 
 ## Contributing
 
-Issues and pull requests are welcome. Run checks and tests before submitting:
+Issues are welcome. Run checks and tests before submitting:
 
 ```sh
 bun run devcheck

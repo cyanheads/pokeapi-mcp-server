@@ -2,10 +2,10 @@
 
 **Server:** pokeapi-mcp-server
 **Version:** 0.1.8
-**Framework:** [@cyanheads/mcp-ts-core](https://www.npmjs.com/package/@cyanheads/mcp-ts-core) `^0.12.3`
-**Engines:** Bun ≥1.3.0, Node ≥24.0.0
+**Framework:** [@cyanheads/mcp-ts-core](https://www.npmjs.com/package/@cyanheads/mcp-ts-core) `^0.13.6`
+**Engines:** Bun ≥1.4.0, Node ≥24.0.0
 **MCP SDK:** `@modelcontextprotocol/server` ^2.0.0
-**Zod:** ^4.4.3
+**Zod:** ^4.6.5
 
 > **Read the framework docs first:** `node_modules/@cyanheads/mcp-ts-core/CLAUDE.md` contains the full API reference — builders, Context, error codes, exports, patterns. This file covers server-specific conventions only.
 
@@ -100,7 +100,7 @@ export const getNature = tool('pokeapi_get_nature', {
 });
 ```
 
-Tool inputs are strict at the root by default: unknown keys are rejected by name before the handler runs and `tools/list` advertises `additionalProperties: false`. The advertised output schema is widened so clients accept either the success shape or the framework's structured error envelope; the handler still has to satisfy the declared `output` schema. `error` is therefore reserved in `output` and `enrichment` schemas.
+Tool inputs are strict at the root by default: `tools/list` advertises `additionalProperties: false`. Before validation, the framework drops undeclared client metadata keys and accepts unambiguous case-style key aliases; remaining unknown keys are rejected by name. Argument rejections carry `InvalidParams` with a reason and recovery hint. The advertised output schema accepts either the success shape or the framework's structured error envelope; the handler must satisfy the declared `output` schema. `error` is reserved in `output` and `enrichment` schemas.
 
 ### Resource
 
@@ -178,6 +178,8 @@ await createApp({
 
 ## Context
 
+The app declares `sessionMode: 'stateless'`. A meaningful `MCP_SESSION_MODE` overrides it; empty and unsubstituted placeholder values fall through to the app default. The framework schema default `auto` resolves to stateful. Tenant-scoped caching is independent of sessions. If a future tool needs `ctx.requestInput`, declare `{ default: 'stateful', require: 'stateful' }`. Release service watchers, sockets, and timers in `createApp({ teardown })` when a service allocates them.
+
 Handlers receive a unified `ctx` object. Key properties:
 
 | Property | Description |
@@ -236,6 +238,8 @@ throw new McpError(JsonRpcErrorCode.DatabaseError, 'Connection failed', { pool: 
 
 See framework CLAUDE.md and the `api-errors` skill for the full auto-classification table, all available factories, and the contract reference.
 
+`RequestCancelled` is also a baseline code that needs no declaration. Recovery forwarding is checked per throw site (`error-contract-recovery-unforwarded`). Mark a reason produced below the handler with `thrownBy: 'service'` so the unthrown-contract check recognizes it. Tool contracts can set `severity` to `debug`, `info`, `notice`, or `warning` without changing the wire error.
+
 ---
 
 ## Structure
@@ -278,9 +282,9 @@ src/
 
 ## Skills
 
-Skills are modular instructions in `skills/` at the project root. Run `bun run list-skills` to see the full registry, then read the skill that matches the task — e.g., `skills/add-tool/SKILL.md` when adding a tool.
+Skills are modular instructions in `framework-skills/` at the project root. Run `bun run list-skills` to see the full registry, then read the skill that matches the task — e.g., `framework-skills/add-tool/SKILL.md` when adding a tool. Keep root `skills/` for skills intended for installing agents; plugin hosts auto-load that path.
 
-**Agent skill directory:** Copy skills into the directory your agent discovers (Claude Code: `.claude/skills/`, others: equivalent). Skills then load as context without referencing `skills/` paths. After framework updates, run the `maintenance` skill — Phase B re-syncs the agent directory.
+**Agent skill directory:** Copy skills into the directory your agent discovers (Claude Code: `.claude/skills/`, others: equivalent). Skills then load as context without referencing `framework-skills/` paths. After framework updates, run the `maintenance` skill — Phase B re-syncs the agent directory.
 
 Available skills:
 
@@ -300,8 +304,9 @@ Available skills:
 | `security-pass` | Audit server for MCP-flavored security gaps: output injection, scope blast radius, input sinks, tenant isolation |
 | `code-simplifier` | Post-session cleanup against `git diff` — modernize syntax, consolidate duplication, align with the codebase |
 | `polish-docs-meta` | Finalize docs, README, metadata, and agent protocol for shipping |
-| `git-wrapup` | Land working-tree changes as a versioned commit + annotated tag — version bump, changelog, verify, tag. Local only. |
-| `release-and-publish` | Push + npm + MCP Registry + GH Release + Docker. Picks up from `git-wrapup` |
+| `git-wrapup` | Land the work as a commit stack, bump the version, and open the release PR |
+| `release-pr-review` | Review an open release PR; fixes are ordinary commits on its branch |
+| `release-and-publish` | Fast-forward main, tag, push, and publish npm, MCP Registry, GH Release, and Docker |
 | `maintenance` | Investigate changelogs, adopt upstream changes, sync skills to agent dirs |
 | `orchestrations` | Chain task skills into a gated multi-phase pipeline — build-out, QA-fix, update-ship — when you can spawn sub-agents |
 | `report-issue-framework` | File a bug or feature request against `@cyanheads/mcp-ts-core` via `gh` CLI |
@@ -319,7 +324,7 @@ Available skills:
 | `api-telemetry` | OTel catalog: spans, metrics, completion logs, env config, cardinality rules |
 | `api-workers` | Cloudflare Workers runtime |
 
-**Chaining skills into pipelines.** When the user wants a multi-phase effort — build this server out, QA-and-fix the surface, update-and-ship — *and you can spawn sub-agents*, `skills/orchestrations/SKILL.md` sequences the task skills above into a gated pipeline with verification at each step. Read it to drive the run. Optional: skip it if you can't orchestrate sub-agents, and ignore it entirely if you were *spawned* as one — you've already been scoped to a single phase.
+**Chaining skills into pipelines.** When the user wants a multi-phase effort — build this server out, QA-and-fix the surface, update-and-ship — *and you can spawn sub-agents*, `framework-skills/orchestrations/SKILL.md` sequences the task skills above into a gated pipeline with verification at each step. Read it to drive the run. Optional: skip it if you can't orchestrate sub-agents, and ignore it entirely if you were *spawned* as one — you've already been scoped to a single phase.
 
 When you complete a skill's checklist, check the boxes and add a completion timestamp at the end (e.g., `Completed: 2026-03-11`).
 
@@ -337,7 +342,8 @@ When you complete a skill's checklist, check the boxes and add a completion time
 | `bun run devcheck` | Lint + format + typecheck + security + changelog sync |
 | `bun run lint:mcp` | Verify MCP definitions, schemas, and typed error contracts |
 | `bun run lint:packaging` | Verify package, manifest, server, plugin, and bundle metadata |
-| `bun run audit:refresh` | Delete `bun.lock`, reinstall, and re-run `bun audit`. Use when `devcheck` flags a transitive advisory — Bun's `update` is sticky on transitive resolutions, so the advisory may be a stale-lockfile false positive. If it survives the refresh, it's real. |
+| `bun run audit:fix` | Upgrade vulnerable packages to the lowest safe version within existing ranges |
+| `bun run audit:refresh` | Delete `bun.lock` and reinstall; last resort after `audit:fix`, `bun update <name>`, and `bun dedupe`, since every ranged dependency re-resolves |
 | `bun run tree` | Generate directory structure doc |
 | `bun run format` | Auto-fix formatting (safe fixes only) |
 | `bun run format:unsafe` | Also apply Biome's unsafe autofixes — review the diff; they can change behavior |
@@ -358,7 +364,7 @@ When you complete a skill's checklist, check the boxes and add a completion time
 
 **Adding an env var requires both files:** `server.json` (registry discovery, `environmentVariables[]`) and `manifest.json` (bundle install UX, `mcp_config.env` + `user_config`). `lint:packaging` (run by `devcheck`) verifies the env var names match.
 
-**README install badges** (Claude Desktop `.mcpb`, Cursor, VS Code) and the `base64` / `encodeURIComponent` config-generation commands are ship-time concerns — run the `polish-docs-meta` skill, which carries the badge format, layout, and generation snippets in `skills/polish-docs-meta/references/readme.md`.
+**README install badges** (Claude Desktop `.mcpb`, Cursor, VS Code) and the `base64` / `encodeURIComponent` config-generation commands are ship-time concerns — run the `polish-docs-meta` skill, which carries the badge format, layout, and generation snippets in `framework-skills/polish-docs-meta/references/readme.md`.
 
 ---
 
@@ -383,9 +389,15 @@ security: false                            # optional — true only for source-c
 
 `agent-notes` is an optional free-form field for maintenance agents processing the release downstream. Content here won't appear in the rendered CHANGELOG — it's consumed by agents running the `maintenance` skill. Use it for adoption instructions that don't fit the human-facing sections: new files to create, fields to populate, one-time migration steps. Omit entirely when there's nothing to say.
 
-**Section order** (Keep a Changelog): Added, Changed, Deprecated, Removed, Fixed, Security. Include only sections with entries — don't ship empty headers.
+**Section order** (Keep a Changelog): Added, Changed, Deprecated, Removed, Fixed, Security, Dependencies. Include only sections with entries — don't ship empty headers.
 
-**Tag annotations** render as GitHub Release bodies via `--notes-from-tag`. They must be structured markdown — never a flat comma-separated string. Subject omits the version number (GitHub prepends it). See `changelog/template.md` for the full format reference.
+**Tag annotations** render as GitHub Release bodies via `--notes-from-tag`. Subject omits the version number. The `release-and-publish` skill owns the tag format.
+
+---
+
+## Publishing
+
+**Every release goes through a release PR, straight-through** — `git-wrapup`'s "Release PR mode", mode `straight-through`. One run: `git-wrapup` lands the commit stack on `release/<version>`, pushes it, and opens the PR (title = the release commit subject, body = the changelog entry plus a gates section); `release-and-publish` then fast-forwards `main` locally with `git merge --ff-only`, creates the tag on `main`'s tip, pushes `main` and the tag, deletes the branch, and publishes. A caller's brief may run a given release as `gated` instead — a `release-pr-review` pass on the open PR before `release-and-publish`. **Never merge through the GitHub UI or `gh pr merge`**: squash and rebase-merge are disabled in the repo settings because both rewrite the stack (rebase-merge also strips the SSH signatures), and a merge commit breaks the linear history.
 
 ---
 
