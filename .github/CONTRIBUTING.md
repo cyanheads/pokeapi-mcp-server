@@ -7,7 +7,7 @@ Open one from the **Issues** tab and pick the **Bug Report** or **Feature Reques
 <!-- Optional: swap the line above for direct links once you know your repo URL —
      https://github.com/OWNER/REPO/issues/new?template=bug_report.yml -->
 
-PRs are welcome; open an issue first for anything larger than a typo.
+Contributions start with an issue describing the problem or proposed behavior.
 
 ## Server bug or framework bug?
 
@@ -39,8 +39,8 @@ Do the triage first — an unverified report costs more to read than it saves to
 
 Two workflows ship with this project:
 
-- [`skills/report-issue-local/SKILL.md`](../skills/report-issue-local/SKILL.md) — filing against this repo.
-- [`skills/report-issue-framework/SKILL.md`](../skills/report-issue-framework/SKILL.md) — filing against `mcp-ts-core` when you've isolated the bug to the framework.
+- [`framework-skills/report-issue-local/SKILL.md`](../framework-skills/report-issue-local/SKILL.md) — filing against this repo.
+- [`framework-skills/report-issue-framework/SKILL.md`](../framework-skills/report-issue-framework/SKILL.md) — filing against `mcp-ts-core` when you've isolated the bug to the framework.
 
 Read the relevant one before filing on a user's behalf.
 
