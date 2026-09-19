@@ -19,15 +19,12 @@ import { initPokeApiService } from './services/pokeapi/pokeapi-service.js';
 await createApp({
   name: 'pokeapi-mcp-server',
   title: 'pokeapi-mcp-server',
+  sessionMode: 'stateless',
   tools: [getPokemon, getTypeMatchups, getMove, getAbility, getItem, getNature, findPokemon],
   resources: [pokemonResource, typeResource],
   prompts: [],
   instructions:
-    'PokéAPI MCP Server — keyless, read-only access to Pokémon game data through Generation IX.\n' +
-    'Start with pokeapi_get_pokemon for a complete Pokémon profile (stats, abilities, evolution, sprites).\n' +
-    'Use pokeapi_get_type_matchups to compute offensive/defensive effectiveness for a type or Pokémon.\n' +
-    'Use pokeapi_find_pokemon to filter by generation, type, pokédex, or egg group.\n' +
-    'Resources: pokeapi://pokemon/{name} and pokeapi://type/{typeName} for injectable context.',
+    'Start with pokeapi_get_pokemon for a Pokémon profile with stats, abilities, evolution, and sprites. Use pokeapi_get_type_matchups for type effectiveness and pokeapi_find_pokemon to filter by generation, type, pokédex, or egg group. Read pokeapi://pokemon/{identifier} or pokeapi://type/{typeName} for injectable Pokémon or type context.',
   setup(core) {
     initPokeApiService(core.config, core.storage);
   },
