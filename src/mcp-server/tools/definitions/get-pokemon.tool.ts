@@ -6,6 +6,7 @@
 import { tool, z } from '@cyanheads/mcp-ts-core';
 import { JsonRpcErrorCode, McpError } from '@cyanheads/mcp-ts-core/errors';
 import { getPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
+import type { EvolutionDetail, EvolutionStep } from '@/services/pokeapi/types.js';
 
 const StatSchema = z.object({
   name: z
@@ -37,25 +38,110 @@ const MoveSummarySchema = z.object({
     .describe('Level at which the move is learned. Zero for non-level-up methods.'),
 });
 
-interface EvolutionStepType {
-  condition: string | null;
-  evolvesTo: EvolutionStepType[];
-  item: string | null;
-  minLevel: number | null;
-  species: string;
-  trigger: string;
-}
+const EvolutionDetailSchema = z.object({
+  versionGroup: z
+    .string()
+    .nullable()
+    .describe('Version group that introduced this method. Null when unspecified.'),
+  isDefault: z
+    .boolean()
+    .nullable()
+    .describe(
+      'Whether this is the expected main-series evolution for its variety. Null when unspecified.',
+    ),
+  requiredPokemonForm: z
+    .string()
+    .nullable()
+    .describe('Required starting form. Null when unspecified.'),
+  evolvedPokemonForm: z.string().nullable().describe('Resulting form. Null when unspecified.'),
+  trigger: z.string().describe('Event that triggers this alternative.'),
+  item: z.string().nullable().describe('Item used for evolution. Null when unspecified.'),
+  gender: z.number().nullable().describe('Required gender ID. Null when unspecified.'),
+  heldItem: z.string().nullable().describe('Required held item. Null when unspecified.'),
+  knownMove: z.string().nullable().describe('Required known move. Null when unspecified.'),
+  knownMoveType: z
+    .string()
+    .nullable()
+    .describe('Type of a required known move. Null when unspecified.'),
+  location: z.string().nullable().describe('Required location. Null when unspecified.'),
+  minLevel: z.number().nullable().describe('Minimum level. Null when unspecified.'),
+  minHappiness: z.number().nullable().describe('Minimum happiness. Null when unspecified.'),
+  minBeauty: z.number().nullable().describe('Minimum beauty. Null when unspecified.'),
+  minAffection: z.number().nullable().describe('Minimum affection. Null when unspecified.'),
+  nearSpecialRock: z
+    .boolean()
+    .nullable()
+    .describe('Whether proximity to a Moss Rock or Icy Rock is required. Null when unspecified.'),
+  needsMultiplayer: z
+    .boolean()
+    .nullable()
+    .describe('Whether multiplayer link play is required. Null when unspecified.'),
+  needsOverworldRain: z
+    .boolean()
+    .nullable()
+    .describe('Whether overworld rain is required. Null when unspecified.'),
+  partySpecies: z
+    .string()
+    .nullable()
+    .describe('Species required in the party. Null when unspecified.'),
+  partyType: z.string().nullable().describe('Type required in the party. Null when unspecified.'),
+  relativePhysicalStats: z
+    .number()
+    .nullable()
+    .describe(
+      'Required Attack relative to Defense: 1 greater, 0 equal, -1 less. Null when unspecified.',
+    ),
+  timeOfDay: z
+    .string()
+    .nullable()
+    .describe('Required time of day. Empty string is preserved; null when unspecified.'),
+  tradeSpecies: z.string().nullable().describe('Species to trade for. Null when unspecified.'),
+  turnUpsideDown: z
+    .boolean()
+    .nullable()
+    .describe('Whether the device must be upside down. Null when unspecified.'),
+  region: z.string().nullable().describe('Required region. Null when unspecified.'),
+  usedMove: z.string().nullable().describe('Move that must be used. Null when unspecified.'),
+  minMoveCount: z.number().nullable().describe('Minimum move uses. Null when unspecified.'),
+  minSteps: z.number().nullable().describe('Minimum steps. Null when unspecified.'),
+  minDamageTaken: z.number().nullable().describe('Minimum damage taken. Null when unspecified.'),
+  allowedNatures: z
+    .array(z.string())
+    .nullable()
+    .describe('Allowed nature names. Empty lists are preserved; null when unspecified.'),
+  conditionExpression: z
+    .object({
+      expression: z.string().describe('Verbatim upstream RPN condition expression; not evaluated.'),
+      percentageChance: z.number().describe('Upstream chance percentage, including zero.'),
+      variables: z.array(z.string()).describe('Names of expression variables in upstream order.'),
+    })
+    .nullable()
+    .describe('Variable-dependent condition supplied by PokéAPI. Null when unspecified.'),
+});
 
-const EvolutionStepSchema: z.ZodType<EvolutionStepType> = z.lazy(() =>
+const EvolutionStepSchema: z.ZodType<EvolutionStep> = z.lazy(() =>
   z.object({
     species: z.string().describe('Species name.'),
-    trigger: z.string().describe('Evolution trigger (level-up, use-item, trade, shed, base).'),
-    minLevel: z.number().nullable().describe('Minimum level required. Null if not applicable.'),
-    item: z.string().nullable().describe('Item used in evolution. Null if not applicable.'),
+    trigger: z.string().describe('First alternative trigger, or base for the root stage.'),
+    minLevel: z
+      .number()
+      .nullable()
+      .describe('First alternative minimum level. Null when unspecified.'),
+    item: z
+      .string()
+      .nullable()
+      .describe('First alternative evolution item. Null when unspecified.'),
     condition: z
       .string()
       .nullable()
-      .describe('Human-readable summary of additional conditions (happiness, time of day, etc.).'),
+      .describe(
+        'Compatibility summary of the first alternative; evolutionDetails contains the complete methods.',
+      ),
+    evolutionDetails: z
+      .array(EvolutionDetailSchema.describe('One complete alternative evolution method.'))
+      .describe(
+        'All alternative methods in upstream order; empty for a base stage. Requirements apply within each method, never across alternatives.',
+      ),
     evolvesTo: z.array(EvolutionStepSchema).describe('Further evolutions from this stage.'),
   }),
 );
@@ -78,7 +164,9 @@ export const getPokemon = tool('pokeapi_get_pokemon', {
     '(with full English effect text), height/weight, resolved evolution chain, sprite URLs including ' +
     'official artwork, species flavor text, variety list, capture rate, growth rate, gender rate, ' +
     'legendary/mythical flags, egg groups, and (optionally) a summarized learnable-move list. ' +
-    'Accepts a name (lowercase, hyphens for spaces, e.g. "bulbasaur", "mr-mime") or Pokédex number. ' +
+    'Accepts a name (lowercase, hyphens for spaces, e.g. "bulbasaur", "mr-mime") or PokéAPI Pokémon-record ID. ' +
+    'A species name with no Pokémon record of its own (e.g. "deoxys") resolves to the default variety of that species ' +
+    '("deoxys-normal"), reported in resolvedFromSpecies. ' +
     'Set include_moves=true to include the move summary (large); defaults to false. ' +
     'Use game_version to select flavor text from a specific game (e.g. "sword", "red"); ' +
     'falls back to the most recent English entry when the version is not found. ' +
@@ -88,7 +176,7 @@ export const getPokemon = tool('pokeapi_get_pokemon', {
     identifier: z
       .string()
       .describe(
-        'Pokémon name (lowercase hyphenated, e.g. "bulbasaur", "mr-mime") or Pokédex number as a string (e.g. "1", "25").',
+        'Pokémon name (lowercase hyphenated, e.g. "bulbasaur", "charizard-mega-x") or PokéAPI Pokémon-record ID as a string (e.g. "1", "10034"). A species name (e.g. "deoxys") resolves to its default variety.',
       ),
     include_moves: z
       .boolean()
@@ -105,8 +193,16 @@ export const getPokemon = tool('pokeapi_get_pokemon', {
       ),
   }),
   output: z.object({
-    id: z.number().describe('National Pokédex number.'),
+    id: z
+      .number()
+      .describe('PokéAPI Pokémon-record ID. Form IDs are not National Pokédex numbers.'),
     name: z.string().describe('Canonical Pokémon name in hyphenated lowercase.'),
+    resolvedFromSpecies: z
+      .string()
+      .nullable()
+      .describe(
+        'Species name the identifier matched when it named no Pokémon record; this dossier is the default variety of that species. Null when the identifier named a Pokémon record directly.',
+      ),
     heightDm: z.number().describe('Height in decimetres.'),
     weightHg: z.number().describe('Weight in hectograms.'),
     types: z.array(z.string()).describe('Type names ordered by slot (e.g. ["fire", "flying"]).'),
@@ -152,9 +248,9 @@ export const getPokemon = tool('pokeapi_get_pokemon', {
     {
       reason: 'not_found',
       code: JsonRpcErrorCode.NotFound,
-      when: 'The identifier resolves to no PokéAPI entry (HTTP 404).',
+      when: 'The identifier matches no Pokémon record and no species.',
       recovery:
-        'Check the spelling against the PokéAPI name list or use a numeric Pokédex number. Common names use hyphens, not spaces.',
+        'Check the spelling against the PokéAPI name list or use a numeric PokéAPI Pokémon-record ID. Common names use hyphens, not spaces.',
     },
   ],
 
@@ -172,8 +268,7 @@ export const getPokemon = tool('pokeapi_get_pokemon', {
       if (err instanceof McpError && err.code === JsonRpcErrorCode.NotFound) {
         throw ctx.fail(
           'not_found',
-          `Pokémon "${input.identifier}" not found — check spelling or use a numeric Pokédex number.`,
-          ctx.recoveryFor('not_found'),
+          `Pokémon "${input.identifier}" not found — check spelling or use a numeric PokéAPI Pokémon-record ID.`,
         );
       }
       throw err;
@@ -183,12 +278,21 @@ export const getPokemon = tool('pokeapi_get_pokemon', {
   format: (result) => {
     const lines: string[] = [];
 
-    lines.push(`# ${result.name} (#${result.id})`);
-    if (result.genus) lines.push(`*${result.genus}*`);
-    if (result.speciesFlavorText) lines.push(`\n> ${result.speciesFlavorText}`);
+    lines.push(`# ${result.name} (PokéAPI ID: ${result.id})`);
+    if (result.resolvedFromSpecies) {
+      lines.push(
+        `**Resolved from species:** ${result.resolvedFromSpecies} (default variety: ${result.name})`,
+      );
+    }
+    lines.push(`**Genus:** ${result.genus ?? 'Not available'}`);
+    lines.push(
+      result.speciesFlavorText
+        ? `\n> ${result.speciesFlavorText}`
+        : '\n*(Flavor text not available.)*',
+    );
 
     lines.push('\n## Overview');
-    lines.push(`**Types:** ${result.types.join(', ')}`);
+    lines.push(`**Types:** ${result.types.join(', ') || 'None listed'}`);
     lines.push(`**Generation:** ${result.generation}`);
     // heightDm and weightHg are the raw API values; converted to SI for readability
     lines.push(
@@ -207,38 +311,42 @@ export const getPokemon = tool('pokeapi_get_pokemon', {
     lines.push(`**Gender Rate:** ${genderLabel} (raw: ${result.genderRate})`);
     lines.push(`**Legendary:** ${result.isLegendary ? 'Yes' : 'No'}`);
     lines.push(`**Mythical:** ${result.isMythical ? 'Yes' : 'No'}`);
-    lines.push(`**Egg Groups:** ${result.eggGroups.join(', ')}`);
+    lines.push(`**Egg Groups:** ${result.eggGroups.join(', ') || 'None listed'}`);
 
     lines.push('\n## Base Stats');
+    if (result.stats.length === 0) lines.push('No base stats listed.');
     for (const s of result.stats) {
       lines.push(`**${s.name}:** ${s.baseStat} (EV: ${s.effort})`);
     }
 
     lines.push('\n## Abilities');
+    if (result.abilities.length === 0) lines.push('No abilities listed.');
     for (const a of result.abilities) {
-      const tag = a.isHidden ? ' *(hidden)*' : '';
+      const tag = a.isHidden ? ' *(hidden)*' : ' *(regular)*';
       lines.push(`### ${a.name} (slot ${a.slot})${tag}`);
-      if (a.effectText) lines.push(a.effectText);
-      if (a.shortEffectText) lines.push(`**Short:** ${a.shortEffectText}`);
+      lines.push(a.effectText ?? '**Effect:** Not available');
+      lines.push(`**Short:** ${a.shortEffectText ?? 'Not available'}`);
     }
 
     lines.push('\n## Sprites');
-    if (result.sprites.officialArtwork)
-      lines.push(`**Official Artwork:** ${result.sprites.officialArtwork}`);
-    if (result.sprites.frontDefault)
-      lines.push(`**Front Default:** ${result.sprites.frontDefault}`);
-    if (result.sprites.frontShiny) lines.push(`**Front Shiny:** ${result.sprites.frontShiny}`);
+    lines.push(`**Official Artwork:** ${result.sprites.officialArtwork ?? 'Not available'}`);
+    lines.push(`**Front Default:** ${result.sprites.frontDefault ?? 'Not available'}`);
+    lines.push(`**Front Shiny:** ${result.sprites.frontShiny ?? 'Not available'}`);
 
     lines.push('\n## Evolution Chain');
     if (result.evolutionChain) {
+      lines.push(
+        'Alternative methods are separate. Unspecified requirement fields are omitted; false, zero and empty values are shown.',
+      );
       lines.push(renderEvolutionStep(result.evolutionChain, 0));
     } else {
       lines.push('*(Evolution chain unavailable.)*');
     }
 
     lines.push('\n## Varieties');
+    if (result.varieties.length === 0) lines.push('No varieties listed.');
     for (const v of result.varieties) {
-      lines.push(`- ${v.name}${v.isDefault ? ' *(default)*' : ''}`);
+      lines.push(`- ${v.name}${v.isDefault ? ' *(default)*' : ' *(alternative)*'}`);
     }
 
     lines.push(`\n## Moves`);
@@ -248,6 +356,8 @@ export const getPokemon = tool('pokeapi_get_pokemon', {
         // Always include levelLearnedAt (0 for non-level-up moves)
         lines.push(`- ${m.name} — ${m.learnMethod} (level: ${m.levelLearnedAt})`);
       }
+    } else if (result.moveCount === 0) {
+      lines.push('No learnable moves listed.');
     } else {
       lines.push('*(Pass include_moves=true to include the full move list.)*');
     }
@@ -256,15 +366,71 @@ export const getPokemon = tool('pokeapi_get_pokemon', {
   },
 });
 
-function renderEvolutionStep(step: EvolutionStepType, depth: number): string {
+function renderEvolutionStep(step: EvolutionStep, depth: number): string {
   const indent = '  '.repeat(depth);
-  const parts: string[] = [`${indent}→ **${step.species}**`];
-  if (step.trigger !== 'base') {
-    const details: string[] = [`trigger: ${step.trigger}`];
-    if (step.condition) details.push(step.condition);
-    parts.push(` *(${details.join(', ')})*`);
-  }
-  const line = parts.join('');
+  const details = [`trigger: ${step.trigger}`];
+  if (step.condition) details.push(step.condition);
+  if (step.minLevel != null) details.push(`minimum level: ${step.minLevel}`);
+  if (step.item != null) details.push(`item: ${step.item}`);
+  const line = `${indent}→ **${step.species}** *(${details.join(', ')})*`;
+  const alternatives = step.evolutionDetails.map((detail, index) =>
+    renderEvolutionDetail(detail, index + 1, indent),
+  );
   const children = step.evolvesTo.map((child) => renderEvolutionStep(child, depth + 1));
-  return [line, ...children].join('\n');
+  return [line, ...alternatives, ...children].join('\n');
+}
+
+function renderEvolutionDetail(detail: EvolutionDetail, index: number, indent: string): string {
+  const requirements: Array<[string, string | number | boolean | string[] | null]> = [
+    ['Trigger', detail.trigger],
+    ['Item', detail.item],
+    ['Gender ID', detail.gender],
+    ['Held item', detail.heldItem],
+    ['Known move', detail.knownMove],
+    ['Known move type', detail.knownMoveType],
+    ['Location', detail.location],
+    ['Minimum level', detail.minLevel],
+    ['Minimum happiness', detail.minHappiness],
+    ['Minimum beauty', detail.minBeauty],
+    ['Minimum affection', detail.minAffection],
+    ['Near special rock', detail.nearSpecialRock],
+    ['Needs multiplayer', detail.needsMultiplayer],
+    ['Needs overworld rain', detail.needsOverworldRain],
+    ['Party species', detail.partySpecies],
+    ['Party type', detail.partyType],
+    ['Relative physical stats', detail.relativePhysicalStats],
+    ['Time of day', detail.timeOfDay],
+    ['Trade species', detail.tradeSpecies],
+    ['Turn upside down', detail.turnUpsideDown],
+    ['Region', detail.region],
+    ['Used move', detail.usedMove],
+    ['Minimum move count', detail.minMoveCount],
+    ['Minimum steps', detail.minSteps],
+    ['Minimum damage taken', detail.minDamageTaken],
+    ['Allowed natures', detail.allowedNatures],
+  ];
+  const rendered = requirements
+    .filter(([, value]) => value !== null)
+    .map(([label, value]) => {
+      const text = Array.isArray(value)
+        ? value.length > 0
+          ? value.join(', ')
+          : '[]'
+        : value === ''
+          ? '""'
+          : String(value);
+      return `${label}: ${text}`;
+    });
+  const lines = [
+    `${indent}  Alternative ${index} — Introduced: ${detail.versionGroup ?? 'Not specified'}; Default: ${detail.isDefault ?? 'Not specified'}`,
+    `${indent}    Forms — Required: ${detail.requiredPokemonForm ?? 'Not specified'}; Evolved: ${detail.evolvedPokemonForm ?? 'Not specified'}`,
+    `${indent}    Requirements — ${rendered.join('; ')}`,
+  ];
+  if (detail.conditionExpression) {
+    const condition = detail.conditionExpression;
+    lines.push(
+      `${indent}    Condition expression (not evaluated): ${condition.expression}; Chance: ${condition.percentageChance}%; Variables: ${condition.variables.length > 0 ? condition.variables.join(', ') : '[]'}`,
+    );
+  }
+  return lines.join('\n');
 }

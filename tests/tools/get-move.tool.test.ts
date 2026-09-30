@@ -83,6 +83,7 @@ describe('getMove', () => {
       target: 'selected-pokemon',
       statChanges: [],
       learnedByPokemon: [],
+      learnersIncluded: false,
     });
 
     const blocks = getMove.format!(result);
@@ -112,6 +113,7 @@ describe('getMove', () => {
       target: 'selected-pokemon',
       statChanges: [],
       learnedByPokemon: [],
+      learnersIncluded: false,
     });
 
     const blocks = getMove.format!(result);

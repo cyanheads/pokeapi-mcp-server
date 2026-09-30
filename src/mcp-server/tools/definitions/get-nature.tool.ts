@@ -71,7 +71,6 @@ export const getNature = tool('pokeapi_get_nature', {
         throw ctx.fail(
           'not_found',
           `Nature "${input.identifier}" not found — use a valid name (e.g. "modest", "jolly") or an ID between 1 and 25.`,
-          ctx.recoveryFor('not_found'),
         );
       }
       throw err;
@@ -102,10 +101,8 @@ export const getNature = tool('pokeapi_get_nature', {
       } else {
         lines.push('**Effect:** Neutral — no stat modifications.');
       }
-      if (n.likesFlavor || n.hatesFlavor) {
-        lines.push(`**Likes Flavor:** ${n.likesFlavor ?? '—'}`);
-        lines.push(`**Hates Flavor:** ${n.hatesFlavor ?? '—'}`);
-      }
+      lines.push(`**Likes Flavor:** ${n.likesFlavor ?? 'None'}`);
+      lines.push(`**Hates Flavor:** ${n.hatesFlavor ?? 'None'}`);
     }
 
     return [{ type: 'text', text: lines.join('\n') }];

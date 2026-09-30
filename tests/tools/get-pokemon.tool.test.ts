@@ -39,7 +39,7 @@ describe('getPokemon', () => {
     expect(result.eggGroups.length).toBeGreaterThan(0);
   }, 15000);
 
-  it('accepts Pokédex number as a string identifier', async () => {
+  it('accepts PokéAPI Pokémon-record ID as a string identifier', async () => {
     const ctx = createMockContext({ errors: getPokemon.errors, tenantId: 'test-tenant' });
     const input = getPokemon.input.parse({ identifier: '25' });
     const result = await getPokemon.handler(input, ctx);
@@ -124,6 +124,7 @@ describe('getPokemon', () => {
     const result = getPokemon.output.parse({
       id: 1,
       name: 'bulbasaur',
+      resolvedFromSpecies: null,
       heightDm: 7,
       weightHg: 69,
       types: ['grass', 'poison'],
@@ -157,6 +158,7 @@ describe('getPokemon', () => {
         minLevel: null,
         item: null,
         condition: null,
+        evolutionDetails: [],
         evolvesTo: [],
       },
       varieties: [{ name: 'bulbasaur', isDefault: true }],
@@ -169,7 +171,7 @@ describe('getPokemon', () => {
     expect(blocks[0]!.type).toBe('text');
     const text = (blocks[0] as { text: string }).text;
     expect(text).toContain('bulbasaur');
-    expect(text).toContain('#1');
+    expect(text).toContain('PokéAPI ID: 1');
     expect(text).toContain('grass');
     expect(text).toContain('poison');
     expect(text).toContain('overgrow');
@@ -183,6 +185,7 @@ describe('getPokemon', () => {
     const result = getPokemon.output.parse({
       id: 1,
       name: 'bulbasaur',
+      resolvedFromSpecies: null,
       heightDm: 7,
       weightHg: 69,
       types: ['grass', 'poison'],
@@ -204,6 +207,7 @@ describe('getPokemon', () => {
         minLevel: null,
         item: null,
         condition: null,
+        evolutionDetails: [],
         evolvesTo: [
           {
             species: 'ivysaur',
@@ -211,6 +215,7 @@ describe('getPokemon', () => {
             minLevel: 16,
             item: null,
             condition: 'level 16+',
+            evolutionDetails: [],
             evolvesTo: [],
           },
         ],

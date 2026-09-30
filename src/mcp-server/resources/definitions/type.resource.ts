@@ -57,7 +57,6 @@ export const typeResource = resource('pokeapi://type/{typeName}', {
         throw ctx.fail(
           'not_found',
           `Type "${params.typeName}" not found — use a valid Pokémon type name (fire, water, grass, etc.).`,
-          ctx.recoveryFor('not_found'),
         );
       }
       throw err;

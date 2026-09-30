@@ -5,7 +5,12 @@
 
 import type { Context } from '@cyanheads/mcp-ts-core';
 import type { AppConfig } from '@cyanheads/mcp-ts-core/config';
-import { serviceUnavailable } from '@cyanheads/mcp-ts-core/errors';
+import {
+  JsonRpcErrorCode,
+  McpError,
+  notFound,
+  serviceUnavailable,
+} from '@cyanheads/mcp-ts-core/errors';
 import type { StorageService } from '@cyanheads/mcp-ts-core/storage';
 import { fetchWithTimeout, withRetry } from '@cyanheads/mcp-ts-core/utils';
 import { getServerConfig } from '../../config/server-config.js';
@@ -36,6 +41,16 @@ import type {
   TypeMatchups,
 } from './types.js';
 
+/**
+ * Longest normalized identifier sent upstream. The longest name in the PokéAPI lists this
+ * service reads is 32 characters. The bound caps the request URL for identifiers that
+ * skip the cache, where the storage layer's 1024-character key limit never applies.
+ */
+export const MAX_IDENTIFIER_LENGTH = 100;
+
+/** PokéAPI's name and ID alphabet — the only identifiers safe to use as a storage key. */
+const CANONICAL_IDENTIFIER = /^[a-z0-9-]+$/;
+
 export class PokeApiService {
   private readonly baseUrl: string;
   private readonly cacheTtlSeconds: number;
@@ -54,19 +69,24 @@ export class PokeApiService {
   // Identifier normalization
   // ---------------------------------------------------------------------------
 
+  /**
+   * Trims, lowercases, and hyphenates whitespace. The result is not URL-encoded, so
+   * normalizing an already-normalized identifier returns it unchanged.
+   */
   normalizeIdentifier(identifier: string | number): string {
-    if (typeof identifier === 'number') return encodeURIComponent(String(identifier));
-    return encodeURIComponent(identifier.trim().toLowerCase().replace(/\s+/g, '-'));
+    return String(identifier).trim().toLowerCase().replace(/\s+/g, '-');
   }
 
   // ---------------------------------------------------------------------------
   // Core fetch with caching
   // ---------------------------------------------------------------------------
 
-  private async fetchRaw<T>(path: string, ctx: Context, cacheKey?: string): Promise<T> {
-    const key = cacheKey ?? `pokeapi/${path}`;
-    const cached = (await ctx.state.get(key)) as T | null;
-    if (cached !== null) return cached;
+  /** Fetches `path`, reading and writing the cache only when `cacheKey` is a string. */
+  private async fetchRaw<T>(path: string, ctx: Context, cacheKey: string | null): Promise<T> {
+    if (cacheKey !== null) {
+      const cached = (await ctx.state.get(cacheKey)) as T | null;
+      if (cached !== null) return cached;
+    }
 
     const timeoutMs = this.requestTimeoutMs;
     const baseUrl = this.baseUrl;
@@ -76,7 +96,7 @@ export class PokeApiService {
         const response = await fetchWithTimeout(url, timeoutMs, ctx, {
           signal: ctx.signal,
           headers: { Accept: 'application/json' },
-          expectedStatuses: [404],
+          expectedStatuses: [400, 404],
         });
 
         const text = await response.text();
@@ -97,8 +117,44 @@ export class PokeApiService {
       },
     );
 
-    await ctx.state.set(key, result, { ttl: this.cacheTtlSeconds });
+    if (cacheKey !== null) await ctx.state.set(cacheKey, result, { ttl: this.cacheTtlSeconds });
     return result;
+  }
+
+  /**
+   * Fetches one record of `resource` by name or ID. The identifier is URL-encoded here and
+   * nowhere else. An identifier that cannot name a record fails as NotFound without a
+   * request: blank, `.`, and `..` address the list endpoint or its parent once the URL is
+   * resolved, a lone surrogate has no URL encoding, and an overlong one exceeds any name.
+   * Only identifiers in PokéAPI's own alphabet are cached. For any other identifier, a 400
+   * is also NotFound: PokéAPI answers 400, not 404, to a path segment that needed encoding.
+   */
+  private async fetchByIdentifier<T>(
+    resource: string,
+    identifier: string | number,
+    ctx: Context,
+  ): Promise<T> {
+    const id = this.normalizeIdentifier(identifier);
+    const miss = () =>
+      notFound(`No PokéAPI ${resource} record matches the identifier.`, { resource });
+    if (
+      id === '' ||
+      id === '.' ||
+      id === '..' ||
+      id.length > MAX_IDENTIFIER_LENGTH ||
+      !id.isWellFormed()
+    ) {
+      throw miss();
+    }
+    if (CANONICAL_IDENTIFIER.test(id)) {
+      return this.fetchRaw<T>(`${resource}/${id}`, ctx, `pokeapi/${resource}/${id}`);
+    }
+    try {
+      return await this.fetchRaw<T>(`${resource}/${encodeURIComponent(id)}`, ctx, null);
+    } catch (err) {
+      if (err instanceof McpError && err.data?.status === 400) throw miss();
+      throw err;
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -106,13 +162,11 @@ export class PokeApiService {
   // ---------------------------------------------------------------------------
 
   fetchPokemon(identifier: string | number, ctx: Context): Promise<RawPokemon> {
-    const id = this.normalizeIdentifier(identifier);
-    return this.fetchRaw<RawPokemon>(`pokemon/${id}`, ctx);
+    return this.fetchByIdentifier<RawPokemon>('pokemon', identifier, ctx);
   }
 
   fetchSpecies(identifier: string | number, ctx: Context): Promise<RawPokemonSpecies> {
-    const id = this.normalizeIdentifier(identifier);
-    return this.fetchRaw<RawPokemonSpecies>(`pokemon-species/${id}`, ctx);
+    return this.fetchByIdentifier<RawPokemonSpecies>('pokemon-species', identifier, ctx);
   }
 
   fetchEvolutionChain(url: string, ctx: Context): Promise<RawEvolutionChain> {
@@ -126,28 +180,23 @@ export class PokeApiService {
   }
 
   fetchAbility(identifier: string | number, ctx: Context): Promise<RawAbility> {
-    const id = this.normalizeIdentifier(identifier);
-    return this.fetchRaw<RawAbility>(`ability/${id}`, ctx);
+    return this.fetchByIdentifier<RawAbility>('ability', identifier, ctx);
   }
 
   fetchType(identifier: string | number, ctx: Context): Promise<RawType> {
-    const id = this.normalizeIdentifier(identifier);
-    return this.fetchRaw<RawType>(`type/${id}`, ctx);
+    return this.fetchByIdentifier<RawType>('type', identifier, ctx);
   }
 
   fetchMove(identifier: string | number, ctx: Context): Promise<RawMove> {
-    const id = this.normalizeIdentifier(identifier);
-    return this.fetchRaw<RawMove>(`move/${id}`, ctx);
+    return this.fetchByIdentifier<RawMove>('move', identifier, ctx);
   }
 
   fetchItem(identifier: string | number, ctx: Context): Promise<RawItem> {
-    const id = this.normalizeIdentifier(identifier);
-    return this.fetchRaw<RawItem>(`item/${id}`, ctx);
+    return this.fetchByIdentifier<RawItem>('item', identifier, ctx);
   }
 
   fetchNature(identifier: string | number, ctx: Context): Promise<RawNature> {
-    const id = this.normalizeIdentifier(identifier);
-    return this.fetchRaw<RawNature>(`nature/${id}`, ctx);
+    return this.fetchByIdentifier<RawNature>('nature', identifier, ctx);
   }
 
   async fetchAllNatures(ctx: Context): Promise<RawNature[]> {
@@ -162,23 +211,45 @@ export class PokeApiService {
   }
 
   fetchGeneration(identifier: string | number, ctx: Context): Promise<RawGeneration> {
-    const id = this.normalizeIdentifier(identifier);
-    return this.fetchRaw<RawGeneration>(`generation/${id}`, ctx);
+    return this.fetchByIdentifier<RawGeneration>('generation', identifier, ctx);
   }
 
   fetchPokedex(identifier: string | number, ctx: Context): Promise<RawPokedex> {
-    const id = this.normalizeIdentifier(identifier);
-    return this.fetchRaw<RawPokedex>(`pokedex/${id}`, ctx);
+    return this.fetchByIdentifier<RawPokedex>('pokedex', identifier, ctx);
   }
 
   fetchEggGroup(identifier: string | number, ctx: Context): Promise<RawEggGroup> {
-    const id = this.normalizeIdentifier(identifier);
-    return this.fetchRaw<RawEggGroup>(`egg-group/${id}`, ctx);
+    return this.fetchByIdentifier<RawEggGroup>('egg-group', identifier, ctx);
   }
 
   // ---------------------------------------------------------------------------
   // Domain-level methods used by tools
   // ---------------------------------------------------------------------------
+
+  /**
+   * Pokémon record for a name or ID. A name with no Pokémon record of its own that names a
+   * species (e.g. "deoxys") resolves to that species' default variety ("deoxys-normal").
+   * The species lookup runs only after the Pokémon lookup misses, and never for a numeric
+   * ID: every species ID is also a Pokémon-record ID, so a numeric miss is final.
+   */
+  private async resolvePokemon(
+    identifier: string | number,
+    ctx: Context,
+  ): Promise<{ pokemon: RawPokemon; resolvedFromSpecies: string | null }> {
+    try {
+      return { pokemon: await this.fetchPokemon(identifier, ctx), resolvedFromSpecies: null };
+    } catch (err) {
+      const isMiss = err instanceof McpError && err.code === JsonRpcErrorCode.NotFound;
+      if (!isMiss || /^\d+$/.test(this.normalizeIdentifier(identifier))) throw err;
+      const species = await this.fetchSpecies(identifier, ctx);
+      const defaultVariety = species.varieties.find((variety) => variety.is_default);
+      if (!defaultVariety) throw err;
+      return {
+        pokemon: await this.fetchPokemon(defaultVariety.pokemon.name, ctx),
+        resolvedFromSpecies: species.name,
+      };
+    }
+  }
 
   /** Full denormalized Pokémon dossier — up to 3+N calls in two async tiers. */
   async getPokemonDossier(
@@ -187,14 +258,12 @@ export class PokeApiService {
     gameVersion: string | undefined,
     ctx: Context,
   ): Promise<PokemonDossier> {
-    const id = this.normalizeIdentifier(identifier);
-
     // Tier 1: fetch the pokemon entry first to resolve the canonical species name.
     // For variant forms (e.g. "pikachu-rock-star"), pokemon.species.name is the base
     // species ("pikachu") while pokemon-species/{form} returns 404. Fetch species by
     // the name the pokemon endpoint itself reports to handle both base species and
     // variant forms correctly.
-    const pokemon = await this.fetchPokemon(id, ctx);
+    const { pokemon, resolvedFromSpecies } = await this.resolvePokemon(identifier, ctx);
     const species = await this.fetchSpecies(pokemon.species.name, ctx);
 
     // Tier 2: evolution chain + ability details in parallel
@@ -247,9 +316,10 @@ export class PokeApiService {
     return {
       id: pokemon.id,
       name: pokemon.name,
+      resolvedFromSpecies,
       heightDm: pokemon.height,
       weightHg: pokemon.weight,
-      types: pokemon.types.sort((a, b) => a.slot - b.slot).map((t) => t.type.name),
+      types: pokemon.types.toSorted((a, b) => a.slot - b.slot).map((t) => t.type.name),
       stats,
       abilities,
       sprites: {
@@ -372,7 +442,13 @@ export class PokeApiService {
       id: raw.id,
       name: raw.name,
       category: raw.category.name,
-      cost: raw.cost ?? 0,
+      cost: raw.cost ?? null,
+      prices: (raw.prices ?? []).map((price) => ({
+        versionGroup: price.version_group.name,
+        currency: price.currency.name,
+        purchasePrice: price.purchase_price,
+        sellPrice: price.sell_price,
+      })),
       flingPower: raw.fling_power ?? null,
       effectText: en?.effect ?? null,
       shortEffectText: en?.short_effect ?? null,
@@ -404,7 +480,7 @@ export class PokeApiService {
     return raws.map((r) => this.normalizeNature(r)).sort((a, b) => a.id - b.id);
   }
 
-  /** Filter Pokémon by generation. */
+  /** Filter by generation, preserving species IDs. */
   async getPokemonByGeneration(generation: string, ctx: Context): Promise<PokemonListEntry[]> {
     const raw = await this.fetchGeneration(generation, ctx);
     return raw.pokemon_species.map((s) => {
@@ -416,7 +492,7 @@ export class PokeApiService {
     });
   }
 
-  /** Filter Pokémon by type. */
+  /** Filter by type, preserving Pokémon-record IDs, including forms. */
   async getPokemonByType(typeName: string, ctx: Context): Promise<PokemonListEntry[]> {
     const raw = await this.fetchType(typeName, ctx);
     return raw.pokemon.map((p) => {
@@ -428,7 +504,7 @@ export class PokeApiService {
     });
   }
 
-  /** Filter Pokémon by regional pokédex. */
+  /** Filter by regional pokédex, preserving species IDs rather than regional entry numbers. */
   async getPokemonByPokedex(pokedex: string, ctx: Context): Promise<PokemonListEntry[]> {
     const raw = await this.fetchPokedex(pokedex, ctx);
     return raw.pokemon_entries.map((e) => {
@@ -440,7 +516,7 @@ export class PokeApiService {
     });
   }
 
-  /** Filter Pokémon by egg group. */
+  /** Filter by egg group, preserving species IDs. */
   async getPokemonByEggGroup(eggGroup: string, ctx: Context): Promise<PokemonListEntry[]> {
     const raw = await this.fetchEggGroup(eggGroup, ctx);
     return raw.pokemon_species.map((s) => {
@@ -499,6 +575,45 @@ export class PokeApiService {
       minLevel: detail?.min_level ?? null,
       item: detail?.item?.name ?? null,
       condition: this.buildEvolutionCondition(detail),
+      evolutionDetails: link.evolution_details.map((method) => ({
+        versionGroup: method.version_group?.name ?? null,
+        isDefault: method.is_default ?? null,
+        item: method.item?.name ?? null,
+        trigger: method.trigger.name,
+        gender: method.gender ?? null,
+        heldItem: method.held_item?.name ?? null,
+        knownMove: method.known_move?.name ?? null,
+        knownMoveType: method.known_move_type?.name ?? null,
+        location: method.location?.name ?? null,
+        minLevel: method.min_level ?? null,
+        minHappiness: method.min_happiness ?? null,
+        minBeauty: method.min_beauty ?? null,
+        minAffection: method.min_affection ?? null,
+        nearSpecialRock: method.near_special_rock ?? null,
+        needsMultiplayer: method.needs_multiplayer ?? null,
+        needsOverworldRain: method.needs_overworld_rain ?? null,
+        partySpecies: method.party_species?.name ?? null,
+        partyType: method.party_type?.name ?? null,
+        relativePhysicalStats: method.relative_physical_stats ?? null,
+        timeOfDay: method.time_of_day ?? null,
+        tradeSpecies: method.trade_species?.name ?? null,
+        turnUpsideDown: method.turn_upside_down ?? null,
+        region: method.region?.name ?? null,
+        requiredPokemonForm: method.required_pokemon_form?.name ?? null,
+        evolvedPokemonForm: method.evolved_pokemon_form?.name ?? null,
+        usedMove: method.used_move?.name ?? null,
+        minMoveCount: method.min_move_count ?? null,
+        minSteps: method.min_steps ?? null,
+        minDamageTaken: method.min_damage_taken ?? null,
+        allowedNatures: method.allowed_natures?.map((nature) => nature.name) ?? null,
+        conditionExpression: method.condition_expression
+          ? {
+              expression: method.condition_expression.expression,
+              percentageChance: method.condition_expression.percentage_chance,
+              variables: method.condition_expression.variables.map((variable) => variable.name),
+            }
+          : null,
+      })),
       evolvesTo: link.evolves_to.map((l) => this.walkEvolutionChain(l)),
     };
   }

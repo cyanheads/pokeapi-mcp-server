@@ -1,5 +1,5 @@
 /**
- * @fileoverview pokeapi://pokemon/{identifier} resource — Pokémon dossier by name or dex number.
+ * @fileoverview pokeapi://pokemon/{identifier} resource — Pokémon dossier by name or PokéAPI record ID.
  * @module mcp-server/resources/definitions/pokemon.resource
  */
 
@@ -10,21 +10,25 @@ import { getPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 export const pokemonResource = resource('pokeapi://pokemon/{identifier}', {
   name: 'Pokémon Dossier',
   description:
-    'Pokémon dossier addressable by name or Pokédex number. ' +
-    'Same payload as pokeapi_get_pokemon without move details.',
+    'Pokémon dossier addressable by name or PokéAPI Pokémon-record ID, including forms. ' +
+    'A species name with no Pokémon record of its own resolves to the default variety of that species, named in resolvedFromSpecies. ' +
+    'Same payload as pokeapi_get_pokemon without move details, including every evolution alternative and its version and form metadata.',
   mimeType: 'application/json',
   params: z.object({
     identifier: z
       .string()
-      .describe('Pokémon name (e.g. "bulbasaur") or Pokédex number (e.g. "1").'),
+      .describe(
+        'Pokémon name (e.g. "bulbasaur", "charizard-mega-x") or PokéAPI Pokémon-record ID (e.g. "1", "10034").',
+      ),
   }),
 
   errors: [
     {
       reason: 'not_found',
       code: JsonRpcErrorCode.NotFound,
-      when: 'No Pokémon matches the identifier.',
-      recovery: 'Use a valid lowercase hyphenated Pokémon name or a numeric Pokédex number.',
+      when: 'The identifier matches no Pokémon record and no species.',
+      recovery:
+        'Use a valid lowercase hyphenated Pokémon name or a numeric PokéAPI Pokémon-record ID.',
     },
   ],
 
@@ -37,8 +41,7 @@ export const pokemonResource = resource('pokeapi://pokemon/{identifier}', {
       if (err instanceof McpError && err.code === JsonRpcErrorCode.NotFound) {
         throw ctx.fail(
           'not_found',
-          `Pokémon "${params.identifier}" not found — use a valid lowercase name or numeric Pokédex number.`,
-          ctx.recoveryFor('not_found'),
+          `Pokémon "${params.identifier}" not found — use a valid lowercase name or numeric PokéAPI Pokémon-record ID.`,
         );
       }
       throw err;
@@ -54,7 +57,7 @@ export const pokemonResource = resource('pokeapi://pokemon/{identifier}', {
       },
       {
         uri: 'pokeapi://pokemon/1',
-        name: 'Pokémon #1 (Bulbasaur)',
+        name: 'Bulbasaur (PokéAPI ID: 1)',
         mimeType: 'application/json',
       },
     ],

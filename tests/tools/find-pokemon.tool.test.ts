@@ -94,7 +94,7 @@ describe('findPokemon', () => {
   it('rejects a negative limit at input validation (#7)', () => {
     // limit must be a positive integer — negatives previously reached Array.slice and
     // returned misleading successes. A Zod failure on the input schema surfaces to the
-    // client as ValidationError (-32007) via the framework's ZodError auto-classification.
+    // client as InvalidParams (-32602) before the handler runs.
     expect(() => findPokemon.input.parse({ generation: 'generation-i', limit: -5 })).toThrow();
   });
 
@@ -144,13 +144,13 @@ describe('findPokemon', () => {
     expect(text).toContain('squirtle');
   });
 
-  it('formats empty results with actionable guidance mirroring the enrichment notice', () => {
+  it('formats empty results without duplicating enrichment guidance', () => {
     const result = findPokemon.output.parse({ pokemon: [], totalCount: 0, shown: 0 });
 
     const blocks = findPokemon.format!(result);
     const text = (blocks[0] as { text: string }).text;
     expect(text).toContain('No results');
-    // Actionable guidance must appear in content[] so clients that only read content[] get it
-    expect(text).toContain('relaxing');
+    // The framework appends the handler's guidance once in the enrichment trailer.
+    expect(text).not.toContain('relaxing');
   });
 });

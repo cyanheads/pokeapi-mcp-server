@@ -25,7 +25,8 @@ describe('getItem', () => {
     expect(result.name).toBe('leftovers');
     expect(typeof result.id).toBe('number');
     expect(typeof result.category).toBe('string');
-    expect(typeof result.cost).toBe('number');
+    expect(result.cost).toBeNull();
+    expect(result.prices).toBeInstanceOf(Array);
     expect(result.attributes).toBeInstanceOf(Array);
     expect(result.heldByPokemon).toBeInstanceOf(Array);
   }, 15000);
@@ -61,6 +62,7 @@ describe('getItem', () => {
       name: 'leftovers',
       category: 'held-items',
       cost: 9800,
+      prices: [],
       flingPower: 10,
       effectText: 'Restores 1/16 of max HP each turn.',
       shortEffectText: 'Restores 1/16 max HP each turn.',
@@ -80,12 +82,13 @@ describe('getItem', () => {
     expect(text).toContain('₽9800');
   });
 
-  it('formats item not sold in shops (cost=0)', () => {
+  it('formats a zero legacy cost literally', () => {
     const result = getItem.output.parse({
       id: 1,
       name: 'master-ball',
       category: 'pokeballs',
       cost: 0,
+      prices: [],
       flingPower: 30,
       effectText: 'Catches any wild Pokémon without fail.',
       shortEffectText: 'Catches any Pokémon.',
@@ -96,7 +99,8 @@ describe('getItem', () => {
 
     const blocks = getItem.format!(result);
     const text = (blocks[0] as { text: string }).text;
-    expect(text).toContain('Not sold');
+    expect(text).toContain('**Legacy cost:** ₽0');
+    expect(text).toContain('No price records available');
   });
 
   it('formats item with null effect text (sparse upstream)', () => {
@@ -105,6 +109,7 @@ describe('getItem', () => {
       name: 'some-item',
       category: 'miscellaneous',
       cost: 0,
+      prices: [],
       flingPower: null,
       effectText: null,
       shortEffectText: null,

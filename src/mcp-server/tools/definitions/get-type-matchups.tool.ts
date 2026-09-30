@@ -26,7 +26,7 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
   description:
     'Get the full offensive and defensive type effectiveness breakdown. ' +
     'Provide either a type name (e.g. "fire", "psychic") or a Pokémon identifier ' +
-    '(name or dex number). For dual-type Pokémon, the defensive multipliers are ' +
+    '(name or PokéAPI Pokémon-record ID). For dual-type Pokémon, the defensive multipliers are ' +
     'correctly composed (e.g. Fire/Flying vs Rock = 4× because both types are ' +
     'weak to Rock). Exactly one of type or pokemon must be provided.',
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
@@ -41,7 +41,7 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
       .string()
       .optional()
       .describe(
-        'Pokémon name or Pokédex number. The server resolves the types automatically. Provide this or type, not both.',
+        'Pokémon name or PokéAPI Pokémon-record ID. The server resolves the types automatically. Provide this or type, not both.',
       ),
   }),
   output: z.object({
@@ -70,7 +70,7 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
       code: JsonRpcErrorCode.NotFound,
       when: 'The type name or Pokémon identifier was not found in PokéAPI.',
       recovery:
-        'Verify the type name is a valid Pokémon type (fire, water, etc.) or use a valid Pokémon name/number.',
+        'Verify the type name is a valid Pokémon type (fire, water, etc.) or use a Pokémon name or PokéAPI Pokémon-record ID.',
     },
     {
       reason: 'invalid_input',
@@ -83,20 +83,8 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
   async handler(input, ctx) {
     const svc = getPokeApiService();
 
-    if (!input.type && !input.pokemon) {
-      throw ctx.fail(
-        'invalid_input',
-        'Provide either type or pokemon — exactly one is required.',
-        ctx.recoveryFor('invalid_input'),
-      );
-    }
-
     if (input.type && input.pokemon) {
-      throw ctx.fail(
-        'invalid_input',
-        'Provide either type or pokemon — not both.',
-        ctx.recoveryFor('invalid_input'),
-      );
+      throw ctx.fail('invalid_input', 'Provide either type or pokemon — not both.');
     }
 
     try {
@@ -120,19 +108,16 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
         };
       }
 
-      // Pokémon query. The guards above ensure exactly one of type/pokemon is set;
-      // narrow input.pokemon for the type-checker before use.
       if (!input.pokemon) {
         throw ctx.fail(
           'invalid_input',
           'Provide either type or pokemon — exactly one is required.',
-          ctx.recoveryFor('invalid_input'),
         );
       }
       const pokemonId = svc.normalizeIdentifier(input.pokemon);
       ctx.log.info('Getting type matchups for Pokémon', { pokemon: pokemonId });
       const rawPokemon = await svc.fetchPokemon(pokemonId, ctx);
-      const types = rawPokemon.types.sort((a, b) => a.slot - b.slot).map((t) => t.type.name);
+      const types = rawPokemon.types.toSorted((a, b) => a.slot - b.slot).map((t) => t.type.name);
 
       const composedMultipliers = await svc.getDualTypeDefensive(types, ctx);
 
@@ -165,8 +150,7 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
         const subject = input.type ?? input.pokemon ?? 'identifier';
         throw ctx.fail(
           'not_found',
-          `"${subject}" not found — verify it is a valid type name (e.g. "fire") or Pokémon name/number.`,
-          ctx.recoveryFor('not_found'),
+          `"${subject}" not found — use a valid type name (e.g. "fire"), Pokémon name, or PokéAPI Pokémon-record ID.`,
         );
       }
       throw err;
@@ -181,28 +165,24 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
 
     if (result.offensiveRelations) {
       lines.push('\n## Offensive Relations');
-      if (result.offensiveRelations.superEffectiveTo.length > 0)
-        lines.push(
-          `**Super Effective (2×):** ${result.offensiveRelations.superEffectiveTo.join(', ')}`,
-        );
-      if (result.offensiveRelations.notVeryEffectiveTo.length > 0)
-        lines.push(
-          `**Not Very Effective (0.5×):** ${result.offensiveRelations.notVeryEffectiveTo.join(', ')}`,
-        );
-      if (result.offensiveRelations.noEffectTo.length > 0)
-        lines.push(`**No Effect (0×):** ${result.offensiveRelations.noEffectTo.join(', ')}`);
+      lines.push(
+        `**Super Effective (2×):** ${result.offensiveRelations.superEffectiveTo.join(', ') || 'None'}`,
+      );
+      lines.push(
+        `**Not Very Effective (0.5×):** ${result.offensiveRelations.notVeryEffectiveTo.join(', ') || 'None'}`,
+      );
+      lines.push(
+        `**No Effect (0×):** ${result.offensiveRelations.noEffectTo.join(', ') || 'None'}`,
+      );
     } else {
       lines.push('\n## Offensive Relations');
       lines.push('*(Offensive breakdown unavailable for dual-type Pokémon queries.)*');
     }
 
     lines.push('\n## Defensive Matchups');
-    if (result.defensiveMatchups.immuneTo.length > 0)
-      lines.push(`**Immune (0×):** ${result.defensiveMatchups.immuneTo.join(', ')}`);
-    if (result.defensiveMatchups.resists.length > 0)
-      lines.push(`**Resists:** ${result.defensiveMatchups.resists.join(', ')}`);
-    if (result.defensiveMatchups.weakTo.length > 0)
-      lines.push(`**Weak To:** ${result.defensiveMatchups.weakTo.join(', ')}`);
+    lines.push(`**Immune (0×):** ${result.defensiveMatchups.immuneTo.join(', ') || 'None'}`);
+    lines.push(`**Resists:** ${result.defensiveMatchups.resists.join(', ') || 'None'}`);
+    lines.push(`**Weak To:** ${result.defensiveMatchups.weakTo.join(', ') || 'None'}`);
 
     lines.push('\n## Composed Multipliers');
     lines.push('*Includes net-neutral 1× cancellations; types not listed deal 1×.*');

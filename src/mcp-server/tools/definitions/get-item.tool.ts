@@ -10,7 +10,7 @@ import { getPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 export const getItem = tool('pokeapi_get_item', {
   title: 'Get Item',
   description:
-    'Get item details by name or numeric ID — effect text, category, in-game cost, ' +
+    'Get item details by name or numeric ID — effect text, category, versioned purchase and sell prices, ' +
     'fling power, item attributes (holdable, consumable, etc.), sprite URL, and Pokémon that commonly hold it.',
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
   input: z.object({
@@ -24,7 +24,36 @@ export const getItem = tool('pokeapi_get_item', {
     id: z.number().describe('Item ID.'),
     name: z.string().describe('Item name in hyphenated lowercase.'),
     category: z.string().describe('Item category (e.g. "held-items", "medicine").'),
-    cost: z.number().describe('Purchase cost in Pokédollars. 0 means not sold in shops.'),
+    cost: z
+      .number()
+      .nullable()
+      .describe(
+        'Legacy Pokédollar cost when supplied. Null when unavailable; zero is a literal amount. Independent of versioned prices.',
+      ),
+    prices: z
+      .array(
+        z
+          .object({
+            versionGroup: z.string().describe('Version group these prices apply to.'),
+            currency: z.string().describe('Currency name for both prices.'),
+            purchasePrice: z
+              .number()
+              .nullable()
+              .describe(
+                'Purchase price in this currency and version group. Null means not purchasable; zero is a literal amount.',
+              ),
+            sellPrice: z
+              .number()
+              .nullable()
+              .describe(
+                'Sell price in this currency and version group. Null means not sellable; zero is a literal amount.',
+              ),
+          })
+          .describe('One version and currency price record.'),
+      )
+      .describe(
+        'All supplied price records in upstream order. Empty when no records are available.',
+      ),
     flingPower: z
       .number()
       .nullable()
@@ -66,7 +95,6 @@ export const getItem = tool('pokeapi_get_item', {
         throw ctx.fail(
           'not_found',
           `Item "${input.identifier}" not found — use a valid lowercase hyphenated name (e.g. "choice-specs") or numeric ID.`,
-          ctx.recoveryFor('not_found'),
         );
       }
       throw err;
@@ -78,12 +106,22 @@ export const getItem = tool('pokeapi_get_item', {
 
     lines.push(`# ${result.name} (Item #${result.id})`);
     lines.push(`**Category:** ${result.category}`);
-    lines.push(`**Cost:** ${result.cost > 0 ? `₽${result.cost}` : 'Not sold'}`);
-    if (result.flingPower != null) {
-      lines.push(`**Fling Power:** ${result.flingPower}`);
-    }
-    if (result.attributes.length > 0) {
-      lines.push(`**Attributes:** ${result.attributes.join(', ')}`);
+    lines.push(`**Legacy cost:** ${result.cost == null ? 'Not available' : `₽${result.cost}`}`);
+    lines.push(`**Fling Power:** ${result.flingPower ?? 'Not throwable'}`);
+    lines.push(
+      `**Attributes:** ${result.attributes.length > 0 ? result.attributes.join(', ') : 'None listed'}`,
+    );
+
+    lines.push('\n## Prices');
+    if (result.prices.length === 0) {
+      lines.push('No price records available.');
+    } else {
+      lines.push('| Version group | Currency | Purchase | Sell |', '| --- | --- | --- | --- |');
+      for (const price of result.prices) {
+        lines.push(
+          `| ${price.versionGroup} | ${price.currency} | ${price.purchasePrice ?? 'Not purchasable'} | ${price.sellPrice ?? 'Not sellable'} |`,
+        );
+      }
     }
 
     lines.push('\n## Effect');
@@ -99,14 +137,12 @@ export const getItem = tool('pokeapi_get_item', {
       lines.push(`\n**Summary:** ${result.shortEffectText}`);
     }
 
-    if (result.heldByPokemon.length > 0) {
-      lines.push('\n## Commonly Held By');
-      lines.push(result.heldByPokemon.join(', '));
-    }
+    lines.push('\n## Commonly Held By');
+    lines.push(
+      result.heldByPokemon.length > 0 ? result.heldByPokemon.join(', ') : 'No known holders.',
+    );
 
-    if (result.spriteUrl) {
-      lines.push(`\n**Sprite:** ${result.spriteUrl}`);
-    }
+    lines.push(`\n**Sprite:** ${result.spriteUrl ?? 'Not available'}`);
 
     return [{ type: 'text', text: lines.join('\n') }];
   },

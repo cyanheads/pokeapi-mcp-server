@@ -28,7 +28,7 @@ describe('pokemonResource', () => {
     expect((result as Record<string, unknown>).stats).toBeInstanceOf(Array);
   }, 15000);
 
-  it('returns Pokémon dossier by dex number', async () => {
+  it('returns Pokémon dossier by PokéAPI Pokémon-record ID', async () => {
     const ctx = createMockContext({ errors: pokemonResource.errors, tenantId: 'test-tenant' });
     const params = pokemonResource.params!.parse({ identifier: '1' });
     const result = await pokemonResource.handler(params, ctx);

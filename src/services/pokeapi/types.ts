@@ -108,27 +108,47 @@ export interface RawEvolutionChain {
   id: number;
 }
 
+/** One upstream evolution method, including its version and form metadata. */
+export interface RawEvolutionDetail {
+  allowed_natures?: NamedResource[] | null;
+  condition_expression?: {
+    expression: string;
+    percentage_chance: number;
+    variables: NamedResource[];
+  } | null;
+  evolved_pokemon_form?: NamedResource | null;
+  gender?: number | null;
+  held_item?: NamedResource | null;
+  is_default?: boolean | null;
+  item?: NamedResource | null;
+  known_move?: NamedResource | null;
+  known_move_type?: NamedResource | null;
+  location?: NamedResource | null;
+  min_affection?: number | null;
+  min_beauty?: number | null;
+  min_damage_taken?: number | null;
+  min_happiness?: number | null;
+  min_level?: number | null;
+  min_move_count?: number | null;
+  min_steps?: number | null;
+  near_special_rock?: boolean | null;
+  needs_multiplayer?: boolean | null;
+  needs_overworld_rain?: boolean | null;
+  party_species?: NamedResource | null;
+  party_type?: NamedResource | null;
+  region?: NamedResource | null;
+  relative_physical_stats?: number | null;
+  required_pokemon_form?: NamedResource | null;
+  time_of_day?: string | null;
+  trade_species?: NamedResource | null;
+  trigger: NamedResource;
+  turn_upside_down?: boolean | null;
+  used_move?: NamedResource | null;
+  version_group?: NamedResource | null;
+}
+
 export interface RawChainLink {
-  evolution_details: Array<{
-    item?: NamedResource | null;
-    trigger: NamedResource;
-    gender?: number | null;
-    held_item?: NamedResource | null;
-    known_move?: NamedResource | null;
-    known_move_type?: NamedResource | null;
-    location?: NamedResource | null;
-    min_level?: number | null;
-    min_happiness?: number | null;
-    min_beauty?: number | null;
-    min_affection?: number | null;
-    needs_overworld_rain: boolean;
-    party_species?: NamedResource | null;
-    party_type?: NamedResource | null;
-    relative_physical_stats?: number | null;
-    time_of_day: string;
-    trade_species?: NamedResource | null;
-    turn_upside_down: boolean;
-  }>;
+  evolution_details: RawEvolutionDetail[];
   evolves_to: RawChainLink[];
   is_baby: boolean;
   species: NamedResource;
@@ -233,7 +253,7 @@ export interface RawItem {
   attributes: NamedResource[];
   baby_trigger_for?: { url: string } | null;
   category: NamedResource;
-  cost: number | null;
+  cost?: number | null;
   effect_entries: Array<{
     effect: string;
     short_effect: string;
@@ -258,6 +278,12 @@ export interface RawItem {
   machines: unknown[];
   name: string;
   names: Array<{ name: string; language: NamedResource }>;
+  prices?: Array<{
+    version_group: NamedResource;
+    currency: NamedResource;
+    purchase_price: number | null;
+    sell_price: number | null;
+  }>;
   sprites: { default: string | null };
 }
 
@@ -339,11 +365,51 @@ export interface PokemonMoveSummary {
 
 export interface EvolutionStep {
   condition: string | null;
+  evolutionDetails: EvolutionDetail[];
   evolvesTo: EvolutionStep[];
   item: string | null;
   minLevel: number | null;
   species: string;
   trigger: string;
+}
+
+/** Complete alternative; null means upstream did not specify the field. */
+export interface EvolutionDetail {
+  allowedNatures: string[] | null;
+  conditionExpression: {
+    expression: string;
+    percentageChance: number;
+    variables: string[];
+  } | null;
+  evolvedPokemonForm: string | null;
+  gender: number | null;
+  heldItem: string | null;
+  isDefault: boolean | null;
+  item: string | null;
+  knownMove: string | null;
+  knownMoveType: string | null;
+  location: string | null;
+  minAffection: number | null;
+  minBeauty: number | null;
+  minDamageTaken: number | null;
+  minHappiness: number | null;
+  minLevel: number | null;
+  minMoveCount: number | null;
+  minSteps: number | null;
+  nearSpecialRock: boolean | null;
+  needsMultiplayer: boolean | null;
+  needsOverworldRain: boolean | null;
+  partySpecies: string | null;
+  partyType: string | null;
+  region: string | null;
+  relativePhysicalStats: number | null;
+  requiredPokemonForm: string | null;
+  timeOfDay: string | null;
+  tradeSpecies: string | null;
+  trigger: string;
+  turnUpsideDown: boolean | null;
+  usedMove: string | null;
+  versionGroup: string | null;
 }
 
 export interface PokemonDossier {
@@ -356,12 +422,15 @@ export interface PokemonDossier {
   genus: string | null;
   growthRate: string;
   heightDm: number;
+  /** Pokémon-record ID, including form IDs; not necessarily a National Pokédex number. */
   id: number;
   isLegendary: boolean;
   isMythical: boolean;
   moveCount: number;
   moves: PokemonMoveSummary[];
   name: string;
+  /** Species name the identifier matched instead of a Pokémon record; null for a direct match. */
+  resolvedFromSpecies: string | null;
   speciesFlavorText: string | null;
   sprites: {
     frontDefault: string | null;
@@ -422,12 +491,18 @@ export interface AbilityDetails {
 export interface ItemDetails {
   attributes: string[];
   category: string;
-  cost: number;
+  cost: number | null;
   effectText: string | null;
   flingPower: number | null;
   heldByPokemon: string[];
   id: number;
   name: string;
+  prices: Array<{
+    versionGroup: string;
+    currency: string;
+    purchasePrice: number | null;
+    sellPrice: number | null;
+  }>;
   shortEffectText: string | null;
   spriteUrl: string | null;
 }
@@ -442,6 +517,7 @@ export interface NatureDetails {
 }
 
 export interface PokemonListEntry {
+  /** Pokémon-record ID for type catalogs; species ID for generation, pokédex and egg groups. */
   id: number;
   name: string;
   types?: string[];

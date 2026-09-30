@@ -66,7 +66,6 @@ export const getAbility = tool('pokeapi_get_ability', {
         throw ctx.fail(
           'not_found',
           `Ability "${input.identifier}" not found — use a valid lowercase hyphenated name or numeric ID.`,
-          ctx.recoveryFor('not_found'),
         );
       }
       throw err;
@@ -92,8 +91,8 @@ export const getAbility = tool('pokeapi_get_ability', {
       lines.push(`\n**Summary:** ${result.shortEffectText}`);
     }
 
+    lines.push('\n## Pokémon with this Ability');
     if (result.pokemon.length > 0) {
-      lines.push('\n## Pokémon with this Ability');
       const regular = result.pokemon.filter((p) => !p.isHidden);
       const hidden = result.pokemon.filter((p) => p.isHidden);
       if (regular.length > 0) {
@@ -108,6 +107,8 @@ export const getAbility = tool('pokeapi_get_ability', {
           lines.push(`- ${p.name} (slot ${p.slot})`);
         }
       }
+    } else {
+      lines.push('No known Pokémon with this ability.');
     }
 
     return [{ type: 'text', text: lines.join('\n') }];

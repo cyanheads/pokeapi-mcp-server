@@ -71,6 +71,9 @@ export const getMove = tool('pokeapi_get_move', {
     learnedByPokemon: z
       .array(z.string())
       .describe('Pokémon names that can learn this move (populated when include_learners=true).'),
+    learnersIncluded: z
+      .boolean()
+      .describe('True when the learner list was requested, including when no learners are known.'),
   }),
 
   errors: [
@@ -88,13 +91,16 @@ export const getMove = tool('pokeapi_get_move', {
     const svc = getPokeApiService();
     try {
       const move = await svc.getMoveDetails(input.identifier, ctx);
-      return { ...move, learnedByPokemon: input.include_learners ? move.learnedByPokemon : [] };
+      return {
+        ...move,
+        learnedByPokemon: input.include_learners ? move.learnedByPokemon : [],
+        learnersIncluded: input.include_learners,
+      };
     } catch (err) {
       if (err instanceof McpError && err.code === JsonRpcErrorCode.NotFound) {
         throw ctx.fail(
           'not_found',
           `Move "${input.identifier}" not found — check spelling or use a numeric ID.`,
-          ctx.recoveryFor('not_found'),
         );
       }
       throw err;
@@ -116,9 +122,9 @@ export const getMove = tool('pokeapi_get_move', {
       `**Power:** ${powerStr} | **Accuracy:** ${accStr} | **PP:** ${ppStr} | **Priority:** ${result.priority}`,
     );
 
-    if (result.effectChance != null) {
-      lines.push(`**Effect Chance:** ${result.effectChance}%`);
-    }
+    lines.push(
+      `**Effect Chance:** ${result.effectChance == null ? 'Not applicable' : `${result.effectChance}%`}`,
+    );
 
     lines.push('\n## Effect');
     if (result.effectText) {
@@ -133,17 +139,22 @@ export const getMove = tool('pokeapi_get_move', {
       lines.push(`\n**Summary:** ${result.shortEffectText}`);
     }
 
+    lines.push('\n## Stat Changes');
     if (result.statChanges.length > 0) {
-      lines.push('\n## Stat Changes');
       for (const sc of result.statChanges) {
         const sign = sc.change > 0 ? '+' : '';
         lines.push(`**${sc.stat}:** ${sign}${sc.change}`);
       }
+    } else {
+      lines.push('No stat changes.');
     }
 
+    lines.push('\n## Learned By');
+    lines.push(`**Learners included:** ${result.learnersIncluded ? 'Yes' : 'No'}`);
     if (result.learnedByPokemon.length > 0) {
-      lines.push('\n## Learned By');
       lines.push(result.learnedByPokemon.join(', '));
+    } else if (result.learnersIncluded) {
+      lines.push('No known learners.');
     } else {
       lines.push('\n*(Pass include_learners=true to include the learner list.)*');
     }

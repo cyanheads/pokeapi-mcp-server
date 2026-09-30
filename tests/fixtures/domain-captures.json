@@ -1,0 +1,4696 @@
+{
+  "chains": {
+    "1": {
+      "id": 1,
+      "baby_trigger_item": null,
+      "chain": {
+        "is_baby": false,
+        "species": {
+          "name": "bulbasaur",
+          "url": "https://pokeapi.co/api/v2/pokemon-species/1/"
+        },
+        "evolution_details": [],
+        "evolves_to": [
+          {
+            "is_baby": false,
+            "species": {
+              "name": "ivysaur",
+              "url": "https://pokeapi.co/api/v2/pokemon-species/2/"
+            },
+            "evolution_details": [
+              {
+                "version_group": {
+                  "name": "red-blue",
+                  "url": "https://pokeapi.co/api/v2/version-group/1/"
+                },
+                "is_default": true,
+                "item": null,
+                "trigger": {
+                  "name": "level-up",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": null,
+                "min_level": 16,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": false,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": null,
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              }
+            ],
+            "evolves_to": [
+              {
+                "is_baby": false,
+                "species": {
+                  "name": "venusaur",
+                  "url": "https://pokeapi.co/api/v2/pokemon-species/3/"
+                },
+                "evolution_details": [
+                  {
+                    "version_group": {
+                      "name": "red-blue",
+                      "url": "https://pokeapi.co/api/v2/version-group/1/"
+                    },
+                    "is_default": true,
+                    "item": null,
+                    "trigger": {
+                      "name": "level-up",
+                      "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                    },
+                    "gender": null,
+                    "held_item": null,
+                    "known_move": null,
+                    "known_move_type": null,
+                    "location": null,
+                    "min_level": 32,
+                    "min_happiness": null,
+                    "min_beauty": null,
+                    "min_affection": null,
+                    "near_special_rock": false,
+                    "needs_multiplayer": false,
+                    "needs_overworld_rain": false,
+                    "party_species": null,
+                    "party_type": null,
+                    "relative_physical_stats": null,
+                    "time_of_day": "",
+                    "trade_species": null,
+                    "turn_upside_down": false,
+                    "region": null,
+                    "required_pokemon_form": null,
+                    "evolved_pokemon_form": null,
+                    "used_move": null,
+                    "min_move_count": null,
+                    "min_steps": null,
+                    "min_damage_taken": null,
+                    "allowed_natures": null,
+                    "condition_expression": null
+                  }
+                ],
+                "evolves_to": []
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "2": {
+      "id": 2,
+      "baby_trigger_item": null,
+      "chain": {
+        "is_baby": false,
+        "species": {
+          "name": "charmander",
+          "url": "https://pokeapi.co/api/v2/pokemon-species/4/"
+        },
+        "evolution_details": [],
+        "evolves_to": [
+          {
+            "is_baby": false,
+            "species": {
+              "name": "charmeleon",
+              "url": "https://pokeapi.co/api/v2/pokemon-species/5/"
+            },
+            "evolution_details": [
+              {
+                "version_group": {
+                  "name": "red-blue",
+                  "url": "https://pokeapi.co/api/v2/version-group/1/"
+                },
+                "is_default": true,
+                "item": null,
+                "trigger": {
+                  "name": "level-up",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": null,
+                "min_level": 16,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": false,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": null,
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              }
+            ],
+            "evolves_to": [
+              {
+                "is_baby": false,
+                "species": {
+                  "name": "charizard",
+                  "url": "https://pokeapi.co/api/v2/pokemon-species/6/"
+                },
+                "evolution_details": [
+                  {
+                    "version_group": {
+                      "name": "red-blue",
+                      "url": "https://pokeapi.co/api/v2/version-group/1/"
+                    },
+                    "is_default": true,
+                    "item": null,
+                    "trigger": {
+                      "name": "level-up",
+                      "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                    },
+                    "gender": null,
+                    "held_item": null,
+                    "known_move": null,
+                    "known_move_type": null,
+                    "location": null,
+                    "min_level": 36,
+                    "min_happiness": null,
+                    "min_beauty": null,
+                    "min_affection": null,
+                    "near_special_rock": false,
+                    "needs_multiplayer": false,
+                    "needs_overworld_rain": false,
+                    "party_species": null,
+                    "party_type": null,
+                    "relative_physical_stats": null,
+                    "time_of_day": "",
+                    "trade_species": null,
+                    "turn_upside_down": false,
+                    "region": null,
+                    "required_pokemon_form": null,
+                    "evolved_pokemon_form": null,
+                    "used_move": null,
+                    "min_move_count": null,
+                    "min_steps": null,
+                    "min_damage_taken": null,
+                    "allowed_natures": null,
+                    "condition_expression": null
+                  }
+                ],
+                "evolves_to": []
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "47": {
+      "id": 47,
+      "baby_trigger_item": null,
+      "chain": {
+        "is_baby": true,
+        "species": {
+          "name": "tyrogue",
+          "url": "https://pokeapi.co/api/v2/pokemon-species/236/"
+        },
+        "evolution_details": [],
+        "evolves_to": [
+          {
+            "is_baby": false,
+            "species": {
+              "name": "hitmonlee",
+              "url": "https://pokeapi.co/api/v2/pokemon-species/106/"
+            },
+            "evolution_details": [
+              {
+                "version_group": {
+                  "name": "gold-silver",
+                  "url": "https://pokeapi.co/api/v2/version-group/3/"
+                },
+                "is_default": true,
+                "item": null,
+                "trigger": {
+                  "name": "level-up",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": null,
+                "min_level": 20,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": false,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": 1,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": null,
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              }
+            ],
+            "evolves_to": []
+          },
+          {
+            "is_baby": false,
+            "species": {
+              "name": "hitmonchan",
+              "url": "https://pokeapi.co/api/v2/pokemon-species/107/"
+            },
+            "evolution_details": [
+              {
+                "version_group": {
+                  "name": "gold-silver",
+                  "url": "https://pokeapi.co/api/v2/version-group/3/"
+                },
+                "is_default": true,
+                "item": null,
+                "trigger": {
+                  "name": "level-up",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": null,
+                "min_level": 20,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": false,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": -1,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": null,
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              }
+            ],
+            "evolves_to": []
+          },
+          {
+            "is_baby": false,
+            "species": {
+              "name": "hitmontop",
+              "url": "https://pokeapi.co/api/v2/pokemon-species/237/"
+            },
+            "evolution_details": [
+              {
+                "version_group": {
+                  "name": "gold-silver",
+                  "url": "https://pokeapi.co/api/v2/version-group/3/"
+                },
+                "is_default": true,
+                "item": null,
+                "trigger": {
+                  "name": "level-up",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": null,
+                "min_level": 20,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": false,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": 0,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": null,
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              }
+            ],
+            "evolves_to": []
+          }
+        ]
+      }
+    },
+    "67": {
+      "id": 67,
+      "baby_trigger_item": null,
+      "chain": {
+        "is_baby": false,
+        "species": {
+          "name": "eevee",
+          "url": "https://pokeapi.co/api/v2/pokemon-species/133/"
+        },
+        "evolution_details": [],
+        "evolves_to": [
+          {
+            "is_baby": false,
+            "species": {
+              "name": "vaporeon",
+              "url": "https://pokeapi.co/api/v2/pokemon-species/134/"
+            },
+            "evolution_details": [
+              {
+                "version_group": {
+                  "name": "red-blue",
+                  "url": "https://pokeapi.co/api/v2/version-group/1/"
+                },
+                "is_default": true,
+                "item": {
+                  "name": "water-stone",
+                  "url": "https://pokeapi.co/api/v2/item/84/"
+                },
+                "trigger": {
+                  "name": "use-item",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/3/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": null,
+                "min_level": null,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": false,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": {
+                  "name": "eevee",
+                  "url": "https://pokeapi.co/api/v2/pokemon-form/133/"
+                },
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              }
+            ],
+            "evolves_to": []
+          },
+          {
+            "is_baby": false,
+            "species": {
+              "name": "jolteon",
+              "url": "https://pokeapi.co/api/v2/pokemon-species/135/"
+            },
+            "evolution_details": [
+              {
+                "version_group": {
+                  "name": "red-blue",
+                  "url": "https://pokeapi.co/api/v2/version-group/1/"
+                },
+                "is_default": true,
+                "item": {
+                  "name": "thunder-stone",
+                  "url": "https://pokeapi.co/api/v2/item/83/"
+                },
+                "trigger": {
+                  "name": "use-item",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/3/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": null,
+                "min_level": null,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": false,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": {
+                  "name": "eevee",
+                  "url": "https://pokeapi.co/api/v2/pokemon-form/133/"
+                },
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              }
+            ],
+            "evolves_to": []
+          },
+          {
+            "is_baby": false,
+            "species": {
+              "name": "flareon",
+              "url": "https://pokeapi.co/api/v2/pokemon-species/136/"
+            },
+            "evolution_details": [
+              {
+                "version_group": {
+                  "name": "red-blue",
+                  "url": "https://pokeapi.co/api/v2/version-group/1/"
+                },
+                "is_default": true,
+                "item": {
+                  "name": "fire-stone",
+                  "url": "https://pokeapi.co/api/v2/item/82/"
+                },
+                "trigger": {
+                  "name": "use-item",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/3/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": null,
+                "min_level": null,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": false,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": {
+                  "name": "eevee",
+                  "url": "https://pokeapi.co/api/v2/pokemon-form/133/"
+                },
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              }
+            ],
+            "evolves_to": []
+          },
+          {
+            "is_baby": false,
+            "species": {
+              "name": "espeon",
+              "url": "https://pokeapi.co/api/v2/pokemon-species/196/"
+            },
+            "evolution_details": [
+              {
+                "version_group": {
+                  "name": "gold-silver",
+                  "url": "https://pokeapi.co/api/v2/version-group/3/"
+                },
+                "is_default": true,
+                "item": null,
+                "trigger": {
+                  "name": "level-up",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": null,
+                "min_level": null,
+                "min_happiness": 160,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": false,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "day",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": {
+                  "name": "eevee",
+                  "url": "https://pokeapi.co/api/v2/pokemon-form/133/"
+                },
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              }
+            ],
+            "evolves_to": []
+          },
+          {
+            "is_baby": false,
+            "species": {
+              "name": "umbreon",
+              "url": "https://pokeapi.co/api/v2/pokemon-species/197/"
+            },
+            "evolution_details": [
+              {
+                "version_group": {
+                  "name": "gold-silver",
+                  "url": "https://pokeapi.co/api/v2/version-group/3/"
+                },
+                "is_default": true,
+                "item": null,
+                "trigger": {
+                  "name": "level-up",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": null,
+                "min_level": null,
+                "min_happiness": 160,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": false,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "night",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": {
+                  "name": "eevee",
+                  "url": "https://pokeapi.co/api/v2/pokemon-form/133/"
+                },
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              }
+            ],
+            "evolves_to": []
+          },
+          {
+            "is_baby": false,
+            "species": {
+              "name": "leafeon",
+              "url": "https://pokeapi.co/api/v2/pokemon-species/470/"
+            },
+            "evolution_details": [
+              {
+                "version_group": {
+                  "name": "diamond-pearl",
+                  "url": "https://pokeapi.co/api/v2/version-group/8/"
+                },
+                "is_default": false,
+                "item": null,
+                "trigger": {
+                  "name": "level-up",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": {
+                  "name": "eterna-forest",
+                  "url": "https://pokeapi.co/api/v2/location/8/"
+                },
+                "min_level": null,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": true,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": {
+                  "name": "eevee",
+                  "url": "https://pokeapi.co/api/v2/pokemon-form/133/"
+                },
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              },
+              {
+                "version_group": {
+                  "name": "black-white",
+                  "url": "https://pokeapi.co/api/v2/version-group/11/"
+                },
+                "is_default": false,
+                "item": null,
+                "trigger": {
+                  "name": "level-up",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": {
+                  "name": "pinwheel-forest",
+                  "url": "https://pokeapi.co/api/v2/location/375/"
+                },
+                "min_level": null,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": true,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": {
+                  "name": "eevee",
+                  "url": "https://pokeapi.co/api/v2/pokemon-form/133/"
+                },
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              },
+              {
+                "version_group": {
+                  "name": "x-y",
+                  "url": "https://pokeapi.co/api/v2/version-group/15/"
+                },
+                "is_default": false,
+                "item": null,
+                "trigger": {
+                  "name": "level-up",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": {
+                  "name": "kalos-route-20",
+                  "url": "https://pokeapi.co/api/v2/location/650/"
+                },
+                "min_level": null,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": true,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": {
+                  "name": "eevee",
+                  "url": "https://pokeapi.co/api/v2/pokemon-form/133/"
+                },
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              },
+              {
+                "version_group": {
+                  "name": "sword-shield",
+                  "url": "https://pokeapi.co/api/v2/version-group/20/"
+                },
+                "is_default": true,
+                "item": {
+                  "name": "leaf-stone",
+                  "url": "https://pokeapi.co/api/v2/item/85/"
+                },
+                "trigger": {
+                  "name": "use-item",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/3/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": null,
+                "min_level": null,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": false,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": {
+                  "name": "eevee",
+                  "url": "https://pokeapi.co/api/v2/pokemon-form/133/"
+                },
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              },
+              {
+                "version_group": {
+                  "name": "omega-ruby-alpha-sapphire",
+                  "url": "https://pokeapi.co/api/v2/version-group/16/"
+                },
+                "is_default": false,
+                "item": null,
+                "trigger": {
+                  "name": "level-up",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": {
+                  "name": "petalburg-woods",
+                  "url": "https://pokeapi.co/api/v2/location/438/"
+                },
+                "min_level": null,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": true,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": {
+                  "name": "eevee",
+                  "url": "https://pokeapi.co/api/v2/pokemon-form/133/"
+                },
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              },
+              {
+                "version_group": {
+                  "name": "sun-moon",
+                  "url": "https://pokeapi.co/api/v2/version-group/17/"
+                },
+                "is_default": false,
+                "item": null,
+                "trigger": {
+                  "name": "level-up",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": {
+                  "name": "lush-jungle",
+                  "url": "https://pokeapi.co/api/v2/location/750/"
+                },
+                "min_level": null,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": true,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": {
+                  "name": "eevee",
+                  "url": "https://pokeapi.co/api/v2/pokemon-form/133/"
+                },
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              }
+            ],
+            "evolves_to": []
+          },
+          {
+            "is_baby": false,
+            "species": {
+              "name": "glaceon",
+              "url": "https://pokeapi.co/api/v2/pokemon-species/471/"
+            },
+            "evolution_details": [
+              {
+                "version_group": {
+                  "name": "diamond-pearl",
+                  "url": "https://pokeapi.co/api/v2/version-group/8/"
+                },
+                "is_default": false,
+                "item": null,
+                "trigger": {
+                  "name": "level-up",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": {
+                  "name": "sinnoh-route-217",
+                  "url": "https://pokeapi.co/api/v2/location/48/"
+                },
+                "min_level": null,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": true,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": {
+                  "name": "eevee",
+                  "url": "https://pokeapi.co/api/v2/pokemon-form/133/"
+                },
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              },
+              {
+                "version_group": {
+                  "name": "black-white",
+                  "url": "https://pokeapi.co/api/v2/version-group/11/"
+                },
+                "is_default": false,
+                "item": null,
+                "trigger": {
+                  "name": "level-up",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": {
+                  "name": "twist-mountain",
+                  "url": "https://pokeapi.co/api/v2/location/380/"
+                },
+                "min_level": null,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": true,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": {
+                  "name": "eevee",
+                  "url": "https://pokeapi.co/api/v2/pokemon-form/133/"
+                },
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              },
+              {
+                "version_group": {
+                  "name": "x-y",
+                  "url": "https://pokeapi.co/api/v2/version-group/15/"
+                },
+                "is_default": false,
+                "item": null,
+                "trigger": {
+                  "name": "level-up",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": {
+                  "name": "frost-cavern",
+                  "url": "https://pokeapi.co/api/v2/location/640/"
+                },
+                "min_level": null,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": true,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": {
+                  "name": "eevee",
+                  "url": "https://pokeapi.co/api/v2/pokemon-form/133/"
+                },
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              },
+              {
+                "version_group": {
+                  "name": "sword-shield",
+                  "url": "https://pokeapi.co/api/v2/version-group/20/"
+                },
+                "is_default": true,
+                "item": {
+                  "name": "ice-stone",
+                  "url": "https://pokeapi.co/api/v2/item/885/"
+                },
+                "trigger": {
+                  "name": "use-item",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/3/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": null,
+                "min_level": null,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": false,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": {
+                  "name": "eevee",
+                  "url": "https://pokeapi.co/api/v2/pokemon-form/133/"
+                },
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              },
+              {
+                "version_group": {
+                  "name": "omega-ruby-alpha-sapphire",
+                  "url": "https://pokeapi.co/api/v2/version-group/16/"
+                },
+                "is_default": false,
+                "item": null,
+                "trigger": {
+                  "name": "level-up",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": {
+                  "name": "shoal-cave",
+                  "url": "https://pokeapi.co/api/v2/location/445/"
+                },
+                "min_level": null,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": true,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": {
+                  "name": "eevee",
+                  "url": "https://pokeapi.co/api/v2/pokemon-form/133/"
+                },
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              },
+              {
+                "version_group": {
+                  "name": "sun-moon",
+                  "url": "https://pokeapi.co/api/v2/version-group/17/"
+                },
+                "is_default": false,
+                "item": null,
+                "trigger": {
+                  "name": "level-up",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": {
+                  "name": "mount-lanakila",
+                  "url": "https://pokeapi.co/api/v2/location/775/"
+                },
+                "min_level": null,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": true,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": {
+                  "name": "eevee",
+                  "url": "https://pokeapi.co/api/v2/pokemon-form/133/"
+                },
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              }
+            ],
+            "evolves_to": []
+          },
+          {
+            "is_baby": false,
+            "species": {
+              "name": "sylveon",
+              "url": "https://pokeapi.co/api/v2/pokemon-species/700/"
+            },
+            "evolution_details": [
+              {
+                "version_group": {
+                  "name": "x-y",
+                  "url": "https://pokeapi.co/api/v2/version-group/15/"
+                },
+                "is_default": false,
+                "item": null,
+                "trigger": {
+                  "name": "level-up",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": {
+                  "name": "fairy",
+                  "url": "https://pokeapi.co/api/v2/type/18/"
+                },
+                "location": null,
+                "min_level": null,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": 2,
+                "near_special_rock": false,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": {
+                  "name": "eevee",
+                  "url": "https://pokeapi.co/api/v2/pokemon-form/133/"
+                },
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              },
+              {
+                "version_group": {
+                  "name": "sword-shield",
+                  "url": "https://pokeapi.co/api/v2/version-group/20/"
+                },
+                "is_default": true,
+                "item": null,
+                "trigger": {
+                  "name": "level-up",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": {
+                  "name": "fairy",
+                  "url": "https://pokeapi.co/api/v2/type/18/"
+                },
+                "location": null,
+                "min_level": null,
+                "min_happiness": 160,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": false,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": {
+                  "name": "eevee",
+                  "url": "https://pokeapi.co/api/v2/pokemon-form/133/"
+                },
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              }
+            ],
+            "evolves_to": []
+          }
+        ]
+      }
+    },
+    "280": {
+      "id": 280,
+      "baby_trigger_item": null,
+      "chain": {
+        "is_baby": false,
+        "species": {
+          "name": "basculin",
+          "url": "https://pokeapi.co/api/v2/pokemon-species/550/"
+        },
+        "evolution_details": [],
+        "evolves_to": [
+          {
+            "is_baby": false,
+            "species": {
+              "name": "basculegion",
+              "url": "https://pokeapi.co/api/v2/pokemon-species/902/"
+            },
+            "evolution_details": [
+              {
+                "version_group": {
+                  "name": "legends-arceus",
+                  "url": "https://pokeapi.co/api/v2/version-group/24/"
+                },
+                "is_default": true,
+                "item": null,
+                "trigger": {
+                  "name": "recoil-damage",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/13/"
+                },
+                "gender": 2,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": null,
+                "min_level": null,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": false,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": {
+                  "name": "basculin-white-striped",
+                  "url": "https://pokeapi.co/api/v2/pokemon-form/10416/"
+                },
+                "evolved_pokemon_form": {
+                  "name": "basculegion-male",
+                  "url": "https://pokeapi.co/api/v2/pokemon-form/902/"
+                },
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": 294,
+                "allowed_natures": null,
+                "condition_expression": null
+              },
+              {
+                "version_group": {
+                  "name": "legends-arceus",
+                  "url": "https://pokeapi.co/api/v2/version-group/24/"
+                },
+                "is_default": true,
+                "item": null,
+                "trigger": {
+                  "name": "recoil-damage",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/13/"
+                },
+                "gender": 1,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": null,
+                "min_level": null,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": false,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": {
+                  "name": "basculin-white-striped",
+                  "url": "https://pokeapi.co/api/v2/pokemon-form/10416/"
+                },
+                "evolved_pokemon_form": {
+                  "name": "basculegion-female",
+                  "url": "https://pokeapi.co/api/v2/pokemon-form/10417/"
+                },
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": 294,
+                "allowed_natures": null,
+                "condition_expression": null
+              }
+            ],
+            "evolves_to": []
+          }
+        ]
+      }
+    },
+    "287": {
+      "id": 287,
+      "baby_trigger_item": null,
+      "chain": {
+        "is_baby": false,
+        "species": {
+          "name": "yamask",
+          "url": "https://pokeapi.co/api/v2/pokemon-species/562/"
+        },
+        "evolution_details": [],
+        "evolves_to": [
+          {
+            "is_baby": false,
+            "species": {
+              "name": "cofagrigus",
+              "url": "https://pokeapi.co/api/v2/pokemon-species/563/"
+            },
+            "evolution_details": [
+              {
+                "version_group": {
+                  "name": "black-white",
+                  "url": "https://pokeapi.co/api/v2/version-group/11/"
+                },
+                "is_default": true,
+                "item": null,
+                "trigger": {
+                  "name": "level-up",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": null,
+                "min_level": 34,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": false,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": null,
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              }
+            ],
+            "evolves_to": []
+          },
+          {
+            "is_baby": false,
+            "species": {
+              "name": "runerigus",
+              "url": "https://pokeapi.co/api/v2/pokemon-species/867/"
+            },
+            "evolution_details": [
+              {
+                "version_group": {
+                  "name": "sword-shield",
+                  "url": "https://pokeapi.co/api/v2/version-group/20/"
+                },
+                "is_default": true,
+                "item": null,
+                "trigger": {
+                  "name": "take-damage",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/9/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": {
+                  "name": "dusty-bowl",
+                  "url": "https://pokeapi.co/api/v2/location/890/"
+                },
+                "min_level": null,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": false,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": {
+                  "name": "yamask-galar",
+                  "url": "https://pokeapi.co/api/v2/pokemon-form/10338/"
+                },
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": 49,
+                "allowed_natures": null,
+                "condition_expression": null
+              }
+            ],
+            "evolves_to": []
+          }
+        ]
+      }
+    },
+    "352": {
+      "id": 352,
+      "baby_trigger_item": null,
+      "chain": {
+        "is_baby": false,
+        "species": {
+          "name": "inkay",
+          "url": "https://pokeapi.co/api/v2/pokemon-species/686/"
+        },
+        "evolution_details": [],
+        "evolves_to": [
+          {
+            "is_baby": false,
+            "species": {
+              "name": "malamar",
+              "url": "https://pokeapi.co/api/v2/pokemon-species/687/"
+            },
+            "evolution_details": [
+              {
+                "version_group": {
+                  "name": "x-y",
+                  "url": "https://pokeapi.co/api/v2/version-group/15/"
+                },
+                "is_default": true,
+                "item": null,
+                "trigger": {
+                  "name": "level-up",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": null,
+                "min_level": 30,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": false,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": true,
+                "region": null,
+                "required_pokemon_form": null,
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              }
+            ],
+            "evolves_to": []
+          }
+        ]
+      }
+    },
+    "362": {
+      "id": 362,
+      "baby_trigger_item": null,
+      "chain": {
+        "is_baby": false,
+        "species": {
+          "name": "goomy",
+          "url": "https://pokeapi.co/api/v2/pokemon-species/704/"
+        },
+        "evolution_details": [],
+        "evolves_to": [
+          {
+            "is_baby": false,
+            "species": {
+              "name": "sliggoo",
+              "url": "https://pokeapi.co/api/v2/pokemon-species/705/"
+            },
+            "evolution_details": [
+              {
+                "version_group": {
+                  "name": "x-y",
+                  "url": "https://pokeapi.co/api/v2/version-group/15/"
+                },
+                "is_default": true,
+                "item": null,
+                "trigger": {
+                  "name": "level-up",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": null,
+                "min_level": 40,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": false,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": null,
+                "required_pokemon_form": null,
+                "evolved_pokemon_form": null,
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              },
+              {
+                "version_group": {
+                  "name": "legends-arceus",
+                  "url": "https://pokeapi.co/api/v2/version-group/24/"
+                },
+                "is_default": true,
+                "item": null,
+                "trigger": {
+                  "name": "level-up",
+                  "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                },
+                "gender": null,
+                "held_item": null,
+                "known_move": null,
+                "known_move_type": null,
+                "location": null,
+                "min_level": 40,
+                "min_happiness": null,
+                "min_beauty": null,
+                "min_affection": null,
+                "near_special_rock": false,
+                "needs_multiplayer": false,
+                "needs_overworld_rain": false,
+                "party_species": null,
+                "party_type": null,
+                "relative_physical_stats": null,
+                "time_of_day": "",
+                "trade_species": null,
+                "turn_upside_down": false,
+                "region": {
+                  "name": "hisui",
+                  "url": "https://pokeapi.co/api/v2/region/9/"
+                },
+                "required_pokemon_form": null,
+                "evolved_pokemon_form": {
+                  "name": "sliggoo-hisui",
+                  "url": "https://pokeapi.co/api/v2/pokemon-form/10410/"
+                },
+                "used_move": null,
+                "min_move_count": null,
+                "min_steps": null,
+                "min_damage_taken": null,
+                "allowed_natures": null,
+                "condition_expression": null
+              }
+            ],
+            "evolves_to": [
+              {
+                "is_baby": false,
+                "species": {
+                  "name": "goodra",
+                  "url": "https://pokeapi.co/api/v2/pokemon-species/706/"
+                },
+                "evolution_details": [
+                  {
+                    "version_group": {
+                      "name": "x-y",
+                      "url": "https://pokeapi.co/api/v2/version-group/15/"
+                    },
+                    "is_default": true,
+                    "item": null,
+                    "trigger": {
+                      "name": "level-up",
+                      "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                    },
+                    "gender": null,
+                    "held_item": null,
+                    "known_move": null,
+                    "known_move_type": null,
+                    "location": null,
+                    "min_level": 50,
+                    "min_happiness": null,
+                    "min_beauty": null,
+                    "min_affection": null,
+                    "near_special_rock": false,
+                    "needs_multiplayer": false,
+                    "needs_overworld_rain": true,
+                    "party_species": null,
+                    "party_type": null,
+                    "relative_physical_stats": null,
+                    "time_of_day": "",
+                    "trade_species": null,
+                    "turn_upside_down": false,
+                    "region": null,
+                    "required_pokemon_form": null,
+                    "evolved_pokemon_form": null,
+                    "used_move": null,
+                    "min_move_count": null,
+                    "min_steps": null,
+                    "min_damage_taken": null,
+                    "allowed_natures": null,
+                    "condition_expression": null
+                  },
+                  {
+                    "version_group": {
+                      "name": "legends-arceus",
+                      "url": "https://pokeapi.co/api/v2/version-group/24/"
+                    },
+                    "is_default": true,
+                    "item": null,
+                    "trigger": {
+                      "name": "level-up",
+                      "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+                    },
+                    "gender": null,
+                    "held_item": null,
+                    "known_move": null,
+                    "known_move_type": null,
+                    "location": null,
+                    "min_level": 50,
+                    "min_happiness": null,
+                    "min_beauty": null,
+                    "min_affection": null,
+                    "near_special_rock": false,
+                    "needs_multiplayer": false,
+                    "needs_overworld_rain": true,
+                    "party_species": null,
+                    "party_type": null,
+                    "relative_physical_stats": null,
+                    "time_of_day": "",
+                    "trade_species": null,
+                    "turn_upside_down": false,
+                    "region": null,
+                    "required_pokemon_form": {
+                      "name": "sliggoo-hisui",
+                      "url": "https://pokeapi.co/api/v2/pokemon-form/10410/"
+                    },
+                    "evolved_pokemon_form": {
+                      "name": "goodra-hisui",
+                      "url": "https://pokeapi.co/api/v2/pokemon-form/10411/"
+                    },
+                    "used_move": null,
+                    "min_move_count": null,
+                    "min_steps": null,
+                    "min_damage_taken": null,
+                    "allowed_natures": null,
+                    "condition_expression": null
+                  }
+                ],
+                "evolves_to": []
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "items": {
+    "choice-specs": {
+      "id": 274,
+      "name": "choice-specs",
+      "category": {
+        "name": "choice",
+        "url": "https://pokeapi.co/api/v2/item-category/13/"
+      },
+      "prices": [],
+      "fling_power": 10,
+      "effect_entries": [
+        {
+          "effect": "Held: Increases the holder’s Special Attack by 50%, but restricts it to the first move it uses until it leaves battle or loses this item.  If this item is swapped for another Choice item via Trick or Switcheroo, the holder’s restriction is still lifted, but it will again be restricted to the next move it uses.\n(Quirk: If the holder is switched in by U-Turn and it also knows U-Turn, U-Turn becomes its restricted move.)",
+          "short_effect": "Held: Increases Special Attack by 50%, but restricts the holder to only one move.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          }
+        }
+      ],
+      "attributes": [
+        {
+          "name": "holdable",
+          "url": "https://pokeapi.co/api/v2/item-attribute/5/"
+        },
+        {
+          "name": "holdable-active",
+          "url": "https://pokeapi.co/api/v2/item-attribute/7/"
+        }
+      ],
+      "held_by_pokemon": [],
+      "sprites": {
+        "default": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/choice-specs.png"
+      }
+    },
+    "master-ball": {
+      "id": 1,
+      "name": "master-ball",
+      "category": {
+        "name": "standard-balls",
+        "url": "https://pokeapi.co/api/v2/item-category/34/"
+      },
+      "prices": [
+        {
+          "purchase_price": null,
+          "sell_price": 0,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "red-blue",
+            "url": "https://pokeapi.co/api/v2/version-group/1/"
+          }
+        },
+        {
+          "purchase_price": null,
+          "sell_price": 0,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "yellow",
+            "url": "https://pokeapi.co/api/v2/version-group/2/"
+          }
+        },
+        {
+          "purchase_price": null,
+          "sell_price": 0,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "gold-silver",
+            "url": "https://pokeapi.co/api/v2/version-group/3/"
+          }
+        },
+        {
+          "purchase_price": null,
+          "sell_price": 0,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "crystal",
+            "url": "https://pokeapi.co/api/v2/version-group/4/"
+          }
+        },
+        {
+          "purchase_price": null,
+          "sell_price": 0,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "red-green-japan",
+            "url": "https://pokeapi.co/api/v2/version-group/28/"
+          }
+        },
+        {
+          "purchase_price": null,
+          "sell_price": 0,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "blue-japan",
+            "url": "https://pokeapi.co/api/v2/version-group/29/"
+          }
+        }
+      ],
+      "fling_power": null,
+      "effect_entries": [
+        {
+          "effect": "Used in battle\n:   Catches a wild Pokémon without fail.\n\n    If used in a trainer battle, nothing happens and the ball is lost.",
+          "short_effect": "Catches a wild Pokémon every time.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          }
+        }
+      ],
+      "attributes": [
+        {
+          "name": "countable",
+          "url": "https://pokeapi.co/api/v2/item-attribute/1/"
+        },
+        {
+          "name": "consumable",
+          "url": "https://pokeapi.co/api/v2/item-attribute/2/"
+        },
+        {
+          "name": "usable-in-battle",
+          "url": "https://pokeapi.co/api/v2/item-attribute/4/"
+        },
+        {
+          "name": "holdable",
+          "url": "https://pokeapi.co/api/v2/item-attribute/5/"
+        }
+      ],
+      "held_by_pokemon": [],
+      "sprites": {
+        "default": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png"
+      }
+    },
+    "leftovers": {
+      "id": 211,
+      "name": "leftovers",
+      "category": {
+        "name": "held-items",
+        "url": "https://pokeapi.co/api/v2/item-category/12/"
+      },
+      "prices": [],
+      "fling_power": 10,
+      "effect_entries": [
+        {
+          "effect": "Held: Heals the holder by 1/16 its max HP at the end of each turn.",
+          "short_effect": "Held: Restores 1/16 (6.25%) holder’s max HP at the end of each turn.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          }
+        }
+      ],
+      "attributes": [
+        {
+          "name": "holdable",
+          "url": "https://pokeapi.co/api/v2/item-attribute/5/"
+        },
+        {
+          "name": "holdable-active",
+          "url": "https://pokeapi.co/api/v2/item-attribute/7/"
+        }
+      ],
+      "held_by_pokemon": [
+        {
+          "pokemon": {
+            "name": "snorlax",
+            "url": "https://pokeapi.co/api/v2/pokemon/143/"
+          },
+          "version_details": [
+            {
+              "rarity": 100,
+              "version": {
+                "name": "ruby",
+                "url": "https://pokeapi.co/api/v2/version/7/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "sapphire",
+                "url": "https://pokeapi.co/api/v2/version/8/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "emerald",
+                "url": "https://pokeapi.co/api/v2/version/9/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "diamond",
+                "url": "https://pokeapi.co/api/v2/version/12/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "pearl",
+                "url": "https://pokeapi.co/api/v2/version/13/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "platinum",
+                "url": "https://pokeapi.co/api/v2/version/14/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "heartgold",
+                "url": "https://pokeapi.co/api/v2/version/15/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "soulsilver",
+                "url": "https://pokeapi.co/api/v2/version/16/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "black",
+                "url": "https://pokeapi.co/api/v2/version/17/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "white",
+                "url": "https://pokeapi.co/api/v2/version/18/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "xd",
+                "url": "https://pokeapi.co/api/v2/version/20/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "black-2",
+                "url": "https://pokeapi.co/api/v2/version/21/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "white-2",
+                "url": "https://pokeapi.co/api/v2/version/22/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "x",
+                "url": "https://pokeapi.co/api/v2/version/23/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "y",
+                "url": "https://pokeapi.co/api/v2/version/24/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "omega-ruby",
+                "url": "https://pokeapi.co/api/v2/version/25/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "alpha-sapphire",
+                "url": "https://pokeapi.co/api/v2/version/26/"
+              }
+            },
+            {
+              "rarity": 5,
+              "version": {
+                "name": "sun",
+                "url": "https://pokeapi.co/api/v2/version/27/"
+              }
+            },
+            {
+              "rarity": 5,
+              "version": {
+                "name": "moon",
+                "url": "https://pokeapi.co/api/v2/version/28/"
+              }
+            },
+            {
+              "rarity": 5,
+              "version": {
+                "name": "ultra-sun",
+                "url": "https://pokeapi.co/api/v2/version/29/"
+              }
+            },
+            {
+              "rarity": 5,
+              "version": {
+                "name": "ultra-moon",
+                "url": "https://pokeapi.co/api/v2/version/30/"
+              }
+            }
+          ]
+        },
+        {
+          "pokemon": {
+            "name": "munchlax",
+            "url": "https://pokeapi.co/api/v2/pokemon/446/"
+          },
+          "version_details": [
+            {
+              "rarity": 100,
+              "version": {
+                "name": "diamond",
+                "url": "https://pokeapi.co/api/v2/version/12/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "pearl",
+                "url": "https://pokeapi.co/api/v2/version/13/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "platinum",
+                "url": "https://pokeapi.co/api/v2/version/14/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "heartgold",
+                "url": "https://pokeapi.co/api/v2/version/15/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "soulsilver",
+                "url": "https://pokeapi.co/api/v2/version/16/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "black",
+                "url": "https://pokeapi.co/api/v2/version/17/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "white",
+                "url": "https://pokeapi.co/api/v2/version/18/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "black-2",
+                "url": "https://pokeapi.co/api/v2/version/21/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "white-2",
+                "url": "https://pokeapi.co/api/v2/version/22/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "x",
+                "url": "https://pokeapi.co/api/v2/version/23/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "y",
+                "url": "https://pokeapi.co/api/v2/version/24/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "omega-ruby",
+                "url": "https://pokeapi.co/api/v2/version/25/"
+              }
+            },
+            {
+              "rarity": 100,
+              "version": {
+                "name": "alpha-sapphire",
+                "url": "https://pokeapi.co/api/v2/version/26/"
+              }
+            },
+            {
+              "rarity": 5,
+              "version": {
+                "name": "sun",
+                "url": "https://pokeapi.co/api/v2/version/27/"
+              }
+            },
+            {
+              "rarity": 5,
+              "version": {
+                "name": "moon",
+                "url": "https://pokeapi.co/api/v2/version/28/"
+              }
+            },
+            {
+              "rarity": 5,
+              "version": {
+                "name": "ultra-sun",
+                "url": "https://pokeapi.co/api/v2/version/29/"
+              }
+            },
+            {
+              "rarity": 5,
+              "version": {
+                "name": "ultra-moon",
+                "url": "https://pokeapi.co/api/v2/version/30/"
+              }
+            }
+          ]
+        }
+      ],
+      "sprites": {
+        "default": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/leftovers.png"
+      }
+    },
+    "poke-ball": {
+      "id": 4,
+      "name": "poke-ball",
+      "category": {
+        "name": "standard-balls",
+        "url": "https://pokeapi.co/api/v2/item-category/34/"
+      },
+      "prices": [],
+      "fling_power": null,
+      "effect_entries": [
+        {
+          "effect": "Used in battle\n:   Attempts to catch a wild Pokémon, using a catch rate of 1×.\n\n    If used in a trainer battle, nothing happens and the ball is lost.",
+          "short_effect": "Tries to catch a wild Pokémon.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          }
+        }
+      ],
+      "attributes": [
+        {
+          "name": "countable",
+          "url": "https://pokeapi.co/api/v2/item-attribute/1/"
+        },
+        {
+          "name": "consumable",
+          "url": "https://pokeapi.co/api/v2/item-attribute/2/"
+        },
+        {
+          "name": "usable-in-battle",
+          "url": "https://pokeapi.co/api/v2/item-attribute/4/"
+        },
+        {
+          "name": "holdable",
+          "url": "https://pokeapi.co/api/v2/item-attribute/5/"
+        }
+      ],
+      "held_by_pokemon": [],
+      "sprites": {
+        "default": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
+      }
+    },
+    "ultra-ball": {
+      "id": 2,
+      "name": "ultra-ball",
+      "category": {
+        "name": "standard-balls",
+        "url": "https://pokeapi.co/api/v2/item-category/34/"
+      },
+      "prices": [
+        {
+          "purchase_price": 1200,
+          "sell_price": 600,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "red-blue",
+            "url": "https://pokeapi.co/api/v2/version-group/1/"
+          }
+        },
+        {
+          "purchase_price": 1200,
+          "sell_price": 600,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "yellow",
+            "url": "https://pokeapi.co/api/v2/version-group/2/"
+          }
+        },
+        {
+          "purchase_price": 1200,
+          "sell_price": 600,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "gold-silver",
+            "url": "https://pokeapi.co/api/v2/version-group/3/"
+          }
+        },
+        {
+          "purchase_price": 1200,
+          "sell_price": 600,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "crystal",
+            "url": "https://pokeapi.co/api/v2/version-group/4/"
+          }
+        },
+        {
+          "purchase_price": 1200,
+          "sell_price": 600,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "ruby-sapphire",
+            "url": "https://pokeapi.co/api/v2/version-group/5/"
+          }
+        },
+        {
+          "purchase_price": 1200,
+          "sell_price": 600,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "emerald",
+            "url": "https://pokeapi.co/api/v2/version-group/6/"
+          }
+        },
+        {
+          "purchase_price": 1200,
+          "sell_price": 600,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "firered-leafgreen",
+            "url": "https://pokeapi.co/api/v2/version-group/7/"
+          }
+        },
+        {
+          "purchase_price": 1200,
+          "sell_price": 600,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "diamond-pearl",
+            "url": "https://pokeapi.co/api/v2/version-group/8/"
+          }
+        },
+        {
+          "purchase_price": 1200,
+          "sell_price": 600,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "platinum",
+            "url": "https://pokeapi.co/api/v2/version-group/9/"
+          }
+        },
+        {
+          "purchase_price": 1200,
+          "sell_price": 600,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "heartgold-soulsilver",
+            "url": "https://pokeapi.co/api/v2/version-group/10/"
+          }
+        },
+        {
+          "purchase_price": 1200,
+          "sell_price": 600,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "black-white",
+            "url": "https://pokeapi.co/api/v2/version-group/11/"
+          }
+        },
+        {
+          "purchase_price": 1200,
+          "sell_price": 600,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "black-2-white-2",
+            "url": "https://pokeapi.co/api/v2/version-group/14/"
+          }
+        },
+        {
+          "purchase_price": 1200,
+          "sell_price": 600,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "x-y",
+            "url": "https://pokeapi.co/api/v2/version-group/15/"
+          }
+        },
+        {
+          "purchase_price": 1200,
+          "sell_price": 600,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "omega-ruby-alpha-sapphire",
+            "url": "https://pokeapi.co/api/v2/version-group/16/"
+          }
+        },
+        {
+          "purchase_price": 800,
+          "sell_price": 400,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "sun-moon",
+            "url": "https://pokeapi.co/api/v2/version-group/17/"
+          }
+        },
+        {
+          "purchase_price": 800,
+          "sell_price": 400,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "ultra-sun-ultra-moon",
+            "url": "https://pokeapi.co/api/v2/version-group/18/"
+          }
+        },
+        {
+          "purchase_price": 500,
+          "sell_price": 250,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "lets-go-pikachu-lets-go-eevee",
+            "url": "https://pokeapi.co/api/v2/version-group/19/"
+          }
+        },
+        {
+          "purchase_price": 800,
+          "sell_price": 400,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "sword-shield",
+            "url": "https://pokeapi.co/api/v2/version-group/20/"
+          }
+        },
+        {
+          "purchase_price": 1200,
+          "sell_price": 600,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "brilliant-diamond-shining-pearl",
+            "url": "https://pokeapi.co/api/v2/version-group/23/"
+          }
+        },
+        {
+          "purchase_price": 600,
+          "sell_price": 150,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "legends-arceus",
+            "url": "https://pokeapi.co/api/v2/version-group/24/"
+          }
+        },
+        {
+          "purchase_price": 800,
+          "sell_price": 200,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "scarlet-violet",
+            "url": "https://pokeapi.co/api/v2/version-group/25/"
+          }
+        },
+        {
+          "purchase_price": 1200,
+          "sell_price": 600,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "red-green-japan",
+            "url": "https://pokeapi.co/api/v2/version-group/28/"
+          }
+        },
+        {
+          "purchase_price": 1200,
+          "sell_price": 600,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "blue-japan",
+            "url": "https://pokeapi.co/api/v2/version-group/29/"
+          }
+        },
+        {
+          "purchase_price": 600,
+          "sell_price": 150,
+          "currency": {
+            "name": "poke-dollar",
+            "url": "https://pokeapi.co/api/v2/currency/1/"
+          },
+          "version_group": {
+            "name": "legends-za",
+            "url": "https://pokeapi.co/api/v2/version-group/30/"
+          }
+        }
+      ],
+      "fling_power": null,
+      "effect_entries": [
+        {
+          "effect": "Used in battle\n:   Attempts to catch a wild Pokémon, using a catch rate of 2×.\n\n    If used in a trainer battle, nothing happens and the ball is lost.",
+          "short_effect": "Tries to catch a wild Pokémon.  Success rate is 2×.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          }
+        }
+      ],
+      "attributes": [
+        {
+          "name": "countable",
+          "url": "https://pokeapi.co/api/v2/item-attribute/1/"
+        },
+        {
+          "name": "consumable",
+          "url": "https://pokeapi.co/api/v2/item-attribute/2/"
+        },
+        {
+          "name": "usable-in-battle",
+          "url": "https://pokeapi.co/api/v2/item-attribute/4/"
+        },
+        {
+          "name": "holdable",
+          "url": "https://pokeapi.co/api/v2/item-attribute/5/"
+        }
+      ],
+      "held_by_pokemon": [],
+      "sprites": {
+        "default": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/ultra-ball.png"
+      }
+    }
+  },
+  "pokemon": {
+    "inkay": {
+      "id": 686,
+      "name": "inkay",
+      "height": 4,
+      "weight": 35,
+      "species": {
+        "name": "inkay",
+        "url": "https://pokeapi.co/api/v2/pokemon-species/686/"
+      },
+      "abilities": [
+        {
+          "is_hidden": false,
+          "slot": 1,
+          "ability": {
+            "name": "contrary",
+            "url": "https://pokeapi.co/api/v2/ability/126/"
+          }
+        },
+        {
+          "is_hidden": false,
+          "slot": 2,
+          "ability": {
+            "name": "suction-cups",
+            "url": "https://pokeapi.co/api/v2/ability/21/"
+          }
+        },
+        {
+          "is_hidden": true,
+          "slot": 3,
+          "ability": {
+            "name": "infiltrator",
+            "url": "https://pokeapi.co/api/v2/ability/151/"
+          }
+        }
+      ],
+      "stats": [
+        {
+          "base_stat": 53,
+          "effort": 0,
+          "stat": {
+            "name": "hp",
+            "url": "https://pokeapi.co/api/v2/stat/1/"
+          }
+        },
+        {
+          "base_stat": 54,
+          "effort": 1,
+          "stat": {
+            "name": "attack",
+            "url": "https://pokeapi.co/api/v2/stat/2/"
+          }
+        },
+        {
+          "base_stat": 53,
+          "effort": 0,
+          "stat": {
+            "name": "defense",
+            "url": "https://pokeapi.co/api/v2/stat/3/"
+          }
+        },
+        {
+          "base_stat": 37,
+          "effort": 0,
+          "stat": {
+            "name": "special-attack",
+            "url": "https://pokeapi.co/api/v2/stat/4/"
+          }
+        },
+        {
+          "base_stat": 46,
+          "effort": 0,
+          "stat": {
+            "name": "special-defense",
+            "url": "https://pokeapi.co/api/v2/stat/5/"
+          }
+        },
+        {
+          "base_stat": 45,
+          "effort": 0,
+          "stat": {
+            "name": "speed",
+            "url": "https://pokeapi.co/api/v2/stat/6/"
+          }
+        }
+      ],
+      "types": [
+        {
+          "slot": 1,
+          "type": {
+            "name": "dark",
+            "url": "https://pokeapi.co/api/v2/type/17/"
+          }
+        },
+        {
+          "slot": 2,
+          "type": {
+            "name": "psychic",
+            "url": "https://pokeapi.co/api/v2/type/14/"
+          }
+        }
+      ],
+      "sprites": {
+        "front_default": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/686.png",
+        "front_shiny": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/686.png",
+        "other": {
+          "official-artwork": {
+            "versions": {
+              "generation-i": {
+                "red-and-blue": {
+                  "front_default": null
+                },
+                "red-and-green": {
+                  "front_default": null
+                }
+              },
+              "generation-ii": {
+                "gold-and-silver": {
+                  "front_default": null
+                }
+              }
+            },
+            "front_shiny": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/686.png",
+            "front_default": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/686.png"
+          }
+        }
+      },
+      "moves": [
+        {
+          "move": {
+            "name": "cut",
+            "url": "https://pokeapi.co/api/v2/move/15/"
+          },
+          "version_group_details": [
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "x-y",
+                "url": "https://pokeapi.co/api/v2/version-group/15/"
+              },
+              "move_learn_method": {
+                "name": "machine",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+              },
+              "order": null
+            },
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "omega-ruby-alpha-sapphire",
+                "url": "https://pokeapi.co/api/v2/version-group/16/"
+              },
+              "move_learn_method": {
+                "name": "machine",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+              },
+              "order": null
+            }
+          ]
+        },
+        {
+          "move": {
+            "name": "bind",
+            "url": "https://pokeapi.co/api/v2/move/20/"
+          },
+          "version_group_details": [
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "omega-ruby-alpha-sapphire",
+                "url": "https://pokeapi.co/api/v2/version-group/16/"
+              },
+              "move_learn_method": {
+                "name": "tutor",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/3/"
+              },
+              "order": null
+            },
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "ultra-sun-ultra-moon",
+                "url": "https://pokeapi.co/api/v2/version-group/18/"
+              },
+              "move_learn_method": {
+                "name": "tutor",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/3/"
+              },
+              "order": null
+            }
+          ]
+        }
+      ]
+    },
+    "bulbasaur": {
+      "id": 1,
+      "name": "bulbasaur",
+      "height": 7,
+      "weight": 69,
+      "species": {
+        "name": "bulbasaur",
+        "url": "https://pokeapi.co/api/v2/pokemon-species/1/"
+      },
+      "abilities": [
+        {
+          "is_hidden": false,
+          "slot": 1,
+          "ability": {
+            "name": "overgrow",
+            "url": "https://pokeapi.co/api/v2/ability/65/"
+          }
+        },
+        {
+          "is_hidden": true,
+          "slot": 3,
+          "ability": {
+            "name": "chlorophyll",
+            "url": "https://pokeapi.co/api/v2/ability/34/"
+          }
+        }
+      ],
+      "stats": [
+        {
+          "base_stat": 45,
+          "effort": 0,
+          "stat": {
+            "name": "hp",
+            "url": "https://pokeapi.co/api/v2/stat/1/"
+          }
+        },
+        {
+          "base_stat": 49,
+          "effort": 0,
+          "stat": {
+            "name": "attack",
+            "url": "https://pokeapi.co/api/v2/stat/2/"
+          }
+        },
+        {
+          "base_stat": 49,
+          "effort": 0,
+          "stat": {
+            "name": "defense",
+            "url": "https://pokeapi.co/api/v2/stat/3/"
+          }
+        },
+        {
+          "base_stat": 65,
+          "effort": 1,
+          "stat": {
+            "name": "special-attack",
+            "url": "https://pokeapi.co/api/v2/stat/4/"
+          }
+        },
+        {
+          "base_stat": 65,
+          "effort": 0,
+          "stat": {
+            "name": "special-defense",
+            "url": "https://pokeapi.co/api/v2/stat/5/"
+          }
+        },
+        {
+          "base_stat": 45,
+          "effort": 0,
+          "stat": {
+            "name": "speed",
+            "url": "https://pokeapi.co/api/v2/stat/6/"
+          }
+        }
+      ],
+      "types": [
+        {
+          "slot": 1,
+          "type": {
+            "name": "grass",
+            "url": "https://pokeapi.co/api/v2/type/12/"
+          }
+        },
+        {
+          "slot": 2,
+          "type": {
+            "name": "poison",
+            "url": "https://pokeapi.co/api/v2/type/4/"
+          }
+        }
+      ],
+      "sprites": {
+        "front_default": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png",
+        "front_shiny": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/1.png",
+        "other": {
+          "official-artwork": {
+            "versions": {
+              "generation-i": {
+                "red-and-blue": {
+                  "front_default": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/versions/generation-i/red-and-blue/1.png"
+                },
+                "red-and-green": {
+                  "front_default": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/versions/generation-i/red-and-green/1.png"
+                }
+              },
+              "generation-ii": {
+                "gold-and-silver": {
+                  "front_default": null
+                }
+              }
+            },
+            "front_shiny": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/1.png",
+            "front_default": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png"
+          }
+        }
+      },
+      "moves": [
+        {
+          "move": {
+            "name": "razor-wind",
+            "url": "https://pokeapi.co/api/v2/move/13/"
+          },
+          "version_group_details": [
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "gold-silver",
+                "url": "https://pokeapi.co/api/v2/version-group/3/"
+              },
+              "move_learn_method": {
+                "name": "egg",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/2/"
+              },
+              "order": null
+            },
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "crystal",
+                "url": "https://pokeapi.co/api/v2/version-group/4/"
+              },
+              "move_learn_method": {
+                "name": "egg",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/2/"
+              },
+              "order": null
+            }
+          ]
+        },
+        {
+          "move": {
+            "name": "swords-dance",
+            "url": "https://pokeapi.co/api/v2/move/14/"
+          },
+          "version_group_details": [
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "red-blue",
+                "url": "https://pokeapi.co/api/v2/version-group/1/"
+              },
+              "move_learn_method": {
+                "name": "machine",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+              },
+              "order": null
+            },
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "yellow",
+                "url": "https://pokeapi.co/api/v2/version-group/2/"
+              },
+              "move_learn_method": {
+                "name": "machine",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+              },
+              "order": null
+            },
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "emerald",
+                "url": "https://pokeapi.co/api/v2/version-group/6/"
+              },
+              "move_learn_method": {
+                "name": "tutor",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/3/"
+              },
+              "order": null
+            },
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "firered-leafgreen",
+                "url": "https://pokeapi.co/api/v2/version-group/7/"
+              },
+              "move_learn_method": {
+                "name": "tutor",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/3/"
+              },
+              "order": null
+            },
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "diamond-pearl",
+                "url": "https://pokeapi.co/api/v2/version-group/8/"
+              },
+              "move_learn_method": {
+                "name": "machine",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+              },
+              "order": null
+            },
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "platinum",
+                "url": "https://pokeapi.co/api/v2/version-group/9/"
+              },
+              "move_learn_method": {
+                "name": "machine",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+              },
+              "order": null
+            },
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "heartgold-soulsilver",
+                "url": "https://pokeapi.co/api/v2/version-group/10/"
+              },
+              "move_learn_method": {
+                "name": "machine",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+              },
+              "order": null
+            },
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "black-white",
+                "url": "https://pokeapi.co/api/v2/version-group/11/"
+              },
+              "move_learn_method": {
+                "name": "machine",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+              },
+              "order": null
+            },
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "black-2-white-2",
+                "url": "https://pokeapi.co/api/v2/version-group/14/"
+              },
+              "move_learn_method": {
+                "name": "machine",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+              },
+              "order": null
+            },
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "x-y",
+                "url": "https://pokeapi.co/api/v2/version-group/15/"
+              },
+              "move_learn_method": {
+                "name": "machine",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+              },
+              "order": null
+            },
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "omega-ruby-alpha-sapphire",
+                "url": "https://pokeapi.co/api/v2/version-group/16/"
+              },
+              "move_learn_method": {
+                "name": "machine",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+              },
+              "order": null
+            },
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "sun-moon",
+                "url": "https://pokeapi.co/api/v2/version-group/17/"
+              },
+              "move_learn_method": {
+                "name": "machine",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+              },
+              "order": null
+            },
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "ultra-sun-ultra-moon",
+                "url": "https://pokeapi.co/api/v2/version-group/18/"
+              },
+              "move_learn_method": {
+                "name": "machine",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+              },
+              "order": null
+            },
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "sword-shield",
+                "url": "https://pokeapi.co/api/v2/version-group/20/"
+              },
+              "move_learn_method": {
+                "name": "machine",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+              },
+              "order": null
+            },
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "brilliant-diamond-shining-pearl",
+                "url": "https://pokeapi.co/api/v2/version-group/23/"
+              },
+              "move_learn_method": {
+                "name": "machine",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+              },
+              "order": null
+            },
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "scarlet-violet",
+                "url": "https://pokeapi.co/api/v2/version-group/25/"
+              },
+              "move_learn_method": {
+                "name": "machine",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+              },
+              "order": null
+            },
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "red-green-japan",
+                "url": "https://pokeapi.co/api/v2/version-group/28/"
+              },
+              "move_learn_method": {
+                "name": "machine",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+              },
+              "order": null
+            },
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "blue-japan",
+                "url": "https://pokeapi.co/api/v2/version-group/29/"
+              },
+              "move_learn_method": {
+                "name": "machine",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+              },
+              "order": null
+            }
+          ]
+        }
+      ]
+    },
+    "charizard-mega-x": {
+      "id": 10034,
+      "name": "charizard-mega-x",
+      "height": 17,
+      "weight": 1105,
+      "species": {
+        "name": "charizard",
+        "url": "https://pokeapi.co/api/v2/pokemon-species/6/"
+      },
+      "abilities": [
+        {
+          "is_hidden": false,
+          "slot": 1,
+          "ability": {
+            "name": "tough-claws",
+            "url": "https://pokeapi.co/api/v2/ability/181/"
+          }
+        }
+      ],
+      "stats": [
+        {
+          "base_stat": 78,
+          "effort": 0,
+          "stat": {
+            "name": "hp",
+            "url": "https://pokeapi.co/api/v2/stat/1/"
+          }
+        },
+        {
+          "base_stat": 130,
+          "effort": 0,
+          "stat": {
+            "name": "attack",
+            "url": "https://pokeapi.co/api/v2/stat/2/"
+          }
+        },
+        {
+          "base_stat": 111,
+          "effort": 0,
+          "stat": {
+            "name": "defense",
+            "url": "https://pokeapi.co/api/v2/stat/3/"
+          }
+        },
+        {
+          "base_stat": 130,
+          "effort": 3,
+          "stat": {
+            "name": "special-attack",
+            "url": "https://pokeapi.co/api/v2/stat/4/"
+          }
+        },
+        {
+          "base_stat": 85,
+          "effort": 0,
+          "stat": {
+            "name": "special-defense",
+            "url": "https://pokeapi.co/api/v2/stat/5/"
+          }
+        },
+        {
+          "base_stat": 100,
+          "effort": 0,
+          "stat": {
+            "name": "speed",
+            "url": "https://pokeapi.co/api/v2/stat/6/"
+          }
+        }
+      ],
+      "types": [
+        {
+          "slot": 1,
+          "type": {
+            "name": "fire",
+            "url": "https://pokeapi.co/api/v2/type/10/"
+          }
+        },
+        {
+          "slot": 2,
+          "type": {
+            "name": "dragon",
+            "url": "https://pokeapi.co/api/v2/type/16/"
+          }
+        }
+      ],
+      "sprites": {
+        "front_default": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/10034.png",
+        "front_shiny": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/10034.png",
+        "other": {
+          "official-artwork": {
+            "versions": {
+              "generation-i": {
+                "red-and-blue": {
+                  "front_default": null
+                },
+                "red-and-green": {
+                  "front_default": null
+                }
+              },
+              "generation-ii": {
+                "gold-and-silver": {
+                  "front_default": null
+                }
+              }
+            },
+            "front_shiny": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/10034.png",
+            "front_default": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10034.png"
+          }
+        }
+      },
+      "moves": [
+        {
+          "move": {
+            "name": "fire-punch",
+            "url": "https://pokeapi.co/api/v2/move/7/"
+          },
+          "version_group_details": [
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "omega-ruby-alpha-sapphire",
+                "url": "https://pokeapi.co/api/v2/version-group/16/"
+              },
+              "move_learn_method": {
+                "name": "tutor",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/3/"
+              },
+              "order": null
+            },
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "ultra-sun-ultra-moon",
+                "url": "https://pokeapi.co/api/v2/version-group/18/"
+              },
+              "move_learn_method": {
+                "name": "tutor",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/3/"
+              },
+              "order": null
+            },
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "lets-go-pikachu-lets-go-eevee",
+                "url": "https://pokeapi.co/api/v2/version-group/19/"
+              },
+              "move_learn_method": {
+                "name": "machine",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+              },
+              "order": null
+            },
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "champions",
+                "url": "https://pokeapi.co/api/v2/version-group/32/"
+              },
+              "move_learn_method": {
+                "name": "train",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/12/"
+              },
+              "order": null
+            }
+          ]
+        },
+        {
+          "move": {
+            "name": "thunder-punch",
+            "url": "https://pokeapi.co/api/v2/move/9/"
+          },
+          "version_group_details": [
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "omega-ruby-alpha-sapphire",
+                "url": "https://pokeapi.co/api/v2/version-group/16/"
+              },
+              "move_learn_method": {
+                "name": "tutor",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/3/"
+              },
+              "order": null
+            },
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "ultra-sun-ultra-moon",
+                "url": "https://pokeapi.co/api/v2/version-group/18/"
+              },
+              "move_learn_method": {
+                "name": "tutor",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/3/"
+              },
+              "order": null
+            },
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "lets-go-pikachu-lets-go-eevee",
+                "url": "https://pokeapi.co/api/v2/version-group/19/"
+              },
+              "move_learn_method": {
+                "name": "machine",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/4/"
+              },
+              "order": null
+            },
+            {
+              "level_learned_at": 0,
+              "version_group": {
+                "name": "champions",
+                "url": "https://pokeapi.co/api/v2/version-group/32/"
+              },
+              "move_learn_method": {
+                "name": "train",
+                "url": "https://pokeapi.co/api/v2/move-learn-method/12/"
+              },
+              "order": null
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "species": {
+    "inkay": {
+      "evolution_chain": {
+        "url": "https://pokeapi.co/api/v2/evolution-chain/352/"
+      },
+      "flavor_text_entries": [
+        {
+          "flavor_text": "Opponents who stare at the flashing of the\nlight-emitting spots on its body become\ndazed and lose their will to fight.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "x",
+            "url": "https://pokeapi.co/api/v2/version/23/"
+          }
+        },
+        {
+          "flavor_text": "It flashes the light-emitting spots on its body,\nwhich drains its opponent’s will to fight.\nIt takes the opportunity to scuttle away and hide.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "y",
+            "url": "https://pokeapi.co/api/v2/version/24/"
+          }
+        },
+        {
+          "flavor_text": "Opponents who stare at the flashing of the\nlight-emitting spots on its body become\ndazed and lose their will to fight.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "omega-ruby",
+            "url": "https://pokeapi.co/api/v2/version/25/"
+          }
+        },
+        {
+          "flavor_text": "It flashes the light-emitting spots on its body,\nwhich drains its opponent’s will to fight.\nIt takes the opportunity to scuttle away and hide.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "alpha-sapphire",
+            "url": "https://pokeapi.co/api/v2/version/26/"
+          }
+        },
+        {
+          "flavor_text": "It draws prey near with its blinking lights and\nthen wraps them up in its long tentacles and\nholds them in place.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "ultra-sun",
+            "url": "https://pokeapi.co/api/v2/version/29/"
+          }
+        },
+        {
+          "flavor_text": "When exchanging information with others of its\nkind, it flashes the light-emitting spots on its\nbody in a complex rhythm.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "ultra-moon",
+            "url": "https://pokeapi.co/api/v2/version/30/"
+          }
+        },
+        {
+          "flavor_text": "It spins while making its luminescent spots flash.\nThese spots allow it to communicate with others\nby using different patterns of light.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "sword",
+            "url": "https://pokeapi.co/api/v2/version/33/"
+          }
+        },
+        {
+          "flavor_text": "By exposing foes to the blinking of its\nluminescent spots, Inkay demoralizes them,\nand then it seizes the chance to flee.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "shield",
+            "url": "https://pokeapi.co/api/v2/version/34/"
+          }
+        }
+      ],
+      "genera": [
+        {
+          "genus": "かいてんポケモン",
+          "language": {
+            "name": "ja-hrkt",
+            "url": "https://pokeapi.co/api/v2/language/1/"
+          }
+        },
+        {
+          "genus": "회전포켓몬",
+          "language": {
+            "name": "ko",
+            "url": "https://pokeapi.co/api/v2/language/3/"
+          }
+        },
+        {
+          "genus": "回轉寶可夢",
+          "language": {
+            "name": "zh-hant",
+            "url": "https://pokeapi.co/api/v2/language/4/"
+          }
+        },
+        {
+          "genus": "Pokémon Rotation",
+          "language": {
+            "name": "fr",
+            "url": "https://pokeapi.co/api/v2/language/5/"
+          }
+        },
+        {
+          "genus": "Rotations-Pokémon",
+          "language": {
+            "name": "de",
+            "url": "https://pokeapi.co/api/v2/language/6/"
+          }
+        },
+        {
+          "genus": "Pokémon Rotación",
+          "language": {
+            "name": "es",
+            "url": "https://pokeapi.co/api/v2/language/7/"
+          }
+        },
+        {
+          "genus": "Pokémon Volteggio",
+          "language": {
+            "name": "it",
+            "url": "https://pokeapi.co/api/v2/language/8/"
+          }
+        },
+        {
+          "genus": "Revolving Pokémon",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          }
+        },
+        {
+          "genus": "かいてんポケモン",
+          "language": {
+            "name": "ja",
+            "url": "https://pokeapi.co/api/v2/language/11/"
+          }
+        },
+        {
+          "genus": "回转宝可梦",
+          "language": {
+            "name": "zh-hans",
+            "url": "https://pokeapi.co/api/v2/language/12/"
+          }
+        },
+        {
+          "genus": "Pokémon Rotación",
+          "language": {
+            "name": "es-419",
+            "url": "https://pokeapi.co/api/v2/language/14/"
+          }
+        }
+      ],
+      "capture_rate": 190,
+      "growth_rate": {
+        "name": "medium",
+        "url": "https://pokeapi.co/api/v2/growth-rate/2/"
+      },
+      "gender_rate": 4,
+      "is_legendary": false,
+      "is_mythical": false,
+      "varieties": [
+        {
+          "is_default": true,
+          "pokemon": {
+            "name": "inkay",
+            "url": "https://pokeapi.co/api/v2/pokemon/686/"
+          }
+        }
+      ],
+      "generation": {
+        "name": "generation-vi",
+        "url": "https://pokeapi.co/api/v2/generation/6/"
+      },
+      "egg_groups": [
+        {
+          "name": "water1",
+          "url": "https://pokeapi.co/api/v2/egg-group/2/"
+        },
+        {
+          "name": "water2",
+          "url": "https://pokeapi.co/api/v2/egg-group/12/"
+        }
+      ]
+    },
+    "bulbasaur": {
+      "evolution_chain": {
+        "url": "https://pokeapi.co/api/v2/evolution-chain/1/"
+      },
+      "flavor_text_entries": [
+        {
+          "flavor_text": "A strange seed was\nplanted on its\nback at birth.\fThe plant sprouts\nand grows with\nthis POKéMON.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "red",
+            "url": "https://pokeapi.co/api/v2/version/1/"
+          }
+        },
+        {
+          "flavor_text": "A strange seed was\nplanted on its\nback at birth.\fThe plant sprouts\nand grows with\nthis POKéMON.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "blue",
+            "url": "https://pokeapi.co/api/v2/version/2/"
+          }
+        },
+        {
+          "flavor_text": "It can go for days\nwithout eating a\nsingle morsel.\fIn the bulb on\nits back, it\nstores energy.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "yellow",
+            "url": "https://pokeapi.co/api/v2/version/3/"
+          }
+        },
+        {
+          "flavor_text": "The seed on its\nback is filled\nwith nutrients.\fThe seed grows\nsteadily larger as\nits body grows.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "gold",
+            "url": "https://pokeapi.co/api/v2/version/4/"
+          }
+        },
+        {
+          "flavor_text": "It carries a seed\non its back right\nfrom birth. As it\fgrows older, the\nseed also grows\nlarger.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "silver",
+            "url": "https://pokeapi.co/api/v2/version/5/"
+          }
+        },
+        {
+          "flavor_text": "While it is young,\nit uses the\nnutrients that are\fstored in the\nseeds on its back\nin order to grow.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "crystal",
+            "url": "https://pokeapi.co/api/v2/version/6/"
+          }
+        },
+        {
+          "flavor_text": "BULBASAUR can be seen napping in\nbright sunlight.\nThere is a seed on its back.\fBy soaking up the sun’s rays, the seed\ngrows progressively larger.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "ruby",
+            "url": "https://pokeapi.co/api/v2/version/7/"
+          }
+        },
+        {
+          "flavor_text": "BULBASAUR can be seen napping in\nbright sunlight.\nThere is a seed on its back.\fBy soaking up the sun’s rays, the seed\ngrows progressively larger.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "sapphire",
+            "url": "https://pokeapi.co/api/v2/version/8/"
+          }
+        },
+        {
+          "flavor_text": "BULBASAUR can be seen napping in bright\nsunlight. There is a seed on its back.\nBy soaking up the sun’s rays, the seed\ngrows progressively larger.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "emerald",
+            "url": "https://pokeapi.co/api/v2/version/9/"
+          }
+        },
+        {
+          "flavor_text": "There is a plant seed on its back right\nfrom the day this POKéMON is born.\nThe seed slowly grows larger.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "firered",
+            "url": "https://pokeapi.co/api/v2/version/10/"
+          }
+        },
+        {
+          "flavor_text": "A strange seed was planted on its back at\nbirth. The plant sprouts and grows with\nthis POKéMON.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "leafgreen",
+            "url": "https://pokeapi.co/api/v2/version/11/"
+          }
+        },
+        {
+          "flavor_text": "For some time after its birth, it\ngrows by gaining nourishment from\nthe seed on its back.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "diamond",
+            "url": "https://pokeapi.co/api/v2/version/12/"
+          }
+        },
+        {
+          "flavor_text": "For some time after its birth, it\ngrows by gaining nourishment from\nthe seed on its back.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "pearl",
+            "url": "https://pokeapi.co/api/v2/version/13/"
+          }
+        },
+        {
+          "flavor_text": "For some time after its birth, it\ngrows by gaining nourishment from\nthe seed on its back.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "platinum",
+            "url": "https://pokeapi.co/api/v2/version/14/"
+          }
+        },
+        {
+          "flavor_text": "The seed on its back is filled\nwith nutrients. The seed grows\nsteadily larger as its body grows.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "heartgold",
+            "url": "https://pokeapi.co/api/v2/version/15/"
+          }
+        },
+        {
+          "flavor_text": "It carries a seed on its back right\nfrom birth. As it grows older, the\nseed also grows larger.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "soulsilver",
+            "url": "https://pokeapi.co/api/v2/version/16/"
+          }
+        },
+        {
+          "flavor_text": "For some time after its birth, it\ngrows by gaining nourishment from\nthe seed on its back.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "black",
+            "url": "https://pokeapi.co/api/v2/version/17/"
+          }
+        },
+        {
+          "flavor_text": "For some time after its birth, it\ngrows by gaining nourishment from\nthe seed on its back.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "white",
+            "url": "https://pokeapi.co/api/v2/version/18/"
+          }
+        },
+        {
+          "flavor_text": "For some time after its birth, it\ngrows by gaining nourishment from\nthe seed on its back.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "black-2",
+            "url": "https://pokeapi.co/api/v2/version/21/"
+          }
+        },
+        {
+          "flavor_text": "For some time after its birth, it\ngrows by gaining nourishment from\nthe seed on its back.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "white-2",
+            "url": "https://pokeapi.co/api/v2/version/22/"
+          }
+        },
+        {
+          "flavor_text": "A strange seed was planted on its back at birth.\nThe plant sprouts and grows with this Pokémon.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "x",
+            "url": "https://pokeapi.co/api/v2/version/23/"
+          }
+        },
+        {
+          "flavor_text": "For some time after its birth, it grows by gaining\nnourishment from the seed on its back.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "y",
+            "url": "https://pokeapi.co/api/v2/version/24/"
+          }
+        },
+        {
+          "flavor_text": "Bulbasaur can be seen napping in bright sunlight.\nThere is a seed on its back. By soaking up the sun’s rays,\nthe seed grows progressively larger.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "omega-ruby",
+            "url": "https://pokeapi.co/api/v2/version/25/"
+          }
+        },
+        {
+          "flavor_text": "Bulbasaur can be seen napping in bright sunlight.\nThere is a seed on its back. By soaking up the sun’s rays,\nthe seed grows progressively larger.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "alpha-sapphire",
+            "url": "https://pokeapi.co/api/v2/version/26/"
+          }
+        },
+        {
+          "flavor_text": "It can go for days without eating a single morsel.\nIn the bulb on its back, it stores energy.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "lets-go-pikachu",
+            "url": "https://pokeapi.co/api/v2/version/31/"
+          }
+        },
+        {
+          "flavor_text": "It can go for days without eating a single morsel.\nIn the bulb on its back, it stores energy.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "lets-go-eevee",
+            "url": "https://pokeapi.co/api/v2/version/32/"
+          }
+        },
+        {
+          "flavor_text": "There is a plant seed on its back right from the\nday this Pokémon is born. The seed slowly\ngrows larger.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "sword",
+            "url": "https://pokeapi.co/api/v2/version/33/"
+          }
+        },
+        {
+          "flavor_text": "While it is young, it uses the nutrients that are\nstored in the seed on its back in order to grow.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "shield",
+            "url": "https://pokeapi.co/api/v2/version/34/"
+          }
+        }
+      ],
+      "genera": [
+        {
+          "genus": "たねポケモン",
+          "language": {
+            "name": "ja-hrkt",
+            "url": "https://pokeapi.co/api/v2/language/1/"
+          }
+        },
+        {
+          "genus": "씨앗포켓몬",
+          "language": {
+            "name": "ko",
+            "url": "https://pokeapi.co/api/v2/language/3/"
+          }
+        },
+        {
+          "genus": "種子寶可夢",
+          "language": {
+            "name": "zh-hant",
+            "url": "https://pokeapi.co/api/v2/language/4/"
+          }
+        },
+        {
+          "genus": "Pokémon Graine",
+          "language": {
+            "name": "fr",
+            "url": "https://pokeapi.co/api/v2/language/5/"
+          }
+        },
+        {
+          "genus": "Samen-Pokémon",
+          "language": {
+            "name": "de",
+            "url": "https://pokeapi.co/api/v2/language/6/"
+          }
+        },
+        {
+          "genus": "Pokémon Semilla",
+          "language": {
+            "name": "es",
+            "url": "https://pokeapi.co/api/v2/language/7/"
+          }
+        },
+        {
+          "genus": "Pokémon Seme",
+          "language": {
+            "name": "it",
+            "url": "https://pokeapi.co/api/v2/language/8/"
+          }
+        },
+        {
+          "genus": "Seed Pokémon",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          }
+        },
+        {
+          "genus": "たねポケモン",
+          "language": {
+            "name": "ja",
+            "url": "https://pokeapi.co/api/v2/language/11/"
+          }
+        },
+        {
+          "genus": "种子宝可梦",
+          "language": {
+            "name": "zh-hans",
+            "url": "https://pokeapi.co/api/v2/language/12/"
+          }
+        },
+        {
+          "genus": "Pokémon Semilla",
+          "language": {
+            "name": "es-419",
+            "url": "https://pokeapi.co/api/v2/language/14/"
+          }
+        }
+      ],
+      "capture_rate": 45,
+      "growth_rate": {
+        "name": "medium-slow",
+        "url": "https://pokeapi.co/api/v2/growth-rate/4/"
+      },
+      "gender_rate": 1,
+      "is_legendary": false,
+      "is_mythical": false,
+      "varieties": [
+        {
+          "is_default": true,
+          "pokemon": {
+            "name": "bulbasaur",
+            "url": "https://pokeapi.co/api/v2/pokemon/1/"
+          }
+        }
+      ],
+      "generation": {
+        "name": "generation-i",
+        "url": "https://pokeapi.co/api/v2/generation/1/"
+      },
+      "egg_groups": [
+        {
+          "name": "monster",
+          "url": "https://pokeapi.co/api/v2/egg-group/1/"
+        },
+        {
+          "name": "plant",
+          "url": "https://pokeapi.co/api/v2/egg-group/7/"
+        }
+      ]
+    },
+    "charizard": {
+      "evolution_chain": {
+        "url": "https://pokeapi.co/api/v2/evolution-chain/2/"
+      },
+      "flavor_text_entries": [
+        {
+          "flavor_text": "Spits fire that\nis hot enough to\nmelt boulders.\fKnown to cause\nforest fires\nunintentionally.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "red",
+            "url": "https://pokeapi.co/api/v2/version/1/"
+          }
+        },
+        {
+          "flavor_text": "Spits fire that\nis hot enough to\nmelt boulders.\fKnown to cause\nforest fires\nunintentionally.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "blue",
+            "url": "https://pokeapi.co/api/v2/version/2/"
+          }
+        },
+        {
+          "flavor_text": "When expelling a\nblast of super\nhot fire, the red\fflame at the tip\nof its tail burns\nmore intensely.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "yellow",
+            "url": "https://pokeapi.co/api/v2/version/3/"
+          }
+        },
+        {
+          "flavor_text": "If CHARIZARD be­\ncomes furious, the\nflame at the tip\fof its tail flares\nup in a whitish-\nblue color.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "gold",
+            "url": "https://pokeapi.co/api/v2/version/4/"
+          }
+        },
+        {
+          "flavor_text": "Breathing intense,\nhot flames, it can\nmelt almost any­\fthing. Its breath\ninflicts terrible\npain on enemies.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "silver",
+            "url": "https://pokeapi.co/api/v2/version/5/"
+          }
+        },
+        {
+          "flavor_text": "It uses its wings\nto fly high. The\ntemperature of its\ffire increases as\nit gains exper­\nience in battle.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "crystal",
+            "url": "https://pokeapi.co/api/v2/version/6/"
+          }
+        },
+        {
+          "flavor_text": "CHARIZARD flies around the sky in\nsearch of powerful opponents.\nIt breathes fire of such great heat\fthat it melts anything. However, it\nnever turns its fiery breath on any\nopponent weaker than itself.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "ruby",
+            "url": "https://pokeapi.co/api/v2/version/7/"
+          }
+        },
+        {
+          "flavor_text": "CHARIZARD flies around the sky in\nsearch of powerful opponents.\nIt breathes fire of such great heat\fthat it melts anything. However, it\nnever turns its fiery breath on any\nopponent weaker than itself.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "sapphire",
+            "url": "https://pokeapi.co/api/v2/version/8/"
+          }
+        },
+        {
+          "flavor_text": "A CHARIZARD flies about in search of\nstrong opponents. It breathes intense\nflames that can melt any material. However,\nit will never torch a weaker foe.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "emerald",
+            "url": "https://pokeapi.co/api/v2/version/9/"
+          }
+        },
+        {
+          "flavor_text": "Its wings can carry this POKéMON close to\nan altitude of 4,600 feet. It blows out\nfire at very high temperatures.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "firered",
+            "url": "https://pokeapi.co/api/v2/version/10/"
+          }
+        },
+        {
+          "flavor_text": "It spits fire that is hot enough to melt\nboulders. It may cause forest fires by\nblowing flames.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "leafgreen",
+            "url": "https://pokeapi.co/api/v2/version/11/"
+          }
+        },
+        {
+          "flavor_text": "It is said that CHARIZARD’s fire\nburns hotter if it has\nexperienced harsh battles.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "diamond",
+            "url": "https://pokeapi.co/api/v2/version/12/"
+          }
+        },
+        {
+          "flavor_text": "It is said that CHARIZARD’s fire\nburns hotter if it has\nexperienced harsh battles.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "pearl",
+            "url": "https://pokeapi.co/api/v2/version/13/"
+          }
+        },
+        {
+          "flavor_text": "It is said that CHARIZARD’s fire\nburns hotter if it has\nexperienced harsh battles.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "platinum",
+            "url": "https://pokeapi.co/api/v2/version/14/"
+          }
+        },
+        {
+          "flavor_text": "If CHARIZARD becomes furious,\nthe flame at the tip of its tail flares\nup in a light blue shade.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "heartgold",
+            "url": "https://pokeapi.co/api/v2/version/15/"
+          }
+        },
+        {
+          "flavor_text": "Breathing intense, hot flames, it can\nmelt almost anything. Its breath\ninflicts terrible pain on enemies.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "soulsilver",
+            "url": "https://pokeapi.co/api/v2/version/16/"
+          }
+        },
+        {
+          "flavor_text": "It is said that Charizard’s fire\nburns hotter if it has\nexperienced harsh battles.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "black",
+            "url": "https://pokeapi.co/api/v2/version/17/"
+          }
+        },
+        {
+          "flavor_text": "It is said that Charizard’s fire\nburns hotter if it has\nexperienced harsh battles.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "white",
+            "url": "https://pokeapi.co/api/v2/version/18/"
+          }
+        },
+        {
+          "flavor_text": "It is said that Charizard’s fire\nburns hotter if it has\nexperienced harsh battles.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "black-2",
+            "url": "https://pokeapi.co/api/v2/version/21/"
+          }
+        },
+        {
+          "flavor_text": "It is said that Charizard’s fire\nburns hotter if it has\nexperienced harsh battles.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "white-2",
+            "url": "https://pokeapi.co/api/v2/version/22/"
+          }
+        },
+        {
+          "flavor_text": "When expelling a blast of superhot fire,\nthe red flame at the tip of its tail burns\nmore intensely.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "x",
+            "url": "https://pokeapi.co/api/v2/version/23/"
+          }
+        },
+        {
+          "flavor_text": "Its wings can carry this Pokémon close to an\naltitude of 4,600 feet. It blows out fire at very\nhigh temperatures.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "y",
+            "url": "https://pokeapi.co/api/v2/version/24/"
+          }
+        },
+        {
+          "flavor_text": "Charizard flies around the sky in search of powerful opponents.\nIt breathes fire of such great heat that it melts anything.\nHowever, it never turns its fiery breath on any opponent\nweaker than itself.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "omega-ruby",
+            "url": "https://pokeapi.co/api/v2/version/25/"
+          }
+        },
+        {
+          "flavor_text": "Charizard flies around the sky in search of powerful opponents.\nIt breathes fire of such great heat that it melts anything.\nHowever, it never turns its fiery breath on any opponent\nweaker than itself.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "alpha-sapphire",
+            "url": "https://pokeapi.co/api/v2/version/26/"
+          }
+        },
+        {
+          "flavor_text": "When this Pokémon expels a blast of superhot\nfire, the red flame at the tip of its tail burns\nmore intensely.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "lets-go-pikachu",
+            "url": "https://pokeapi.co/api/v2/version/31/"
+          }
+        },
+        {
+          "flavor_text": "When this Pokémon expels a blast of superhot\nfire, the red flame at the tip of its tail burns\nmore intensely.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "lets-go-eevee",
+            "url": "https://pokeapi.co/api/v2/version/32/"
+          }
+        },
+        {
+          "flavor_text": "It spits fire that is hot enough to melt boulders.\nIt may cause forest fires by blowing flames.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "sword",
+            "url": "https://pokeapi.co/api/v2/version/33/"
+          }
+        },
+        {
+          "flavor_text": "Its wings can carry this Pokémon close to an\naltitude of 4,600 feet. It blows out fire at very\nhigh temperatures.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          },
+          "version": {
+            "name": "shield",
+            "url": "https://pokeapi.co/api/v2/version/34/"
+          }
+        }
+      ],
+      "genera": [
+        {
+          "genus": "かえんポケモン",
+          "language": {
+            "name": "ja-hrkt",
+            "url": "https://pokeapi.co/api/v2/language/1/"
+          }
+        },
+        {
+          "genus": "화염포켓몬",
+          "language": {
+            "name": "ko",
+            "url": "https://pokeapi.co/api/v2/language/3/"
+          }
+        },
+        {
+          "genus": "火焰寶可夢",
+          "language": {
+            "name": "zh-hant",
+            "url": "https://pokeapi.co/api/v2/language/4/"
+          }
+        },
+        {
+          "genus": "Pokémon Flamme",
+          "language": {
+            "name": "fr",
+            "url": "https://pokeapi.co/api/v2/language/5/"
+          }
+        },
+        {
+          "genus": "Flammen-Pokémon",
+          "language": {
+            "name": "de",
+            "url": "https://pokeapi.co/api/v2/language/6/"
+          }
+        },
+        {
+          "genus": "Pokémon Llama",
+          "language": {
+            "name": "es",
+            "url": "https://pokeapi.co/api/v2/language/7/"
+          }
+        },
+        {
+          "genus": "Pokémon Fiamma",
+          "language": {
+            "name": "it",
+            "url": "https://pokeapi.co/api/v2/language/8/"
+          }
+        },
+        {
+          "genus": "Flame Pokémon",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          }
+        },
+        {
+          "genus": "かえんポケモン",
+          "language": {
+            "name": "ja",
+            "url": "https://pokeapi.co/api/v2/language/11/"
+          }
+        },
+        {
+          "genus": "火焰宝可梦",
+          "language": {
+            "name": "zh-hans",
+            "url": "https://pokeapi.co/api/v2/language/12/"
+          }
+        },
+        {
+          "genus": "Pokémon Llama",
+          "language": {
+            "name": "es-419",
+            "url": "https://pokeapi.co/api/v2/language/14/"
+          }
+        }
+      ],
+      "capture_rate": 45,
+      "growth_rate": {
+        "name": "medium-slow",
+        "url": "https://pokeapi.co/api/v2/growth-rate/4/"
+      },
+      "gender_rate": 1,
+      "is_legendary": false,
+      "is_mythical": false,
+      "varieties": [
+        {
+          "is_default": true,
+          "pokemon": {
+            "name": "charizard",
+            "url": "https://pokeapi.co/api/v2/pokemon/6/"
+          }
+        },
+        {
+          "is_default": false,
+          "pokemon": {
+            "name": "charizard-mega-x",
+            "url": "https://pokeapi.co/api/v2/pokemon/10034/"
+          }
+        },
+        {
+          "is_default": false,
+          "pokemon": {
+            "name": "charizard-mega-y",
+            "url": "https://pokeapi.co/api/v2/pokemon/10035/"
+          }
+        },
+        {
+          "is_default": false,
+          "pokemon": {
+            "name": "charizard-gmax",
+            "url": "https://pokeapi.co/api/v2/pokemon/10196/"
+          }
+        }
+      ],
+      "generation": {
+        "name": "generation-i",
+        "url": "https://pokeapi.co/api/v2/generation/1/"
+      },
+      "egg_groups": [
+        {
+          "name": "monster",
+          "url": "https://pokeapi.co/api/v2/egg-group/1/"
+        },
+        {
+          "name": "dragon",
+          "url": "https://pokeapi.co/api/v2/egg-group/14/"
+        }
+      ]
+    }
+  },
+  "abilities": {
+    "contrary": {
+      "effect_entries": [
+        {
+          "effect": "Whenever this Pokémon's stats would be raised, they are instead lowered by the same amount, and vice versa.",
+          "short_effect": "Inverts stat changes.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          }
+        }
+      ]
+    },
+    "suction-cups": {
+      "effect_entries": [
+        {
+          "effect": "This Pokémon cannot be forced out of battle by moves such as Whirlwind.\n\nDragon Tail and Circle Throw still inflict damage against this Pokémon.\n\nOverworld: If the lead Pokémon has this ability, the success rate while fishing is increased.",
+          "short_effect": "Prevents being forced out of battle by other Pokémon's moves.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          }
+        }
+      ]
+    },
+    "infiltrator": {
+      "effect_entries": [
+        {
+          "effect": "This Pokémon's moves ignore Light Screen, Reflect, and Safeguard.",
+          "short_effect": "Bypasses Light Screen, Reflect, and Safeguard.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          }
+        }
+      ]
+    },
+    "overgrow": {
+      "effect_entries": [
+        {
+          "effect": "When this Pokémon has 1/3 or less of its HP remaining, its Grass-type moves inflict 1.5× as much regular damage.",
+          "short_effect": "Strengthens Grass moves to inflict 1.5× damage at 1/3 max HP or less.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          }
+        }
+      ]
+    },
+    "chlorophyll": {
+      "effect_entries": [
+        {
+          "effect": "This Pokémon's Speed is doubled during strong sunlight.\n\nThis bonus does not count as a stat modifier.",
+          "short_effect": "Doubles Speed during strong sunlight.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          }
+        }
+      ]
+    },
+    "tough-claws": {
+      "effect_entries": [
+        {
+          "effect": "Strengthens moves that make contact to 1.33× their power.",
+          "short_effect": "Strengthens moves that make contact to 1.33× their power.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          }
+        }
+      ]
+    }
+  },
+  "syntheticDetail": {
+    "version_group": {
+      "name": "x-y",
+      "url": "https://pokeapi.co/api/v2/version-group/15/"
+    },
+    "is_default": false,
+    "item": null,
+    "trigger": {
+      "name": "level-up",
+      "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
+    },
+    "gender": 1,
+    "held_item": {
+      "name": "fixture-item"
+    },
+    "known_move": {
+      "name": "fixture-move"
+    },
+    "known_move_type": {
+      "name": "fairy"
+    },
+    "location": {
+      "name": "fixture-location"
+    },
+    "min_level": 30,
+    "min_happiness": 160,
+    "min_beauty": 170,
+    "min_affection": 2,
+    "near_special_rock": true,
+    "needs_multiplayer": true,
+    "needs_overworld_rain": true,
+    "party_species": {
+      "name": "fixture-species"
+    },
+    "party_type": {
+      "name": "dark"
+    },
+    "relative_physical_stats": 0,
+    "time_of_day": "night",
+    "trade_species": {
+      "name": "fixture-trade-species"
+    },
+    "turn_upside_down": true,
+    "region": {
+      "name": "hisui"
+    },
+    "required_pokemon_form": {
+      "name": "fixture-base-form"
+    },
+    "evolved_pokemon_form": {
+      "name": "fixture-evolved-form"
+    },
+    "used_move": {
+      "name": "fixture-used-move"
+    },
+    "min_move_count": 20,
+    "min_steps": 1000,
+    "min_damage_taken": 49,
+    "allowed_natures": [
+      {
+        "name": "hardy"
+      }
+    ],
+    "condition_expression": {
+      "expression": "EC 100 % 0 ==",
+      "percentage_chance": 1,
+      "variables": [
+        {
+          "name": "encryption-constant",
+          "url": "https://pokeapi.co/api/v2/evolution-variable/1/"
+        }
+      ]
+    }
+  }
+}
