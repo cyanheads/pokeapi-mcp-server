@@ -1,6 +1,6 @@
 # pokeapi-mcp-server - Directory Structure
 
-Generated on: 2026-09-19 18:35:51
+Generated on: 2026-09-30 11:38:45
 
 ```text
 pokeapi-mcp-server/
@@ -25,6 +25,7 @@ pokeapi-mcp-server/
 │   └── settings.json
 ├── changelog/
 │   ├── 0.1.x/
+│   ├── 0.2.x/
 │   └── template.md
 ├── docs/
 │   ├── design.md
@@ -127,6 +128,7 @@ pokeapi-mcp-server/
 │   ├── clean-mcpb.ts
 │   ├── clean.ts
 │   ├── devcheck.ts
+│   ├── install-otel.ts
 │   ├── lint-mcp.ts
 │   ├── lint-packaging.ts
 │   ├── list-skills.ts
@@ -157,18 +159,27 @@ pokeapi-mcp-server/
 │   │       └── types.ts
 │   └── index.ts
 ├── tests/
+│   ├── fixtures/
+│   │   ├── domain-captures.json
+│   │   └── README.md
 │   ├── prompts/
 │   ├── resources/
 │   │   ├── pokemon.resource.test.ts
 │   │   └── type.resource.test.ts
+│   ├── services/
+│   │   └── pokeapi-service.test.ts
 │   └── tools/
+│       ├── domain-contracts.test.ts
 │       ├── find-pokemon.tool.test.ts
 │       ├── get-ability.tool.test.ts
 │       ├── get-item.tool.test.ts
 │       ├── get-move.tool.test.ts
 │       ├── get-nature.tool.test.ts
 │       ├── get-pokemon.tool.test.ts
-│       └── get-type-matchups.tool.test.ts
+│       ├── get-type-matchups.tool.test.ts
+│       ├── identifier-contracts.test.ts
+│       ├── maintenance-contracts.test.ts
+│       └── search-format-contracts.test.ts
 ├── .dockerignore
 ├── .env.example
 ├── .gitattributes
