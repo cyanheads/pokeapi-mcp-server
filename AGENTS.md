@@ -2,9 +2,9 @@
 
 **Server:** pokeapi-mcp-server
 **Version:** 0.1.9
-**Framework:** [@cyanheads/mcp-ts-core](https://www.npmjs.com/package/@cyanheads/mcp-ts-core) `^0.13.6`
+**Framework:** [@cyanheads/mcp-ts-core](https://www.npmjs.com/package/@cyanheads/mcp-ts-core) `^0.13.10`
 **Engines:** Bun ≥1.4.0, Node ≥24.0.0
-**MCP SDK:** `@modelcontextprotocol/server` ^2.0.0
+**MCP SDK:** `@modelcontextprotocol/server` ^2.1.0
 **Zod:** ^4.6.5
 
 > **Read the framework docs first:** `node_modules/@cyanheads/mcp-ts-core/CLAUDE.md` contains the full API reference — builders, Context, error codes, exports, patterns. This file covers server-specific conventions only.
@@ -37,6 +37,7 @@ Tailor suggestions to what's actually missing or stale — don't recite the full
 - **Use `ctx.state`** for tenant-scoped storage. Never access persistence directly.
 - **Need input the caller didn't supply?** `return ctx.requestInput(...)` and read `ctx.inputs` when the handler is re-entered. Never `await` for user input mid-handler.
 - **Secrets in env vars only** — never hardcoded.
+- **Cut noise.** Add only what earns its place: no speculative generality, no guards for states the framework already prevents (Zod-validated params, classified errors), no abstraction until a third caller proves it, no option nothing sets.
 - **Close the loop on issues.** When implementing work tracked by a GitHub issue, comment on the issue with what landed and close it. Do both — a comment without a close leaves stale issues open; a close without a comment leaves no record of what shipped. The comment is for future readers — state the concrete changes, not the conversation that produced them.
 
 ---
@@ -85,7 +86,7 @@ export const getNature = tool('pokeapi_get_nature', {
       return { natures: [nature], isListAll: false };
     } catch (err) {
       if (err instanceof McpError && err.code === JsonRpcErrorCode.NotFound) {
-        throw ctx.fail('not_found', `Nature '${input.identifier}' not found`, ctx.recoveryFor('not_found'));
+        throw ctx.fail('not_found', `Nature '${input.identifier}' not found`);
       }
       throw err;
     }
@@ -110,13 +111,13 @@ import { JsonRpcErrorCode, McpError } from '@cyanheads/mcp-ts-core/errors';
 import { getPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 
 export const pokemonResource = resource('pokeapi://pokemon/{identifier}', {
-  description: 'Pokémon dossier by name or dex number — same payload as pokeapi_get_pokemon without moves.',
-  params: z.object({ identifier: z.string().describe('Pokémon name or dex number.') }),
+  description: 'Pokémon dossier by name or PokéAPI Pokémon-record ID — same payload as pokeapi_get_pokemon without moves.',
+  params: z.object({ identifier: z.string().describe('Pokémon name or PokéAPI Pokémon-record ID.') }),
   errors: [{
     reason: 'not_found',
     code: JsonRpcErrorCode.NotFound,
     when: 'No Pokémon matches the identifier.',
-    recovery: 'Use a valid lowercase hyphenated Pokémon name or numeric Pokédex number.',
+    recovery: 'Use a valid lowercase hyphenated Pokémon name or numeric PokéAPI Pokémon-record ID.',
   }],
   async handler(params, ctx) {
     const svc = getPokeApiService();
@@ -124,7 +125,7 @@ export const pokemonResource = resource('pokeapi://pokemon/{identifier}', {
       return await svc.getPokemonDossier(params.identifier, false, undefined, ctx);
     } catch (err) {
       if (err instanceof McpError && err.code === JsonRpcErrorCode.NotFound) {
-        throw ctx.fail('not_found', `Pokémon '${params.identifier}' not found`, ctx.recoveryFor('not_found'));
+        throw ctx.fail('not_found', `Pokémon '${params.identifier}' not found`);
       }
       throw err;
     }
@@ -185,13 +186,14 @@ Handlers receive a unified `ctx` object. Key properties:
 | Property | Description |
 |:---------|:------------|
 | `ctx.log` | Request-scoped logger — `.debug()`, `.info()`, `.notice()`, `.warning()`, `.error()`. Auto-correlates requestId, traceId, tenantId. Dual-sink: Pino and client-visible `notifications/message`. |
-| `ctx.state` | Tenant-scoped KV — `.get(key)`, `.set(key, value, { ttl? })`, `.delete(key)`, `.list(prefix, { cursor, limit })`. Used here for PokéAPI response caching with long TTL. |
+| `ctx.state` | Tenant-scoped KV — `.get(key)`, `.set(key, value, { ttl? })`, `.delete(key)`, `.getMany(keys)`, `.list(prefix, { cursor, limit })`. Values round-trip as JSON; reads return fresh objects and a `Date` becomes an ISO string. Used here for PokéAPI response caching. |
 | `ctx.requestInput` | Suspend and ask the caller for missing input. Return it directly; the handler is re-entered with responses. Always present. |
-| `ctx.inputs` | Reader over a retried request's responses — `.accepted(key, schema)`, `.view(key)`, `.state()`, `.dropped`. Empty on the first round. |
+| `ctx.inputs` | Client-supplied responses — `.accepted(key, schema)`, `.view(key)`, `.state()`, `.dropped` — filtered to the client's declared capabilities. Consent gates redeem a stored `ctx.state` record bound to the operation, caller, and target; see `api-context`. |
+| `ctx.clientCapabilities` | What the client declared for this request, or `undefined`. Use to decide whether to ask for optional context, never to skip consent. |
 | `ctx.enrich` | Success-path context such as query echo, notices, and totals. Reaches both client response surfaces when the definition declares `enrichment`. |
 | `ctx.content` | Add non-text image or audio content blocks to `content[]`. |
 | `ctx.signal` | `AbortSignal` for cancellation. |
-| `ctx.requestId` | Unique request ID. |
+| `ctx.requestId` | Request ID carried by the call's logs and error envelope as `data.requestId`. |
 | `ctx.tenantId` | Tenant ID from JWT or `'default'` for stdio and unauthenticated HTTP. |
 
 ---
@@ -200,7 +202,7 @@ Handlers receive a unified `ctx` object. Key properties:
 
 Handlers throw — the framework catches, classifies, and formats.
 
-**Recommended: typed error contract.** Declare `errors: [{ reason, code, when, recovery, retryable? }]` on `tool()` / `resource()` to receive `ctx.fail(reason, …)` typed against the reason union. TypeScript catches typos at compile time, `data.reason` is auto-populated for observability, linter enforces conformance against the handler body. `recovery` is required (≥ 5 words, lint-validated) — the single source of truth for the caller's next move. Pass `ctx.recoveryFor('reason')` as the throw's data to put it on the wire (`data.recovery.hint`, mirrored into `content[]` text); override with an explicit `{ recovery: { hint: '...' } }` when dynamic runtime context matters. Baseline codes (`InternalError`, `ServiceUnavailable`, `Timeout`, `ValidationError`, `SerializationError`) bubble freely and don't need declaring.
+**Recommended: typed error contract.** Declare `errors: [{ reason, code, when, recovery, retryable?, severity?, thrownBy? }]` on `tool()` / `resource()` to receive `ctx.fail(reason, …)` typed against the reason union. TypeScript checks reason names; the framework fills `data.recovery.hint` from the declared reason when the thrown error has no recovery of its own, and mirrors the hint into `content[]`. Use an explicit `{ recovery: { hint: '...' } }` only for runtime-specific guidance. `recovery` is required (≥ 5 words, lint-validated). Error envelopes also carry `data.requestId`; tool text ends with the same ID. Baseline codes (`InternalError`, `ServiceUnavailable`, `Timeout`, `ValidationError`, `SerializationError`, `RequestCancelled`) need no declaration. Output-contract failures are `InternalError`, not caller input errors.
 
 ```ts
 import { JsonRpcErrorCode } from '@cyanheads/mcp-ts-core/errors';
@@ -212,7 +214,7 @@ errors: [
 ],
 async handler(input, ctx) {
   const item = await db.find(input.id);
-  if (!item) throw ctx.fail('no_match', `No item ${input.id}`, ctx.recoveryFor('no_match'));
+  if (!item) throw ctx.fail('no_match', `No item ${input.id}`);
   return item;
 }
 ```
@@ -238,7 +240,7 @@ throw new McpError(JsonRpcErrorCode.DatabaseError, 'Connection failed', { pool: 
 
 See framework CLAUDE.md and the `api-errors` skill for the full auto-classification table, all available factories, and the contract reference.
 
-`RequestCancelled` is also a baseline code that needs no declaration. Recovery forwarding is checked per throw site (`error-contract-recovery-unforwarded`). Mark a reason produced below the handler with `thrownBy: 'service'` so the unthrown-contract check recognizes it. Tool contracts can set `severity` to `debug`, `info`, `notice`, or `warning` without changing the wire error.
+Mark a reason produced below the handler with `thrownBy: 'service'` so the unthrown-contract check recognizes it. Tool contracts can set `severity` to `debug`, `info`, `notice`, or `warning` without changing the wire error. `runToolContract` applies the same recovery fill as production; a direct handler invocation sees only the authored throw data.
 
 ---
 
@@ -302,7 +304,7 @@ Available skills:
 | `techniques` | Catalog of reusable response/data-shaping patterns — outline-on-overflow, truncation disclosure, stateless re-call contract |
 | `tool-defs-analysis` | Read-only audit of MCP definition language across the surface — voice, leaks, defaults, recovery hints, output descriptions |
 | `security-pass` | Audit server for MCP-flavored security gaps: output injection, scope blast radius, input sinks, tenant isolation |
-| `code-simplifier` | Post-session cleanup against `git diff` — modernize syntax, consolidate duplication, align with the codebase |
+| `code-simplifier` | Edit the working tree to simplify and align code; report defects separately from cleanup |
 | `polish-docs-meta` | Finalize docs, README, metadata, and agent protocol for shipping |
 | `git-wrapup` | Land the work as a commit stack, bump the version, and open the release PR |
 | `release-pr-review` | Review an open release PR; fixes are ordinary commits on its branch |
@@ -314,7 +316,7 @@ Available skills:
 | `api-auth` | Auth modes, scopes, JWT/OAuth |
 | `api-canvas` | DataCanvas: register tabular data, run SQL, export, plus the `spillover()` helper for big result sets — Tier 3 opt-in |
 | `api-config` | AppConfig, parseConfig, env vars |
-| `api-context` | Context interface, logger, state, multi-round-trip input |
+| `api-context` | Context interface, RequestContext, logger, state, multi-round-trip input |
 | `api-errors` | McpError, JsonRpcErrorCode, error patterns |
 | `api-linter` | Definition linter rule catalog — invoked by `bun run lint:mcp` and `devcheck` |
 | `api-mirror` | MirrorService: persistent self-refreshing local mirror (embedded SQLite + FTS5) of a bulk upstream dataset — Tier 3 opt-in |
@@ -360,9 +362,11 @@ When you complete a skill's checklist, check the boxes and add a completion time
 
 ## Bundling
 
+**CI is one file.** `.github/workflows/codeql.yml` is the only GitHub Actions workflow, with repository CodeQL default setup off. Verification and release gates run locally; do not add a workflow that repeats them.
+
 `bun run bundle` produces a `.mcpb` extension bundle for one-click install in Claude Desktop. The pack step is followed by `scripts/clean-mcpb.ts`, which prunes dev dependencies (`mcpb clean`), strips dependency-shipped agent docs (`node_modules/**` `skills/`, `.claude/`, `.agents/`, `SKILL.md`), and removes incompatible native bindings that root-anchored `.mcpbignore` patterns cannot reach. MCPB is stdio-only — HTTP and Cloudflare Workers deployments are unaffected. Consumers who don't need it can delete `manifest.json` and `.mcpbignore`; `lint:packaging` skips cleanly.
 
-**Adding an env var requires both files:** `server.json` (registry discovery, `environmentVariables[]`) and `manifest.json` (bundle install UX, `mcp_config.env` + `user_config`). `lint:packaging` (run by `devcheck`) verifies the env var names match.
+**Adding an env var requires both files:** `server.json` (registry discovery, `environmentVariables[]`) and `manifest.json` (bundle install UX, `mcp_config.env` + `user_config`). `lint:packaging` verifies name parity, that each `user_config` option is referenced as `${user_config.<option>}`, and that optional strings carry `"default": ""` so the host does not pass an unresolved placeholder.
 
 **README install badges** (Claude Desktop `.mcpb`, Cursor, VS Code) and the `base64` / `encodeURIComponent` config-generation commands are ship-time concerns — run the `polish-docs-meta` skill, which carries the badge format, layout, and generation snippets in `framework-skills/polish-docs-meta/references/readme.md`.
 
@@ -428,5 +432,5 @@ import { getMyService } from '@/services/my-domain/my-service.js';
 - [ ] Registered in `createApp()` arrays (directly or via barrel exports)
 - [ ] Tests use `createMockContext()` from `@cyanheads/mcp-ts-core/testing`
 - [ ] PokéAPI responses: English-only text (`language.name === 'en'`) before returning; missing entries surface as `null`
-- [ ] Cache keys include `identifier` after normalization (lowercase, hyphenated); TTL from `getServerConfig().cacheTtlSeconds`
+- [ ] Identifier lookups go through `PokeApiService.fetchByIdentifier`: it normalizes (trim, lowercase, hyphenate), URL-encodes once, rejects blank, `.`, `..`, unencodable, and over-`MAX_IDENTIFIER_LENGTH` identifiers as NotFound without a request, caches only identifiers matching `[a-z0-9-]`, and maps an upstream 400 for any other identifier to NotFound; TTL from `getServerConfig().cacheTtlSeconds`
 - [ ] `bun run devcheck` passes

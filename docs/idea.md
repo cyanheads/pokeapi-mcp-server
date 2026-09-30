@@ -42,7 +42,7 @@ The complete Pokédex over PokéAPI. The data is pristine — so where's the val
 - Get type matchups — what's super-effective against / weak to a type or Pokémon
 - Look up an ability and which Pokémon have it
 - Browse by generation, type, region/Pokédex, or egg group
-- Resolve a fuzzy name or dex number to the canonical entry
+- Resolve a canonical name or PokéAPI Pokémon-record ID to the entry
 
 ## API Surface
 
@@ -63,7 +63,7 @@ PokéAPI v2, keyless, fully static versioned game data. Heavily normalized — t
 Tool prefix `pokeapi_` (canonical brand; avoids the `pokemon_pokemon` stutter).
 
 ```
-pokeapi_get_pokemon   — the flagship. Name or dex number → a denormalized dossier in
+pokeapi_get_pokemon   — the flagship. Name or PokéAPI ID → a denormalized dossier in
                         one call: base stats, types, abilities (with effects),
                         height/weight, full resolved evolution chain, learnable moves
                         (summarized), sprite URLs, and species flavor text. Replaces
@@ -83,8 +83,8 @@ pokeapi_get_matchups  — type effectiveness. Input a type, or a Pokémon (resol
                         type relations.
 
 pokeapi_find_pokemon  — list/filter entries by generation, type, region/pokedex, or
-                        egg group. Returns names + dex numbers for follow-up
-                        get_pokemon calls. Also serves fuzzy name resolution.
+                        egg group. Returns names + PokéAPI IDs for follow-up
+                        get_pokemon calls. Matches name tokens within a category.
 
 pokeapi_get_item      — item by name/id: effect text, category (held, consumable,
                         berry, TM/HM), fling power, and which Pokémon commonly hold
@@ -98,7 +98,7 @@ pokeapi_get_item      — item by name/id: effect text, category (held, consumab
 - **Data is static** — versioned game data that rarely changes. Cache aggressively (long TTL, effectively a static dataset); PokéAPI's fair-use ask is "cache, don't hammer." Hosting cost is near-zero.
 - **`pokeapi_type_matchups` earns its keep** because type effectiveness is *computable but tedious* — the raw API gives type→type relations; the agent wants "what's super-effective vs this Pokémon," which means resolving its types and composing the matrix. Bake it.
 - Sprites are URLs (official artwork + game sprites) — return full URLs; note shiny/animated variants exist.
-- Name resolution: accept fuzzy names and dex numbers; forms/variants (Alolan, Mega, regional, Gigantamax) are distinct species entries — surface them rather than silently picking one.
+- Name resolution: accept canonical names and PokéAPI Pokémon-record IDs; forms/variants (Alolan, Mega, regional, Gigantamax) have distinct Pokémon records associated with a species — surface them rather than silently picking one.
 - Prefix `pokeapi_` chosen over `pokemon_` (stutter) and `pokedex_` (cuter, but breaks name↔prefix consistency).
 - Composes with `wikidata` / `wikipedia` for lore and competitive context the structured game data doesn't carry.
 - README one-liner: "Everything about a Pokémon in one call — stats, abilities, evolutions, moves, and type matchups, denormalized from PokéAPI's resource graph."
