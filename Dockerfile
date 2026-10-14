@@ -4,7 +4,7 @@
 # This stage installs all dependencies (including dev), builds the TypeScript
 # source code into JavaScript, and prepares the production assets.
 # ==============================================================================
-FROM --platform=$BUILDPLATFORM oven/bun:1.4.2 AS build
+FROM --platform=$BUILDPLATFORM oven/bun:1.4.3 AS build
 
 WORKDIR /usr/src/app
 
@@ -29,7 +29,7 @@ RUN bun run build
 # Run Bun and the security scanner on the build platform, cross-installing
 # optional native dependencies for the target platform without QEMU.
 # ==============================================================================
-FROM --platform=$BUILDPLATFORM oven/bun:1.4.2 AS deps
+FROM --platform=$BUILDPLATFORM oven/bun:1.4.3 AS deps
 
 WORKDIR /usr/src/app
 
@@ -57,6 +57,9 @@ RUN --mount=type=cache,target=/root/.bun/install/cache \
       bun scripts/install-otel.ts --os="$TARGETOS" --cpu="$(cat .bun-cpu)"; \
     fi
 
+COPY scripts/prune-musl-packages.ts ./scripts/
+RUN bun scripts/prune-musl-packages.ts
+
 RUN rm -rf node_modules/@socketsecurity/bun-security-scanner
 
 
@@ -67,7 +70,7 @@ RUN rm -rf node_modules/@socketsecurity/bun-security-scanner
 # application. It uses a slim base image and only includes production
 # dependencies and build artifacts.
 # ==============================================================================
-FROM oven/bun:1.4.2-slim AS production
+FROM oven/bun:1.4.3-slim AS production
 
 WORKDIR /usr/src/app
 
