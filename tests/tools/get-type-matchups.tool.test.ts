@@ -5,15 +5,20 @@
 
 import { McpError } from '@cyanheads/mcp-ts-core/errors';
 import { createInMemoryStorage, createMockContext } from '@cyanheads/mcp-ts-core/testing';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { getTypeMatchups } from '@/mcp-server/tools/definitions/get-type-matchups.tool.js';
 import { initPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
+import { handlerHttp } from '../fixtures/handler-fixtures.js';
 
 const mockAppConfig = {} as Parameters<typeof initPokeApiService>[0];
 const mockStorage = createInMemoryStorage();
+let http: ReturnType<typeof handlerHttp>;
+afterEach(() => http.restore());
 
 describe('getTypeMatchups', () => {
   beforeEach(() => {
+    http = handlerHttp();
+    http.install();
     initPokeApiService(mockAppConfig, mockStorage);
   });
 
@@ -105,6 +110,8 @@ describe('getTypeMatchups', () => {
   it('formats output with resolved types and matchups', () => {
     const result = getTypeMatchups.output.parse({
       queryType: 'type',
+      resolvedPokemon: null,
+      resolvedFromSpecies: null,
       resolvedTypes: ['fire'],
       offensiveRelations: {
         superEffectiveTo: ['grass', 'ice', 'bug', 'steel'],
@@ -130,6 +137,8 @@ describe('getTypeMatchups', () => {
   it('formats unavailable offensive relations explicitly for dual-type queries', () => {
     const result = getTypeMatchups.output.parse({
       queryType: 'pokemon',
+      resolvedPokemon: { id: 6, name: 'charizard' },
+      resolvedFromSpecies: null,
       resolvedTypes: ['fire', 'flying'],
       offensiveRelations: null,
       defensiveMatchups: {

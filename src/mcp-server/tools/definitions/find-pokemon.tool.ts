@@ -70,7 +70,7 @@ export const findPokemon = tool('pokeapi_find_pokemon', {
             id: z
               .number()
               .describe(
-                'PokéAPI ID: Pokémon record for type filters, species record for generation, pokedex, or egg_group filters. Form IDs are not National Pokédex numbers.',
+                'PokéAPI ID: Pokémon record for type-only searches, species record whenever generation, pokedex, or egg_group is present. Form IDs are not National Pokédex numbers.',
               ),
             name: z.string().describe('Pokémon name.'),
           })
@@ -165,11 +165,6 @@ export const findPokemon = tool('pokeapi_find_pokemon', {
         candidateSets.push(entries);
       }
 
-      if (typeName) {
-        const entries = await svc.getPokemonByType(typeName, ctx);
-        candidateSets.push(entries);
-      }
-
       if (pokedex) {
         const entries = await svc.getPokemonByPokedex(pokedex, ctx);
         candidateSets.push(entries);
@@ -177,6 +172,11 @@ export const findPokemon = tool('pokeapi_find_pokemon', {
 
       if (eggGroup) {
         const entries = await svc.getPokemonByEggGroup(eggGroup, ctx);
+        candidateSets.push(entries);
+      }
+
+      if (typeName) {
+        const entries = await svc.getPokemonByType(typeName, ctx);
         candidateSets.push(entries);
       }
     } catch (err) {
@@ -189,12 +189,16 @@ export const findPokemon = tool('pokeapi_find_pokemon', {
       throw err;
     }
 
-    // Intersect all candidate sets by name (AND logic).
+    /**
+     * Species rows lead mixed searches. Default Pokémon-record IDs equal species IDs;
+     * alternate records have distinct IDs, so a matching alternate alone cannot qualify
+     * its species. The endpoint lists supply the entire join without extra requests.
+     */
     const [firstSet, ...otherSets] = candidateSets;
     let results: PokemonListEntry[] = firstSet ?? [];
     for (const set of otherSets) {
-      const nextSet = new Set(set.map((e) => e.name));
-      results = results.filter((e) => nextSet.has(e.name));
+      const nextSet = new Set(set.map((e) => e.id));
+      results = results.filter((e) => nextSet.has(e.id));
     }
 
     // Apply query filter (token match on name)

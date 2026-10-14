@@ -5,16 +5,21 @@
 
 import { McpError } from '@cyanheads/mcp-ts-core/errors';
 import { createInMemoryStorage, createMockContext } from '@cyanheads/mcp-ts-core/testing';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { getPokemon } from '@/mcp-server/tools/definitions/get-pokemon.tool.js';
 import { initPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
+import { handlerHttp } from '../fixtures/handler-fixtures.js';
 
 // Use a mock AppConfig — the service only reads server config from env vars
 const mockAppConfig = {} as Parameters<typeof initPokeApiService>[0];
 const mockStorage = createInMemoryStorage();
+let http: ReturnType<typeof handlerHttp>;
+afterEach(() => http.restore());
 
 describe('getPokemon', () => {
   beforeEach(() => {
+    http = handlerHttp();
+    http.install();
     initPokeApiService(mockAppConfig, mockStorage);
   });
 

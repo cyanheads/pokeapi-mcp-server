@@ -5,15 +5,20 @@
 
 import { McpError } from '@cyanheads/mcp-ts-core/errors';
 import { createInMemoryStorage, createMockContext } from '@cyanheads/mcp-ts-core/testing';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { getItem } from '@/mcp-server/tools/definitions/get-item.tool.js';
 import { initPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
+import { handlerHttp } from '../fixtures/handler-fixtures.js';
 
 const mockAppConfig = {} as Parameters<typeof initPokeApiService>[0];
 const mockStorage = createInMemoryStorage();
+let http: ReturnType<typeof handlerHttp>;
+afterEach(() => http.restore());
 
 describe('getItem', () => {
   beforeEach(() => {
+    http = handlerHttp();
+    http.install();
     initPokeApiService(mockAppConfig, mockStorage);
   });
 

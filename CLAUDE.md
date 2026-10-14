@@ -2,10 +2,10 @@
 
 **Server:** pokeapi-mcp-server
 **Version:** 0.2.0
-**Framework:** [@cyanheads/mcp-ts-core](https://www.npmjs.com/package/@cyanheads/mcp-ts-core) `^0.13.10`
+**Framework:** [@cyanheads/mcp-ts-core](https://www.npmjs.com/package/@cyanheads/mcp-ts-core) `^0.13.15`
 **Engines:** Bun ≥1.4.0, Node ≥24.0.0
-**MCP SDK:** `@modelcontextprotocol/server` ^2.1.0
-**Zod:** ^4.6.5
+**MCP SDK:** `@modelcontextprotocol/server` ^2.3.1
+**Zod:** ^4.6.6
 
 > **Read the framework docs first:** `node_modules/@cyanheads/mcp-ts-core/CLAUDE.md` contains the full API reference — builders, Context, error codes, exports, patterns. This file covers server-specific conventions only.
 
@@ -304,7 +304,7 @@ Available skills:
 | `techniques` | Catalog of reusable response/data-shaping patterns — outline-on-overflow, truncation disclosure, stateless re-call contract |
 | `tool-defs-analysis` | Read-only audit of MCP definition language across the surface — voice, leaks, defaults, recovery hints, output descriptions |
 | `security-pass` | Audit server for MCP-flavored security gaps: output injection, scope blast radius, input sinks, tenant isolation |
-| `code-simplifier` | Edit the working tree to simplify and align code; report defects separately from cleanup |
+| `code-simplifier` | Post-session cleanup against `git diff` — modernize syntax, consolidate duplication, align with the codebase |
 | `polish-docs-meta` | Finalize docs, README, metadata, and agent protocol for shipping |
 | `git-wrapup` | Land the work as a commit stack, bump the version, and open the release PR |
 | `release-pr-review` | Review an open release PR; fixes are ordinary commits on its branch |
@@ -401,7 +401,7 @@ security: false                            # optional — true only for source-c
 
 ## Publishing
 
-**Every release goes through a release PR, straight-through** — `git-wrapup`'s "Release PR mode", mode `straight-through`. One run: `git-wrapup` lands the commit stack on `release/<version>`, pushes it, and opens the PR (title = the release commit subject, body = the changelog entry plus a gates section); `release-and-publish` then fast-forwards `main` locally with `git merge --ff-only`, creates the tag on `main`'s tip, pushes `main` and the tag, deletes the branch, and publishes. A caller's brief may run a given release as `gated` instead — a `release-pr-review` pass on the open PR before `release-and-publish`. **Never merge through the GitHub UI or `gh pr merge`**: squash and rebase-merge are disabled in the repo settings because both rewrite the stack (rebase-merge also strips the SSH signatures), and a merge commit breaks the linear history.
+**Every release goes through a release PR, straight-through** — `git-wrapup`'s "Release PR mode", mode `straight-through`. One run: `git-wrapup` lands the commit stack on `release/<version>`, pushes it, and opens the PR (title = the release commit subject, body = the release digest: theme line, `## Changes`, `## Gates`, changelog link last); `release-and-publish` then fast-forwards `main` locally with `git merge --ff-only`, creates the tag on `main`'s tip, pushes `main` and the tag, deletes the branch, and publishes. A caller's brief may run a given release as `gated` instead — a `release-pr-review` pass on the open PR before `release-and-publish`. **Never merge through the GitHub UI or `gh pr merge`**: squash and rebase-merge are disabled in the repo settings because both rewrite the stack (rebase-merge also strips the SSH signatures), and a merge commit breaks the linear history.
 
 ---
 
@@ -433,4 +433,7 @@ import { getMyService } from '@/services/my-domain/my-service.js';
 - [ ] Tests use `createMockContext()` from `@cyanheads/mcp-ts-core/testing`
 - [ ] PokéAPI responses: English-only text (`language.name === 'en'`) before returning; missing entries surface as `null`
 - [ ] Identifier lookups go through `PokeApiService.fetchByIdentifier`: it normalizes (trim, lowercase, hyphenate), URL-encodes once, rejects blank, `.`, `..`, unencodable, and over-`MAX_IDENTIFIER_LENGTH` identifiers as NotFound without a request, caches only identifiers matching `[a-z0-9-]`, and maps an upstream 400 for any other identifier to NotFound; TTL from `getServerConfig().cacheTtlSeconds`
+- [ ] Pokémon dossiers, resources, and matchups share `resolvePokemon`: preserve direct form/numeric identity, resolve species names to their default record, and cache only verified successful species mappings with the configured TTL; never cache misses or failed defaults
+- [ ] Search intersections use IDs with species rows whenever generation, pokedex, or egg_group is present; type-only searches retain form record IDs and names
+- [ ] Default tests install explicit fetch fixtures; unmatched requests fail through `tests/setup.ts`, including attempts swallowed by handler error conversion
 - [ ] `bun run devcheck` passes

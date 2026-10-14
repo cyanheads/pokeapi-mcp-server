@@ -7,7 +7,7 @@
 
 <div align="center">
 
-[![Version](https://img.shields.io/badge/Version-0.2.0-blue.svg?style=flat-square)](./CHANGELOG.md) [![License](https://img.shields.io/badge/License-Apache%202.0-orange.svg?style=flat-square)](./LICENSE) [![Docker](https://img.shields.io/badge/Docker-ghcr.io-2496ED?style=flat-square&logo=docker&logoColor=white)](https://github.com/users/cyanheads/packages/container/package/pokeapi-mcp-server) [![MCP SDK](https://img.shields.io/badge/MCP%20SDK-^2.1.0-green.svg?style=flat-square)](https://modelcontextprotocol.io/) [![npm](https://img.shields.io/npm/v/@cyanheads/pokeapi-mcp-server?style=flat-square&logo=npm&logoColor=white)](https://www.npmjs.com/package/@cyanheads/pokeapi-mcp-server) [![TypeScript](https://img.shields.io/badge/TypeScript-^7.0.2-3178C6.svg?style=flat-square)](https://www.typescriptlang.org/) [![Bun](https://img.shields.io/badge/Bun-v1.4.2-blueviolet.svg?style=flat-square)](https://bun.sh/)
+[![Version](https://img.shields.io/badge/Version-0.2.0-blue.svg?style=flat-square)](./CHANGELOG.md) [![License](https://img.shields.io/badge/License-Apache%202.0-orange.svg?style=flat-square)](./LICENSE) [![Docker](https://img.shields.io/badge/Docker-ghcr.io-2496ED?style=flat-square&logo=docker&logoColor=white)](https://github.com/users/cyanheads/packages/container/package/pokeapi-mcp-server) [![MCP SDK](https://img.shields.io/badge/MCP%20SDK-^2.3.1-green.svg?style=flat-square)](https://modelcontextprotocol.io/) [![npm](https://img.shields.io/npm/v/@cyanheads/pokeapi-mcp-server?style=flat-square&logo=npm&logoColor=white)](https://www.npmjs.com/package/@cyanheads/pokeapi-mcp-server) [![TypeScript](https://img.shields.io/badge/TypeScript-^7.0.2-3178C6.svg?style=flat-square)](https://www.typescriptlang.org/) [![Bun](https://img.shields.io/badge/Bun-v1.4.3-blueviolet.svg?style=flat-square)](https://bun.sh/)
 
 </div>
 
@@ -69,6 +69,7 @@ All resource data is also reachable via tools.
 ### `pokeapi_get_type_matchups` <sub>tool</sub>
 
 - Requires exactly one of `type` (type name) or `pokemon` (name or PokéAPI Pokémon-record ID); unknown entries return `not_found`.
+- Species names resolve to their default variety: `deoxys` uses `deoxys-normal`, and `wormadam` uses `wormadam-plant`; explicit forms keep their own types. `resolvedPokemon` gives the record's `id` and `name`, and `resolvedFromSpecies` names the fallback species. Both are null for direct type queries.
 - Returns `offensiveRelations` (null for dual-type Pokémon) and `defensiveMatchups`, with dual-type defenses composed and immunity taking precedence.
 - `composedMultipliers` carries 0, 0.25, 0.5, 1, 2, or 4 for every attacking type touched, including neutral 1× cancellations; absent types also deal 1×.
 
@@ -111,7 +112,7 @@ All resource data is also reachable via tools.
 ### `pokeapi_find_pokemon` <sub>tool</sub>
 
 - Requires at least one of `generation`, `type`, `pokedex`, and `egg_group`, combined with AND logic; `query` (at most 100 characters) adds per-token name matching within them. Unrecognized category names return `invalid_filter`.
-- Returns `id` and `name` entries for follow-up `pokeapi_get_pokemon` calls, with `totalCount` before paging. Every returned name works as a `pokeapi_get_pokemon` identifier: a species name resolves to its default variety. Type catalogs supply Pokémon-record IDs, including forms; generation, pokédex, and egg-group catalogs supply species IDs. These are PokéAPI IDs, not regional dex positions or National Pokédex numbers for forms.
+- Returns `id` and `name` entries for follow-up `pokeapi_get_pokemon` calls, with `totalCount` before paging. Every returned name works as a Pokémon identifier: a species name resolves to its default variety. Type-only searches return Pokémon-record IDs and names, including forms. Any generation, pokédex, or egg-group filter makes the result species-scoped; intersections use IDs, so the type must match the species' default record. These are PokéAPI IDs, not regional dex positions or National Pokédex numbers for forms.
 - `appliedFilters` echoes normalized nonblank categories, lowercase query tokens joined with single spaces, and accepted `limit`/`offset` values, including defaults. A call without a category, with or without `query`, returns no entries and a category-required notice; an unapplied query is omitted from the echo.
 - `limit` (default 50) and `offset` (default 0) paginate the filtered set. A page beyond existing matches retains `totalCount` and advises retrying with `offset: 0`; true zero matches advise relaxing the filters. Echoes and notices appear in structured results and the text trailer.
 
@@ -142,6 +143,7 @@ PokéAPI-specific:
 - Keyless and read-only — no API key, no auth, no configuration required to run
 - Graph-walk consolidation — `pokeapi_get_pokemon` fans out across `/pokemon`, `/pokemon-species`, `/evolution-chain`, and N `/ability` endpoints in two parallel tiers, returning one object
 - Aggressive caching — PokéAPI data is static game data; responses are cached in `ctx.state` with a configurable TTL (default 6 h) to respect PokéAPI's fair-use policy. Only identifiers in PokéAPI's own `a–z`, `0–9`, and hyphen alphabet are cached; any other identifier is fetched each time
+- Verified species-name resolutions share that TTL and tenant scope across dossiers, resources, and matchups. Warm lookups reuse the default record without repeating the species-name 404; unknown names and failed resolutions are never cached.
 - Input normalization — accepts lowercase-hyphenated names or numeric IDs; trims, lowercases, and hyphenates whitespace, then URL-encodes the identifier once when the request is built. A blank, `.`, or `..` identifier, or one over 100 characters, returns `not_found` (`invalid_filter` for a search filter) without an upstream request. An identifier outside the `a–z`, `0–9`, and hyphen alphabet that PokéAPI refuses with a 400 returns the same error
 - English-first — `effect_entries` and `flavor_text_entries` are always filtered to `language.name === 'en'`; absent entries surface as `null` rather than a foreign-language string
 
@@ -310,7 +312,7 @@ PokéAPI's [Fair Use Policy](https://pokeapi.co/docs/v2#fairuse) asks consumers 
 
   ```sh
   bun run devcheck   # Lint, format, typecheck, security
-  bun run test       # Vitest test suite
+  bun run test       # Offline Vitest suite with deterministic fetch fixtures
   bun run lint:mcp   # Validate MCP definitions against spec
   ```
 

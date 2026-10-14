@@ -622,12 +622,16 @@ describe('effective search filters and empty-page guidance', () => {
     }
   });
 
-  it('keeps numeric-string pagination invalid without fetching', async () => {
+  it('keeps nonnumeric-string pagination invalid without fetching', async () => {
     const http = fixtureHttp();
     http.install();
     try {
-      // @ts-expect-error Number fields do not accept numeric strings from wire clients.
-      const result = await runToolContract(findPokemon, { type: 'fire', limit: '1', offset: '2' });
+      const result = await runToolContract(findPokemon, {
+        type: 'fire',
+        // @ts-expect-error The wire can carry a string that cannot be repaired to a number.
+        limit: 'many',
+        offset: 2,
+      });
       expect(result.structuredContent).toMatchObject({
         error: { code: JsonRpcErrorCode.InvalidParams, data: { reason: 'invalid_arguments' } },
       });

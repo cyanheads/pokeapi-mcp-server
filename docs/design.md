@@ -9,9 +9,9 @@
 | `pokeapi_get_pokemon` | Denormalized Pokémon dossier — stats, types, ability effects, height/weight, complete evolution alternatives, move summaries, sprites, flavor text, varieties, capture/growth/gender rates, and legendary/mythical flags. | `identifier` (name or PokéAPI Pokémon-record ID; a species name such as `deoxys` resolves to its default variety, reported in `resolvedFromSpecies`), `include_moves` bool (default false), `game_version` for flavor text (falls back to the most recent English entry) | `readOnlyHint: true` | `not_found` (NotFound): identifier resolves to no PokéAPI entry |
 | `pokeapi_get_move` | Move details by name or ID — type, damage class, power, accuracy, PP, priority, target, stat changes, status-effect chance, full English effect text, and the Pokémon that can learn it (`learned_by_pokemon`). | `identifier` (name or ID), `include_learners` bool (default false) | `readOnlyHint: true` | `not_found` (NotFound): identifier resolves to no move |
 | `pokeapi_get_ability` | Ability details by name or ID — full English effect text, short effect text, and the Pokémon that have it (with hidden-ability flag and slot). | `identifier` (name or ID) | `readOnlyHint: true` | `not_found` (NotFound): identifier resolves to no ability |
-| `pokeapi_get_type_matchups` | Computed offensive and defensive type effectiveness, with composed dual-type defenses. | `type` (type name) or `pokemon` (name or PokéAPI Pokémon-record ID) — exactly one required | `readOnlyHint: true` | `not_found` (NotFound): type or Pokémon identifier not recognized; `invalid_input` (ValidationError): neither or both inputs provided |
+| `pokeapi_get_type_matchups` | Computed offensive and defensive type effectiveness, with composed dual-type defenses, resolved record identity, and species-fallback attribution. | `type` (type name) or `pokemon` (name or PokéAPI Pokémon-record ID; species names resolve to their default variety) — exactly one required | `readOnlyHint: true` | `not_found` (NotFound): type or Pokémon identifier not recognized; `invalid_input` (ValidationError): neither or both inputs provided |
 | `pokeapi_get_item` | Item details by name or ID — effect text, category, cost, fling power, attributes, and Pokémon that commonly hold it. | `identifier` (name or ID) | `readOnlyHint: true` | `not_found` (NotFound): identifier resolves to no item |
-| `pokeapi_find_pokemon` | Filter Pokémon by generation, type, pokédex, or egg group. Returns names and PokéAPI IDs, pre-pagination count, normalized applied filters, and guidance for empty results or past-end pages. Type catalogs supply Pokémon-record IDs; generation, pokédex, and egg-group catalogs supply species IDs. | `generation`, `type`, `pokedex`, `egg_group` (at least one required; a call without one returns an empty result and a notice), `query` (strict name-token matching within a category, at most 100 characters), positive integer `limit`, nonnegative integer `offset` | `readOnlyHint: true`, `openWorldHint: false` | `invalid_filter` (ValidationError): unrecognized category name; schema failures are InvalidParams |
+| `pokeapi_find_pokemon` | Filter Pokémon by generation, type, pokédex, or egg group. Returns names and PokéAPI IDs, pre-pagination count, normalized applied filters, and guidance for empty results or past-end pages. Type-only searches return Pokémon records; any species filter returns species rows joined by default-record ID. | `generation`, `type`, `pokedex`, `egg_group` (at least one required; a call without one returns an empty result and a notice), `query` (strict name-token matching within a category, at most 100 characters), positive integer `limit`, nonnegative integer `offset` | `readOnlyHint: true`, `openWorldHint: false` | `invalid_filter` (ValidationError): unrecognized category name; schema failures are InvalidParams |
 | `pokeapi_get_nature` | Nature details by name or ID — stat boost and penalty (increased/decreased stat names), preferred and disliked berry flavor. Returns all 25 natures when called without an identifier. Critical for team-building: natures apply +10%/−10% to two stats. | `identifier` (name e.g. `"modest"` or ID 1–25; omit to list all) | `readOnlyHint: true`, `openWorldHint: false` | `not_found` (NotFound): identifier resolves to no nature |
 
 ### Resources
@@ -58,8 +58,10 @@ This server's entire value proposition is consolidation. `pokeapi_get_pokemon` f
 
 Single service — one upstream, no auth variation. Init/accessor pattern. Exposes typed fetch methods per resource type; tools compose these into their outputs. Caches responses in `ctx.state` with a long TTL (configurable, default 6 hours).
 
+The lightweight `resolvePokemon` method serves dossiers and matchups. It stores a normalized species-name → default-record-name mapping only after the default record fetch succeeds, using the same tenant-scoped state and configured TTL as response caching. No failed lookup or operational error creates a mapping.
+
 **Resilience:**
-- Retry: 2 attempts, 500ms base backoff (PokéAPI is stable; network blips are the primary failure mode)
+- Retry: up to 3 retries after the initial attempt, 500ms base backoff
 - Timeout: 10s per request
 - Parse: check HTTP status before body parse; empty 404 body → `notFound()`
 - Rate limits: PokéAPI has no published hard rate limit; cache policy absorbs most repetition
@@ -109,9 +111,11 @@ Each tool is independently testable after its service methods are in place.
 
 ## Workflow Analysis
 
-### `pokeapi_get_pokemon` (up to 3 + N calls, two async tiers)
+### `pokeapi_get_pokemon` (up to 3 + N calls, or 4 + N for a species name; two async tiers)
 
 Fetch the Pokémon record first, then resolve its species using `pokemon.species.name`. This preserves form lookup: a form record such as `charizard-mega-x` (10034) points to species `charizard` (6). Evolution-chain and ability fetches then run in parallel.
+
+A cold name with no Pokémon record of its own that names a species (`deoxys`) costs one extra call: `GET /pokemon/{identifier}` returns 404, `GET /pokemon-species/{identifier}` supplies the default variety, and that variety (`deoxys-normal`) is fetched as the Pokémon record. Call 2 reuses the cached species response. Warm resolutions skip the initial 404; when the mapping and all dependent responses remain valid, the dossier makes zero requests.
 
 | # | Call | Purpose | Tier | Condition |
 |:--|:-----|:--------|:-----|:----------|
@@ -121,16 +125,18 @@ Fetch the Pokémon record first, then resolve its species using `pokemon.species
 | 4…N | `GET /ability/{id}` (×1–3) | Effect text for each ability (refs from step 1) | 2 | always, parallel via `Promise.all` |
 | — | Move summarization | Deduplicate + summarize moves array from step 1 | — | only when `include_moves: true` |
 
-### `pokeapi_get_type_matchups` (1–3 calls)
+### `pokeapi_get_type_matchups` (1–3 cold calls for direct queries; 4–5 for species fallback)
 
 | # | Call | Purpose | Condition |
 |:--|:-----|:--------|:----------|
 | 1a | `GET /type/{typeName}` | Damage relations | when input is a type name |
-| 1b | `GET /pokemon/{identifier}` | Resolve Pokémon's type(s) | when input is a Pokémon identifier |
-| 2 | `GET /type/{type2}` | Second type's damage relations | only for dual-type Pokémon |
+| 1b | Shared Pokémon resolver | Resolve record and its type(s), with default-variety fallback for species names | when input is a Pokémon identifier |
+| 2 | `GET /type/{type}` (×1–2) | Resolved type damage relations | when input is a Pokémon identifier |
 | — | Matrix composition | Multiply effectiveness factors for dual types | always |
 
 For dual-type Pokémon: multiply per-type defensive factors. A Fire/Flying Pokémon vs. Rock: Fire takes 2× from Rock, Flying takes 2× from Rock → 4× total. Immune in either type always wins (0×).
+
+Pokémon queries return `resolvedPokemon: {id, name}` and nullable `resolvedFromSpecies`; direct type queries return null for both. Record and mapping caches are shared with dossiers and resources, without fetching dossier dependencies.
 
 ---
 
@@ -143,6 +149,8 @@ For dual-type Pokémon: multiply per-type defensive factors. A Fire/Flying Poké
 **Separate `pokeapi_get_type_matchups` tool rather than bundling into `get_pokemon`.** Matchup queries are a standalone workflow — "what beats Charizard?" or "what does Fire resist?" don't need the full Pokémon dossier. Keeping it separate lets agents call it cheaply for type questions without triggering the full fan-out.
 
 **`pokeapi_find_pokemon` uses MCP-side list filtering.** PokéAPI has no native multi-filter search (`/pokemon` only lists all). The server fetches the relevant bounded set (generation species list, pokedex entries, type members, egg group members) and filters client-side. Each sub-list is bounded (151 for Kanto, ~100–200 per type), making this appropriate. `query` parameter does strict token matching on names.
+
+**Mixed filters intersect IDs and preserve species rows.** Official PokéAPI default-record IDs equal their species IDs, while alternate forms have distinct IDs. Joining the existing lists by ID preserves suffix-named defaults without per-record fetches or suffix guessing. A type represented only by an alternate form does not qualify the default species. Type-only searches preserve all record names and IDs.
 
 **`pokeapi_get_nature` added.** Natures are the primary stat modifier in competitive team-building: every 1 of 25 natures gives +10% to one stat and −10% to another. "What nature should my Garchomp run?" and "which natures boost Sp. Atk?" are among the most common questions for the audience this server targets. The `/nature/{name}` endpoint is a trivial GET with a 25-item bounded domain; the omission was a gap, not a deliberate deferral.
 

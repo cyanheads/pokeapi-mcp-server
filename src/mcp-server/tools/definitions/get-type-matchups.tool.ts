@@ -26,7 +26,7 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
   description:
     'Get the full offensive and defensive type effectiveness breakdown. ' +
     'Provide either a type name (e.g. "fire", "psychic") or a Pokémon identifier ' +
-    '(name or PokéAPI Pokémon-record ID). For dual-type Pokémon, the defensive multipliers are ' +
+    '(name or PokéAPI Pokémon-record ID; a species name resolves to its default variety). For dual-type Pokémon, the defensive multipliers are ' +
     'correctly composed (e.g. Fire/Flying vs Rock = 4× because both types are ' +
     'weak to Rock). Exactly one of type or pokemon must be provided.',
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
@@ -41,7 +41,7 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
       .string()
       .optional()
       .describe(
-        'Pokémon name or PokéAPI Pokémon-record ID. The server resolves the types automatically. Provide this or type, not both.',
+        'Pokémon name or PokéAPI Pokémon-record ID; a species name resolves to its default variety. The server resolves the types automatically. Provide this or type, not both.',
       ),
   }),
   output: z.object({
@@ -51,6 +51,19 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
         'How the query was resolved: "type" for a direct type query, "pokemon" for a Pokémon lookup.',
       ),
     resolvedTypes: z.array(z.string()).describe('The type name(s) the query resolved to.'),
+    resolvedPokemon: z
+      .object({
+        id: z.number().describe('Resolved PokéAPI Pokémon-record ID, including form IDs.'),
+        name: z.string().describe('Resolved Pokémon-record name.'),
+      })
+      .nullable()
+      .describe('Resolved Pokémon record for a pokemon query; null for direct type queries.'),
+    resolvedFromSpecies: z
+      .string()
+      .nullable()
+      .describe(
+        'Species name when it resolved to its default variety; null for direct record or type queries.',
+      ),
     offensiveRelations: TypeRelationsSchema.nullable().describe(
       'Offensive effectiveness (populated for single-type queries; null for dual-type Pokémon where per-type breakdown does not compose cleanly).',
     ),
@@ -102,6 +115,8 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
         return {
           queryType: 'type',
           resolvedTypes: [matchups.typeName],
+          resolvedPokemon: null,
+          resolvedFromSpecies: null,
           offensiveRelations: matchups.offensiveRelations,
           defensiveMatchups: matchups.defensiveRelations,
           composedMultipliers: multipliers,
@@ -116,7 +131,7 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
       }
       const pokemonId = svc.normalizeIdentifier(input.pokemon);
       ctx.log.info('Getting type matchups for Pokémon', { pokemon: pokemonId });
-      const rawPokemon = await svc.fetchPokemon(pokemonId, ctx);
+      const { pokemon: rawPokemon, resolvedFromSpecies } = await svc.resolvePokemon(pokemonId, ctx);
       const types = rawPokemon.types.toSorted((a, b) => a.slot - b.slot).map((t) => t.type.name);
 
       const composedMultipliers = await svc.getDualTypeDefensive(types, ctx);
@@ -141,6 +156,8 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
       return {
         queryType: 'pokemon',
         resolvedTypes: types,
+        resolvedPokemon: { id: rawPokemon.id, name: rawPokemon.name },
+        resolvedFromSpecies,
         offensiveRelations,
         defensiveMatchups: { weakTo, resists, immuneTo },
         composedMultipliers,
@@ -162,6 +179,16 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
 
     lines.push(`# Type Matchups: ${result.resolvedTypes.join(' / ')}`);
     lines.push(`**Query type:** ${result.queryType}`);
+    if (result.resolvedPokemon) {
+      lines.push(
+        `**Resolved Pokémon:** ${result.resolvedPokemon.name} (PokéAPI ID: ${result.resolvedPokemon.id})`,
+      );
+      if (result.resolvedFromSpecies) {
+        lines.push(
+          `**Resolved from species:** ${result.resolvedFromSpecies} (default variety: ${result.resolvedPokemon.name})`,
+        );
+      }
+    }
 
     if (result.offensiveRelations) {
       lines.push('\n## Offensive Relations');

@@ -9,15 +9,20 @@ import {
   createMockContext,
   getEnrichment,
 } from '@cyanheads/mcp-ts-core/testing';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { findPokemon } from '@/mcp-server/tools/definitions/find-pokemon.tool.js';
 import { initPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
+import { handlerHttp } from '../fixtures/handler-fixtures.js';
 
 const mockAppConfig = {} as Parameters<typeof initPokeApiService>[0];
 const mockStorage = createInMemoryStorage();
+let http: ReturnType<typeof handlerHttp>;
+afterEach(() => http.restore());
 
 describe('findPokemon', () => {
   beforeEach(() => {
+    http = handlerHttp();
+    http.install();
     initPokeApiService(mockAppConfig, mockStorage);
   });
 

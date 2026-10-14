@@ -229,23 +229,39 @@ export class PokeApiService {
   /**
    * Pokémon record for a name or ID. A name with no Pokémon record of its own that names a
    * species (e.g. "deoxys") resolves to that species' default variety ("deoxys-normal").
-   * The species lookup runs only after the Pokémon lookup misses, and never for a numeric
-   * ID: every species ID is also a Pokémon-record ID, so a numeric miss is final.
+   * A verified species-name mapping skips the initial miss while its configured TTL lasts.
+   * Otherwise the species lookup runs only after a Pokémon miss, never for a numeric ID:
+   * every species ID is also a Pokémon-record ID, so a numeric miss is final.
    */
-  private async resolvePokemon(
+  async resolvePokemon(
     identifier: string | number,
     ctx: Context,
   ): Promise<{ pokemon: RawPokemon; resolvedFromSpecies: string | null }> {
+    const id = this.normalizeIdentifier(identifier);
+    const mappingKey =
+      CANONICAL_IDENTIFIER.test(id) && id.length <= MAX_IDENTIFIER_LENGTH && !/^\d+$/.test(id)
+        ? `pokeapi/species-resolution/${id}`
+        : null;
+    if (mappingKey !== null) {
+      const recordName = await ctx.state.get<string>(mappingKey);
+      if (recordName !== null) {
+        return { pokemon: await this.fetchPokemon(recordName, ctx), resolvedFromSpecies: id };
+      }
+    }
     try {
       return { pokemon: await this.fetchPokemon(identifier, ctx), resolvedFromSpecies: null };
     } catch (err) {
       const isMiss = err instanceof McpError && err.code === JsonRpcErrorCode.NotFound;
-      if (!isMiss || /^\d+$/.test(this.normalizeIdentifier(identifier))) throw err;
+      if (!isMiss || /^\d+$/.test(id)) throw err;
       const species = await this.fetchSpecies(identifier, ctx);
       const defaultVariety = species.varieties.find((variety) => variety.is_default);
       if (!defaultVariety) throw err;
+      const pokemon = await this.fetchPokemon(defaultVariety.pokemon.name, ctx);
+      if (mappingKey !== null && species.name === id) {
+        await ctx.state.set(mappingKey, pokemon.name, { ttl: this.cacheTtlSeconds });
+      }
       return {
-        pokemon: await this.fetchPokemon(defaultVariety.pokemon.name, ctx),
+        pokemon,
         resolvedFromSpecies: species.name,
       };
     }

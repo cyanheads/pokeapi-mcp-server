@@ -80,7 +80,7 @@ const LOOKUPS = [
   {
     name: 'pokeapi_get_type_matchups (pokemon)',
     run: (identifier: string) => runToolContract(getTypeMatchups, { pokemon: identifier }),
-    paths: ['pokemon'],
+    paths: ['pokemon', 'pokemon-species'],
     recovery: recoveryOf(getTypeMatchups.errors, 'not_found'),
   },
 ];

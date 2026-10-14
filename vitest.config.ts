@@ -22,6 +22,7 @@ export default mergeConfig(
           extends: true,
           test: {
             name: 'unit',
+            setupFiles: ['./tests/setup.ts'],
             include: ['src/**/*.test.ts', 'tests/**/*.test.ts'],
             exclude: ['tests/smoke/**', 'tests/integration/**', 'tests/fuzz/**'],
           },
