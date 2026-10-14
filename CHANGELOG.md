@@ -2,6 +2,10 @@
 
 All notable changes to this project. Each entry links to its full per-version file in [changelog/](changelog/).
 
+## [0.2.1](changelog/0.2.x/0.2.1.md) — 2026-10-14
+
+Species names resolve consistently across Pokémon lookups, mixed-filter searches, and type matchups, with cached resolutions and deterministic handler tests.
+
 ## [0.2.0](changelog/0.2.x/0.2.0.md) — 2026-09-30 · ⚠️ Breaking
 
 pokeapi_get_pokemon returns every evolution method and resolves species names, and pokeapi_get_item returns per-version prices. Breaking: item cost is nullable, and identifiers that cannot name a record fail as not_found.

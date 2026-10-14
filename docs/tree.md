@@ -1,6 +1,6 @@
 # pokeapi-mcp-server - Directory Structure
 
-Generated on: 2026-09-30 11:38:45
+Generated on: 2026-10-14 17:08:11
 
 ```text
 pokeapi-mcp-server/
@@ -132,6 +132,7 @@ pokeapi-mcp-server/
 │   ├── lint-mcp.ts
 │   ├── lint-packaging.ts
 │   ├── list-skills.ts
+│   ├── prune-musl-packages.ts
 │   ├── release-github.ts
 │   └── tree.ts
 ├── src/
@@ -161,25 +162,31 @@ pokeapi-mcp-server/
 ├── tests/
 │   ├── fixtures/
 │   │   ├── domain-captures.json
-│   │   └── README.md
+│   │   ├── handler-fixtures.ts
+│   │   ├── README.md
+│   │   └── resolution-captures.json
 │   ├── prompts/
 │   ├── resources/
 │   │   ├── pokemon.resource.test.ts
 │   │   └── type.resource.test.ts
 │   ├── services/
-│   │   └── pokeapi-service.test.ts
-│   └── tools/
-│       ├── domain-contracts.test.ts
-│       ├── find-pokemon.tool.test.ts
-│       ├── get-ability.tool.test.ts
-│       ├── get-item.tool.test.ts
-│       ├── get-move.tool.test.ts
-│       ├── get-nature.tool.test.ts
-│       ├── get-pokemon.tool.test.ts
-│       ├── get-type-matchups.tool.test.ts
-│       ├── identifier-contracts.test.ts
-│       ├── maintenance-contracts.test.ts
-│       └── search-format-contracts.test.ts
+│   │   ├── pokeapi-service.test.ts
+│   │   └── pokemon-resolution.test.ts
+│   ├── tools/
+│   │   ├── domain-contracts.test.ts
+│   │   ├── find-pokemon.tool.test.ts
+│   │   ├── get-ability.tool.test.ts
+│   │   ├── get-item.tool.test.ts
+│   │   ├── get-move.tool.test.ts
+│   │   ├── get-nature.tool.test.ts
+│   │   ├── get-pokemon.tool.test.ts
+│   │   ├── get-type-matchups.tool.test.ts
+│   │   ├── identifier-contracts.test.ts
+│   │   ├── maintenance-contracts.test.ts
+│   │   ├── mixed-search-contracts.test.ts
+│   │   ├── search-format-contracts.test.ts
+│   │   └── species-matchup-contracts.test.ts
+│   └── setup.ts
 ├── .dockerignore
 ├── .env.example
 ├── .gitattributes
