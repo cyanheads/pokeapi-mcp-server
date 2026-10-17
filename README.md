@@ -29,7 +29,7 @@
 
 ## Overview
 
-Pokémon game data from PokéAPI v2 — Pokémon, moves, abilities, items, and natures, plus computed type-effectiveness matchups. Fetch a denormalized Pokémon dossier in a single call, filter Pokémon by generation, type, pokédex, or egg group, and compute dual-type matchups from any MCP client. Runs as a stdio process, a local Streamable HTTP server, or the public hosted endpoint above.
+Pokémon game data from PokéAPI: Pokémon, moves, abilities, items, and natures. Get a complete Pokémon profile in one call (stats, abilities, evolution, sprites), filter by generation, type, pokédex, or egg group, and compute dual-type matchups.
 
 ### Tools
 
@@ -58,20 +58,18 @@ All resource data is also reachable via tools.
 
 ### `pokeapi_get_pokemon` <sub>tool</sub>
 
-- Accepts a lowercase-hyphenated name or numeric PokéAPI Pokémon-record ID as `identifier`; an unknown entry returns `not_found`. Form IDs identify their own records: `charizard-mega-x` is `10034`, while its associated species is `charizard` (`6`).
-- A species name with no Pokémon record of its own resolves to that species' default variety: `deoxys` returns the `deoxys-normal` dossier with `resolvedFromSpecies: "deoxys"`. `resolvedFromSpecies` is null when the identifier names a record directly.
-- Returns stats, types, ability effects, sprites, evolution chain, varieties, capture and growth rates, gender ratio, and legendary/mythical flags in one dossier.
-- Each evolution step includes all `evolutionDetails` alternatives in upstream order, with requirements, version/default metadata, and starting/resulting forms. The existing `trigger`, `minLevel`, `item`, and `condition` summarize the first alternative. Conditional expressions, variable names, and chance percentages are preserved without evaluation.
-- `include_moves` (default `false`) adds the move summary; `moveCount` is always returned. `game_version` selects flavor text and falls back to the most recent English entry when unavailable.
+- Accepts a lowercase-hyphenated name or numeric PokéAPI Pokémon-record ID as `identifier`; an unknown entry returns `not_found`. A species name resolves to its default variety (`deoxys` returns `deoxys-normal`, with `resolvedFromSpecies: "deoxys"`).
+- Returns stats, types, ability effects, sprites, evolution chain (every `evolutionDetails` alternative), varieties, capture and growth rates, gender ratio, and legendary/mythical flags in one dossier.
+- `include_moves` (default `false`) adds the move summary; `moveCount` is always returned. `game_version` selects flavor text and falls back to the most recent English entry.
 
 ---
 
 ### `pokeapi_get_type_matchups` <sub>tool</sub>
 
 - Requires exactly one of `type` (type name) or `pokemon` (name or PokéAPI Pokémon-record ID); unknown entries return `not_found`.
-- Species names resolve to their default variety: `deoxys` uses `deoxys-normal`, and `wormadam` uses `wormadam-plant`; explicit forms keep their own types. `resolvedPokemon` gives the record's `id` and `name`, and `resolvedFromSpecies` names the fallback species. Both are null for direct type queries.
+- Species names resolve to their default variety (`deoxys` uses `deoxys-normal`); `resolvedPokemon` and `resolvedFromSpecies` report the match and are null for direct type queries.
 - Returns `offensiveRelations` (null for dual-type Pokémon) and `defensiveMatchups`, with dual-type defenses composed and immunity taking precedence.
-- `composedMultipliers` carries 0, 0.25, 0.5, 1, 2, or 4 for every attacking type touched, including neutral 1× cancellations; absent types also deal 1×.
+- `composedMultipliers` carries 0, 0.25, 0.5, 1, 2, or 4 per attacking type; absent types also deal 1×.
 
 ---
 
@@ -95,8 +93,7 @@ All resource data is also reachable via tools.
 
 - Accepts a lowercase-hyphenated item name or numeric ID
 - Returns category, fling power, attributes (holdable, consumable, etc.), sprite URL, effect text, and Pokémon that commonly hold it
-- `prices` preserves every version/currency row (`versionGroup`, `currency`, `purchasePrice`, `sellPrice`). Null purchase/sell values mean not purchasable/not sellable in that row; zero is a literal amount. An empty list means price records are unavailable.
-- `cost` preserves a supplied legacy Pokédollar cost and is null when absent. It is never inferred from a versioned price row.
+- `prices` lists every version/currency row (`versionGroup`, `currency`, `purchasePrice`, `sellPrice`); null means not purchasable/sellable there, and an empty list means no price records. `cost` is the legacy Pokédollar cost, or null.
 - `not_found` when the identifier resolves to no item
 
 ---
@@ -112,9 +109,9 @@ All resource data is also reachable via tools.
 ### `pokeapi_find_pokemon` <sub>tool</sub>
 
 - Requires at least one of `generation`, `type`, `pokedex`, and `egg_group`, combined with AND logic; `query` (at most 100 characters) adds per-token name matching within them. Unrecognized category names return `invalid_filter`.
-- Returns `id` and `name` entries for follow-up `pokeapi_get_pokemon` calls, with `totalCount` before paging. Every returned name works as a Pokémon identifier: a species name resolves to its default variety. Type-only searches return Pokémon-record IDs and names, including forms. Any generation, pokédex, or egg-group filter makes the result species-scoped; intersections use IDs, so the type must match the species' default record. These are PokéAPI IDs, not regional dex positions or National Pokédex numbers for forms.
-- `appliedFilters` echoes normalized nonblank categories, lowercase query tokens joined with single spaces, and accepted `limit`/`offset` values, including defaults. A call without a category, with or without `query`, returns no entries and a category-required notice; an unapplied query is omitted from the echo.
-- `limit` (default 50) and `offset` (default 0) paginate the filtered set. A page beyond existing matches retains `totalCount` and advises retrying with `offset: 0`; true zero matches advise relaxing the filters. Echoes and notices appear in structured results and the text trailer.
+- Returns `id` and `name` entries for follow-up `pokeapi_get_pokemon` calls, with `totalCount` before paging. Type-only searches include forms; generation, pokédex, and egg-group filters return species. IDs are PokéAPI IDs, not dex numbers.
+- `appliedFilters` echoes the filters, query tokens, `limit`, and `offset` that were applied. A call with no category returns no entries and a notice saying one is required.
+- `limit` (default 50) and `offset` (default 0) paginate the filtered set. A page past the last match keeps `totalCount` and advises `offset: 0`; zero matches advise relaxing the filters.
 
 ---
 
@@ -142,16 +139,15 @@ PokéAPI-specific:
 
 - Keyless and read-only — no API key, no auth, no configuration required to run
 - Graph-walk consolidation — `pokeapi_get_pokemon` fans out across `/pokemon`, `/pokemon-species`, `/evolution-chain`, and N `/ability` endpoints in two parallel tiers, returning one object
-- Aggressive caching — PokéAPI data is static game data; responses are cached in `ctx.state` with a configurable TTL (default 6 h) to respect PokéAPI's fair-use policy. Only identifiers in PokéAPI's own `a–z`, `0–9`, and hyphen alphabet are cached; any other identifier is fetched each time
-- Verified species-name resolutions share that TTL and tenant scope across dossiers, resources, and matchups. Warm lookups reuse the default record without repeating the species-name 404; unknown names and failed resolutions are never cached.
-- Input normalization — accepts lowercase-hyphenated names or numeric IDs; trims, lowercases, and hyphenates whitespace, then URL-encodes the identifier once when the request is built. A blank, `.`, or `..` identifier, or one over 100 characters, returns `not_found` (`invalid_filter` for a search filter) without an upstream request. An identifier outside the `a–z`, `0–9`, and hyphen alphabet that PokéAPI refuses with a 400 returns the same error
+- Aggressive caching — PokéAPI data is static game data; responses are cached with a configurable TTL (default 6 h) to respect PokéAPI's fair-use policy
+- Input normalization — accepts lowercase-hyphenated names or numeric IDs; trims, lowercases, and hyphenates whitespace. A blank identifier or one over 100 characters returns `not_found` (`invalid_filter` for a search filter) without an upstream request
 - English-first — `effect_entries` and `flavor_text_entries` are always filtered to `language.name === 'en'`; absent entries surface as `null` rather than a foreign-language string
 
 Agent-friendly output:
 
 - Dual-type composition — `pokeapi_get_type_matchups` computes the effective matchup matrix from raw damage relations, so agents get a direct answer rather than raw tables to multiply
 - Variant surface — `pokeapi_get_pokemon` lists all form variants so agents can identify and re-call with specific forms (Alolan, Galarian, Mega, Gigantamax)
-- Nullable details — meaningful missing scalars and empty lists are explicit in text as well as structured results: unavailable descriptions and sprites, no known holders or learners, no stat changes, neutral flavor preferences, and empty type relations. Regular/hidden abilities and default/alternative varieties retain their labels.
+- Nullable details — missing descriptions, sprites, holders, and learners are stated explicitly in text and structured results rather than omitted
 
 ---
 
@@ -277,14 +273,14 @@ cp .env.example .env
 | `POKEAPI_CACHE_TTL_SECONDS` | How long to cache PokéAPI responses (seconds). | `21600` (6 h) |
 | `POKEAPI_REQUEST_TIMEOUT_MS` | Per-request timeout in milliseconds. | `10000` |
 | `MCP_TRANSPORT_TYPE` | Transport: `stdio` or `http`. | `stdio` |
-| `MCP_SESSION_MODE` | HTTP session mode: `auto`, `stateful`, or `stateless`. A meaningful env value overrides the app default. The framework schema defaults to `auto`, which resolves to stateful. Tenant-scoped caching works in every mode. | `stateless` |
+| `MCP_SESSION_MODE` | HTTP session mode: `auto`, `stateful`, or `stateless`. | `stateless` |
 | `MCP_HTTP_PORT` | Port for HTTP server. | `3010` |
 | `MCP_AUTH_MODE` | Auth mode: `none`, `jwt`, or `oauth`. | `none` |
 | `MCP_LOG_LEVEL` | Log level (RFC 5424). | `info` |
 | `LOGS_DIR` | Directory for log files (Node.js only). | `<project-root>/logs` |
 | `LOG_TOOL_FAILURE_PAYLOADS` | Log failed-call input and result, redacted by key name and capped at `LOG_TOOL_FAILURE_PAYLOAD_MAX_BYTES` (default `16384`). Secrets inside free-form values are not redacted. | `false` |
 | `OTEL_ENABLED` | Enable [OpenTelemetry instrumentation](https://github.com/cyanheads/mcp-ts-core/tree/main/docs/telemetry). | `false` |
-| `OTEL_EXPORTER_OTLP_LOGS_ENDPOINT` | Explicit OTLP log export endpoint; the base OTLP endpoint enables traces and metrics only. | Unset |
+| `OTEL_EXPORTER_OTLP_LOGS_ENDPOINT` | OTLP log export endpoint. | Unset |
 
 See [`.env.example`](./.env.example) for the full list of optional overrides.
 
