@@ -1,0 +1,27 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "pokeapi-mcp-server",
+  "version": "0.2.1",
+  "description": "Look up Pokémon, moves, abilities, items, natures, and type matchups from PokéAPI v2 via MCP. STDIO or Streamable HTTP.",
+  "author": {
+    "name": "Casey Hand",
+    "email": "casey@caseyjhand.com",
+    "url": "https://caseyjhand.com"
+  },
+  "homepage": "https://github.com/cyanheads/pokeapi-mcp-server#readme",
+  "repository": "git+https://github.com/cyanheads/pokeapi-mcp-server.git",
+  "license": "Apache-2.0",
+  "keywords": [
+    "pokemon",
+    "pokeapi",
+    "game-data",
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "typescript",
+    "bun",
+    "stdio",
+    "streamable-http",
+    "ai-agent"
+  ]
+}
