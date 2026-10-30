@@ -1,6 +1,6 @@
 # pokeapi-mcp-server - Directory Structure
 
-Generated on: 2026-10-14 17:08:11
+Generated on: 2026-10-30 09:20:01
 
 ```text
 pokeapi-mcp-server/
@@ -26,6 +26,7 @@ pokeapi-mcp-server/
 ├── changelog/
 │   ├── 0.1.x/
 │   ├── 0.2.x/
+│   ├── 0.3.x/
 │   └── template.md
 ├── docs/
 │   ├── design.md
@@ -38,6 +39,8 @@ pokeapi-mcp-server/
 │   ├── add-resource/
 │   │   └── SKILL.md
 │   ├── add-service/
+│   │   └── SKILL.md
+│   ├── add-skill/
 │   │   └── SKILL.md
 │   ├── add-test/
 │   │   └── SKILL.md
@@ -135,12 +138,16 @@ pokeapi-mcp-server/
 │   ├── prune-musl-packages.ts
 │   ├── release-github.ts
 │   └── tree.ts
+├── skills/
+│   └── pokeapi-guide/
+│       └── SKILL.md
 ├── src/
 │   ├── config/
 │   │   └── server-config.ts
 │   ├── mcp-server/
 │   │   ├── prompts/
 │   │   │   └── definitions/
+│   │   │       └── team-builder.prompt.ts
 │   │   ├── resources/
 │   │   │   └── definitions/
 │   │   │       ├── pokemon.resource.ts
@@ -166,9 +173,13 @@ pokeapi-mcp-server/
 │   │   ├── README.md
 │   │   └── resolution-captures.json
 │   ├── prompts/
+│   │   ├── team-builder-registration.test.ts
+│   │   └── team-builder.prompt.test.ts
 │   ├── resources/
 │   │   ├── pokemon.resource.test.ts
 │   │   └── type.resource.test.ts
+│   ├── scripts/
+│   │   └── bundle-runtime.test.ts
 │   ├── services/
 │   │   ├── pokeapi-service.test.ts
 │   │   └── pokemon-resolution.test.ts
@@ -202,7 +213,9 @@ pokeapi-mcp-server/
 ├── Dockerfile
 ├── LICENSE
 ├── manifest.json
+├── mcp.json
 ├── package.json
+├── plugin.json
 ├── README.md
 ├── server.json
 ├── tsconfig.build.json

@@ -2,6 +2,10 @@
 
 All notable changes to this project. Each entry links to its full per-version file in [changelog/](changelog/).
 
+## [0.3.0](changelog/0.3.x/0.3.0.md) — 2026-10-30
+
+Add a client-directed team-building prompt and a Pokémon research guide, with form-aware evidence checks and delivery through MCP, plugins, npm, MCPB, and Docker.
+
 ## [0.2.1](changelog/0.2.x/0.2.1.md) — 2026-10-14
 
 Species names resolve consistently across Pokémon lookups, mixed-filter searches, and type matchups, with cached resolutions and deterministic handler tests.
