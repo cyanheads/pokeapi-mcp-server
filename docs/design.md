@@ -23,7 +23,9 @@
 
 ### Prompts
 
-None. This is a data-retrieval server; no recurring interaction patterns warrant a prompt template.
+| Name | Arguments | Workflow |
+|:-----|:----------|:---------|
+| `pokeapi_team_builder` | Required `lead`, `opponent`, `opponent_kind` (`pokemon` or `type`) | Pure client-directed template: resolve the lead and opponent, discover and verify complementary candidates, and propose six members including the lead where evidence permits. No retrieval-time fetches, battle guarantees, or game-legality claims. |
 
 ---
 
@@ -45,7 +47,7 @@ This server's entire value proposition is consolidation. `pokeapi_get_pokemon` f
 - English text — `effect_entries` and `flavor_text_entries` exist in multiple languages; always filter `language.name === 'en'`. When no English entry exists, surface `null` rather than a foreign-language string
 - Identifier input — all single-item GET tools accept a canonical name (e.g. `"bulbasaur"`, `"choice-specs"`) or numeric ID as a string; the framework repairs integer IDs to strings. Normalize names before fetching (trim, lowercase, replace spaces with hyphens); URL-encode the identifier once, where the request path is built. Blank, `.`, `..`, and identifiers over 100 characters fail as `not_found` (`invalid_filter` for search filters) without a request, and only identifiers matching `[a-z0-9-]` are used as cache keys. PokéAPI answers 400, not 404, to a path segment that needed encoding; for an identifier outside `[a-z0-9-]` that 400 is the same miss
 - Variants awareness — Pokémon with regional/cosmetic forms (Pikachu cap variants, Alolan forms, Gigantamax, Mega) are separate entries in PokéAPI; surface the variant list so callers can request a specific form
-- Moves are large — `/pokemon/{id}` returns 100–200+ moves with multi-game version history. Default `include_moves: false`; when true, summarize to the move name and learn method only (not every version-group detail)
+- Moves are large — `/pokemon/{id}` returns 100–200+ moves with multi-game version history. Default `include_moves: false`; when true, summarize to move name, learn method, and level using each move's last upstream version-group detail independently, without a common-game filter
 - 404 responses from PokéAPI return an empty body — check HTTP status, not body parsing
 
 ---
@@ -144,7 +146,7 @@ Pokémon queries return `resolvedPokemon: {id, name}` and nullable `resolvedFrom
 
 **`pokeapi_get_pokemon` as the flagship workflow tool.** The graph-walk consolidation is the entire point of this server. A single call replaces what would be 10–30 agent-initiated HTTP GETs with manual stitching. All other tools exist to answer more focused questions the flagship doesn't cover (move details, ability lookup, type matchups as a computed answer).
 
-**`include_moves: false` default.** Pikachu has 119 learnable moves in the API, each with multi-game version history. Returning the full list by default would produce a 20KB+ payload that buries the stats and evolution data. The default returns move names only as a count; `include_moves: true` returns a summarized list (name, type, learn method, level) filtered to the latest game generation.
+**`include_moves: false` default.** Pikachu has 119 learnable moves in the API, each with multi-game version history. Returning the full list by default would produce a 20KB+ payload that buries the stats and evolution data. The default returns a move count; `include_moves: true` returns a summarized list (name, learn method, level), selecting each move's last upstream version-group entry independently. It does not filter the list to one game or generation.
 
 **Separate `pokeapi_get_type_matchups` tool rather than bundling into `get_pokemon`.** Matchup queries are a standalone workflow — "what beats Charizard?" or "what does Fire resist?" don't need the full Pokémon dossier. Keeping it separate lets agents call it cheaply for type questions without triggering the full fan-out.
 
@@ -156,7 +158,7 @@ Pokémon queries return `resolvedPokemon: {id, name}` and nullable `resolvedFrom
 
 **`pokeapi_` prefix over `pokemon_` or `pokedex_`.** `pokemon_get_pokemon` stutters. `pokedex_` is cuter but breaks the standard `{brand}-mcp-server` → `{brand}_` tool prefix convention. `pokeapi_` reads cleanly and names the data source correctly.
 
-**No prompts.** The server is pure data retrieval with no recurring compositional workflow that would benefit from a structured message template.
+**Team synthesis is a client-directed prompt.** Building a candidate team around a lead combines repeated dossier, discovery, and matchup calls into one workflow. A pure template keeps execution with the client and uses existing tools without adding a simulator. The six-member target includes the lead; missing evidence leaves explicit gaps rather than invented members. Type membership, composed defenses, ability effects, move details, and base Speed support recommendations, never guarantees of wins, turn order, or game legality.
 
 **Resources as supplementary only.** `pokeapi://pokemon/{id}` and `pokeapi://type/{typeName}` are convenience resources for clients that support injectable context. All data is reachable through tools; resources add nothing for tool-only clients.
 
@@ -165,7 +167,7 @@ Pokémon queries return `resolvedPokemon: {id, name}` and nullable `resolvedFrom
 ## Known Limitations
 
 - **No competitive data.** PokéAPI doesn't cover competitive tiers (Smogon OU/UU/etc.), usage stats, or meta analysis. Those belong in a hypothetical `smogon-mcp-server`.
-- **Game version filtering is limited.** Flavor text exists per game version but move learnsets are complex to filter by game — the server picks the latest generation's learnset for simplicity.
+- **Game version filtering is limited.** `game_version` selects flavor text only. Each summarized move uses its own last upstream version-group entry, so the combined list does not establish learnability in a particular game.
 - **Variants require explicit lookup.** Forms like `pikachu-alola-cap` are separate PokéAPI entries. `get_pokemon` surfaces the varieties list; callers must re-call with the specific variant name for its stats.
 - **Static data only.** PokéAPI covers mainline series data through its last-updated generation. Fan games, ROM hacks, and unofficial data are out of scope.
 

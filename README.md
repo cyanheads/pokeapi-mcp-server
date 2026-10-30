@@ -1,13 +1,13 @@
 <div align="center">
   <h1>@cyanheads/pokeapi-mcp-server</h1>
   <p><b>Look up Pokémon, moves, abilities, items, natures, and type matchups from PokéAPI v2 via MCP. STDIO or Streamable HTTP.</b>
-  <div>7 Tools • 2 Resources</div>
+  <div>7 Tools • 2 Resources • 1 Prompt</div>
   </p>
 </div>
 
 <div align="center">
 
-[![Version](https://img.shields.io/badge/Version-0.2.1-blue.svg?style=flat-square)](./CHANGELOG.md) [![License](https://img.shields.io/badge/License-Apache%202.0-orange.svg?style=flat-square)](./LICENSE) [![Docker](https://img.shields.io/badge/Docker-ghcr.io-2496ED?style=flat-square&logo=docker&logoColor=white)](https://github.com/users/cyanheads/packages/container/package/pokeapi-mcp-server) [![MCP SDK](https://img.shields.io/badge/MCP%20SDK-^2.3.1-green.svg?style=flat-square)](https://modelcontextprotocol.io/) [![npm](https://img.shields.io/npm/v/@cyanheads/pokeapi-mcp-server?style=flat-square&logo=npm&logoColor=white)](https://www.npmjs.com/package/@cyanheads/pokeapi-mcp-server) [![TypeScript](https://img.shields.io/badge/TypeScript-^7.0.2-3178C6.svg?style=flat-square)](https://www.typescriptlang.org/) [![Bun](https://img.shields.io/badge/Bun-v1.4.3-blueviolet.svg?style=flat-square)](https://bun.sh/)
+[![Version](https://img.shields.io/badge/Version-0.2.1-blue.svg?style=flat-square)](./CHANGELOG.md) [![License](https://img.shields.io/badge/License-Apache%202.0-orange.svg?style=flat-square)](./LICENSE) [![Docker](https://img.shields.io/badge/Docker-ghcr.io-2496ED?style=flat-square&logo=docker&logoColor=white)](https://github.com/users/cyanheads/packages/container/package/pokeapi-mcp-server) [![MCP SDK](https://img.shields.io/badge/MCP%20SDK-^2.4.0-green.svg?style=flat-square)](https://modelcontextprotocol.io/) [![npm](https://img.shields.io/npm/v/@cyanheads/pokeapi-mcp-server?style=flat-square&logo=npm&logoColor=white)](https://www.npmjs.com/package/@cyanheads/pokeapi-mcp-server) [![TypeScript](https://img.shields.io/badge/TypeScript-^7.0.2-3178C6.svg?style=flat-square)](https://www.typescriptlang.org/) [![Bun](https://img.shields.io/badge/Bun-v1.4.4-blueviolet.svg?style=flat-square)](https://bun.sh/)
 
 </div>
 
@@ -51,6 +51,19 @@ Pokémon game data from PokéAPI: Pokémon, moves, abilities, items, and natures
 | `pokeapi://type/{typeName}` | Type damage relations — raw multiplier table, offensive and defensive |
 
 All resource data is also reachable via tools.
+
+### Prompt
+
+Request `pokeapi_team_builder` through your client's prompt picker with required arguments `lead`, `opponent`, and `opponent_kind` (`pokemon` or `type`). For example, the MCP `prompts/get` parameters are:
+
+```json
+{
+  "name": "pokeapi_team_builder",
+  "arguments": { "lead": "charizard", "opponent": "aerodactyl", "opponent_kind": "pokemon" }
+}
+```
+
+For a type opponent, use `"opponent": "electric", "opponent_kind": "type"`. Retrieval returns instructions; the client then calls the existing tools to propose up to six verified members including the lead. The workflow asks for game/format restrictions and separates type-chart and base-stat observations from recommendations. It does not establish battle turn order, game legality, or guaranteed counters; a type opponent has no individual Speed.
 
 ---
 
@@ -153,115 +166,32 @@ Agent-friendly output:
 
 ## Getting started
 
-### Public Hosted Instance
+Connect to the hosted instance, no install:
 
-A public instance is available at `https://pokeapi.caseyjhand.com/mcp` — no installation required. Point any MCP client at it via Streamable HTTP:
-
-```json
-{
-  "mcpServers": {
-    "pokeapi-mcp-server": {
-      "type": "streamable-http",
-      "url": "https://pokeapi.caseyjhand.com/mcp"
-    }
-  }
-}
+```sh
+claude mcp add --transport http pokeapi-mcp-server https://pokeapi.caseyjhand.com/mcp
 ```
 
-### Self-Hosted / Local
+Or run it locally:
 
-No API key required. Add the following to your MCP client configuration file:
-
-```json
-{
-  "mcpServers": {
-    "pokeapi-mcp-server": {
-      "type": "stdio",
-      "command": "bunx",
-      "args": ["@cyanheads/pokeapi-mcp-server@latest"],
-      "env": {
-        "MCP_TRANSPORT_TYPE": "stdio",
-        "MCP_LOG_LEVEL": "info"
-      }
-    }
-  }
-}
+```sh
+claude mcp add pokeapi-mcp-server -- npx -y @cyanheads/pokeapi-mcp-server
 ```
 
-Or with npx (no Bun required):
+For other clients, add this to the MCP config file:
 
 ```json
 {
   "mcpServers": {
     "pokeapi-mcp-server": {
-      "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@cyanheads/pokeapi-mcp-server@latest"],
-      "env": {
-        "MCP_TRANSPORT_TYPE": "stdio",
-        "MCP_LOG_LEVEL": "info"
-      }
+      "args": ["-y", "@cyanheads/pokeapi-mcp-server"]
     }
   }
 }
 ```
 
-Or with Docker:
-
-```json
-{
-  "mcpServers": {
-    "pokeapi-mcp-server": {
-      "type": "stdio",
-      "command": "docker",
-      "args": [
-        "run", "-i", "--rm",
-        "-e", "MCP_TRANSPORT_TYPE=stdio",
-        "ghcr.io/cyanheads/pokeapi-mcp-server:latest"
-      ]
-    }
-  }
-}
-```
-
-For Streamable HTTP, set the transport and start the server:
-
-```sh
-MCP_TRANSPORT_TYPE=http MCP_HTTP_PORT=3010 bun run start:http
-# Server listens at http://localhost:3010/mcp
-```
-
-### Prerequisites
-
-- [Bun v1.4.0](https://bun.sh/) or higher (or Node.js v24+).
-- No API key required — PokéAPI is fully public.
-
-### Installation
-
-1. **Clone the repository:**
-
-```sh
-git clone https://github.com/cyanheads/pokeapi-mcp-server.git
-```
-
-2. **Navigate into the directory:**
-
-```sh
-cd pokeapi-mcp-server
-```
-
-3. **Install dependencies:**
-
-```sh
-bun install
-```
-
-4. **Configure environment (optional):**
-
-```sh
-cp .env.example .env
-# All vars are optional — the server works with defaults
-```
+No API key is required. For Docker or a source build, see [Running the server](#running-the-server).
 
 ---
 
@@ -294,6 +224,14 @@ PokéAPI's [Fair Use Policy](https://pokeapi.co/docs/v2#fairuse) asks consumers 
 
 ### Local development
 
+Requires [Bun v1.4.0](https://bun.sh/) or higher (or Node.js v24+).
+
+```sh
+git clone https://github.com/cyanheads/pokeapi-mcp-server.git
+cd pokeapi-mcp-server && bun install
+cp .env.example .env   # optional overrides; no API key required
+```
+
 - **Build and run:**
 
   ```sh
@@ -315,11 +253,10 @@ PokéAPI's [Fair Use Policy](https://pokeapi.co/docs/v2#fairuse) asks consumers 
 ### Docker
 
 ```sh
-docker build -t pokeapi-mcp-server .
-docker run --rm -p 3010:3010 pokeapi-mcp-server
+docker run --rm -p 3010:3010 ghcr.io/cyanheads/pokeapi-mcp-server:latest
 ```
 
-The Dockerfile defaults to HTTP transport, stateless session mode, and logs to `/var/log/pokeapi-mcp-server`. Build with `--build-arg OTEL_ENABLED=false` to omit OpenTelemetry peer dependencies.
+The image defaults to HTTP transport, stateless session mode, and logs to `/var/log/pokeapi-mcp-server`. For stdio, run `docker run -i --rm -e MCP_TRANSPORT_TYPE=stdio ghcr.io/cyanheads/pokeapi-mcp-server:latest`. To build locally, run `docker build -t pokeapi-mcp-server .`; add `--build-arg OTEL_ENABLED=false` to omit OpenTelemetry peer dependencies.
 
 ---
 
@@ -327,10 +264,11 @@ The Dockerfile defaults to HTTP transport, stateless session mode, and logs to `
 
 | Path | Purpose |
 |:-----|:--------|
-| `src/index.ts` | `createApp()` entry point — registers tools, resources, and inits services. |
+| `src/index.ts` | `createApp()` entry point — registers tools, resources, prompts, and inits services. |
 | `src/config/` | Server-specific env var parsing with Zod (`server-config.ts`). |
 | `src/mcp-server/tools/` | Tool definitions (`*.tool.ts`). |
 | `src/mcp-server/resources/` | Resource definitions (`*.resource.ts`). |
+| `src/mcp-server/prompts/` | Pure prompt templates (`*.prompt.ts`). |
 | `src/services/pokeapi/` | `PokeApiService` — typed fetch methods, caching, retry, timeout. |
 | `tests/` | Vitest test suite mirroring `src/`. |
 
@@ -342,7 +280,7 @@ See [`CLAUDE.md`](./CLAUDE.md) for development guidelines and architectural rule
 
 - Handlers throw, framework catches — catch typed upstream errors only to map a declared `errors[]` contract with `ctx.fail(...)`
 - Use `ctx.log` for request-scoped logging, `ctx.state` for tenant-scoped storage (and caching)
-- Register new tools and resources in the `createApp()` arrays in `src/index.ts`
+- Register new tools, resources, and prompts in the `createApp()` arrays in `src/index.ts`
 - Wrap external API calls: validate raw → normalize to domain type → return output schema; never fabricate missing fields
 
 ---

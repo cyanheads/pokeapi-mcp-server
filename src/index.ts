@@ -5,6 +5,7 @@
  */
 
 import { createApp } from '@cyanheads/mcp-ts-core';
+import { teamBuilder } from './mcp-server/prompts/definitions/team-builder.prompt.js';
 import { pokemonResource } from './mcp-server/resources/definitions/pokemon.resource.js';
 import { typeResource } from './mcp-server/resources/definitions/type.resource.js';
 import { findPokemon } from './mcp-server/tools/definitions/find-pokemon.tool.js';
@@ -22,7 +23,8 @@ await createApp({
   sessionMode: 'stateless',
   tools: [getPokemon, getTypeMatchups, getMove, getAbility, getItem, getNature, findPokemon],
   resources: [pokemonResource, typeResource],
-  prompts: [],
+  skills: 'skills',
+  prompts: [teamBuilder],
   instructions:
     'Start with pokeapi_get_pokemon for a Pokémon profile with stats, abilities, evolution, and sprites. Use pokeapi_get_type_matchups for type effectiveness and pokeapi_find_pokemon to filter by generation, type, pokédex, or egg group. Read pokeapi://pokemon/{identifier} or pokeapi://type/{typeName} for injectable Pokémon or type context.',
   setup(core) {
