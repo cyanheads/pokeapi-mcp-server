@@ -10,16 +10,13 @@ import { getPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 export const getMove = tool('pokeapi_get_move', {
   title: 'Get Move',
   description:
-    'Get move details by name or numeric ID — type, damage class, power, accuracy, PP, ' +
-    'priority, target, stat changes, status-effect chance, and full English effect text. ' +
-    'Set include_learners=true to include the list of Pokémon that can learn the move. ' +
-    'Move names are available from pokeapi_get_pokemon when include_moves=true.',
+    'Get move details by name or numeric ID — type, damage class, power, accuracy, PP, priority, target, stat changes, status-effect chance, and full English effect text. Set include_learners=true to include the list of Pokémon that can learn the move. Move names are available from pokeapi_get_pokemon when include_moves=true.',
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
   input: z.object({
     identifier: z
       .string()
       .describe(
-        'Move name in lowercase hyphenated form (e.g. "flamethrower", "close-combat") or numeric ID as a string.',
+        'Move name (e.g. "flamethrower", "King’s Shield", "close-combat") or numeric ID as a string.',
       ),
     include_learners: z
       .boolean()
@@ -81,8 +78,7 @@ export const getMove = tool('pokeapi_get_move', {
       reason: 'not_found',
       code: JsonRpcErrorCode.NotFound,
       when: 'The identifier resolves to no move in PokéAPI.',
-      recovery:
-        'Verify the move name uses lowercase hyphens (e.g. "close-combat" not "Close Combat") or use the numeric ID.',
+      recovery: 'Check the move name in PokéAPI (e.g. "close-combat") or use the numeric ID.',
     },
   ],
 

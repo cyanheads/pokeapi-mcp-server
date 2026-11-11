@@ -71,9 +71,12 @@ For a type opponent, use `"opponent": "electric", "opponent_kind": "type"`. Retr
 
 ### `pokeapi_get_pokemon` <sub>tool</sub>
 
-- Accepts a lowercase-hyphenated name or numeric PokéAPI Pokémon-record ID as `identifier`; an unknown entry returns `not_found`. A species name resolves to its default variety (`deoxys` returns `deoxys-normal`, with `resolvedFromSpecies: "deoxys"`).
+- Accepts a name (including display spellings such as `Mr. Mime`) or numeric PokéAPI Pokémon-record ID as `identifier`; an unknown entry returns `not_found`. A species name resolves to its default variety (`deoxys` returns `deoxys-normal`, with `resolvedFromSpecies: "deoxys"`).
 - Returns stats, types, ability effects, sprites, evolution chain (every `evolutionDetails` alternative), varieties, capture and growth rates, gender ratio, and legendary/mythical flags in one dossier.
-- `include_moves` (default `false`) adds the move summary; `moveCount` is always returned. `game_version` selects flavor text and falls back to the most recent English entry.
+- `id` preserves Pokémon-record identity, including forms. `speciesId` is the National Pokédex number; `pokedexNumbers` lists Pokédex entries as `{ pokedex, entryNumber }`. Breeding data includes nullable `hatchCounter` and `baseHappiness`, plus `isBaby`. Alolan Raichu keeps record ID 10100 while reporting species ID 26.
+- `include_moves` (default `false`) adds each move's learn methods, levels, and `versionGroup`, selecting the latest group per move and method by PokéAPI's chronology. Distinct levels within that group are retained. `moveCount` always counts distinct moves across all groups.
+- `version_group` (such as `scarlet-violet`) implies move inclusion and selects that group's recorded methods and levels. A known group with no moves returns an empty list and a notice; an unknown group returns `invalid_version_group`. If default-summary chronology metadata is unavailable, a notice identifies the fallback to each move and method's last group in source order.
+- `game_version` selects English flavor text independently of moves. `flavorTextVersion` names its source. A missing match, including an unknown version, keeps the successful dossier and reports the fallback to the last English entry in PokéAPI source order. Both text fields are null when no English entry exists.
 
 ---
 
@@ -88,7 +91,7 @@ For a type opponent, use `"opponent": "electric", "opponent_kind": "type"`. Retr
 
 ### `pokeapi_get_move` <sub>tool</sub>
 
-- Accepts a lowercase-hyphenated move name or numeric ID; an unknown entry returns `not_found`.
+- Accepts a move name (such as `King’s Shield`) or numeric ID; an unknown entry returns `not_found`.
 - Returns type, damage class, power, accuracy, PP, priority, target, stat changes, and secondary-effect chance, plus full and short English effect text
 - `include_learners` (default `false`) adds the list of Pokémon that can learn the move. `learnersIncluded` distinguishes an unrequested list from a requested list with no known learners.
 
@@ -96,7 +99,7 @@ For a type opponent, use `"opponent": "electric", "opponent_kind": "type"`. Retr
 
 ### `pokeapi_get_ability` <sub>tool</sub>
 
-- Accepts a lowercase-hyphenated ability name or numeric ID
+- Accepts an ability name or numeric ID
 - Returns full and short English effect text, the generation introduced, and every Pokémon that has the ability, with its hidden-ability flag and slot
 - `not_found` when the identifier resolves to no ability
 
@@ -104,7 +107,7 @@ For a type opponent, use `"opponent": "electric", "opponent_kind": "type"`. Retr
 
 ### `pokeapi_get_item` <sub>tool</sub>
 
-- Accepts a lowercase-hyphenated item name or numeric ID
+- Accepts an item name (such as `Poké Ball`) or numeric ID
 - Returns category, fling power, attributes (holdable, consumable, etc.), sprite URL, effect text, and Pokémon that commonly hold it
 - `prices` lists every version/currency row (`versionGroup`, `currency`, `purchasePrice`, `sellPrice`); null means not purchasable/sellable there, and an empty list means no price records. `cost` is the legacy Pokédollar cost, or null.
 - `not_found` when the identifier resolves to no item
@@ -121,8 +124,9 @@ For a type opponent, use `"opponent": "electric", "opponent_kind": "type"`. Retr
 
 ### `pokeapi_find_pokemon` <sub>tool</sub>
 
-- Requires at least one of `generation`, `type`, `pokedex`, and `egg_group`, combined with AND logic; `query` (at most 100 characters) adds per-token name matching within them. Unrecognized category names return `invalid_filter`.
-- Returns `id` and `name` entries for follow-up `pokeapi_get_pokemon` calls, with `totalCount` before paging. Type-only searches include forms; generation, pokédex, and egg-group filters return species. IDs are PokéAPI IDs, not dex numbers.
+- Requires at least one of `generation`, `type`, `pokedex`, and `egg_group`, combined with AND logic; `query` (at most 100 characters) adds per-token name matching within them. An `invalid_filter` error names the failed filter and lists its accepted names when the catalog is available.
+- Egg groups accept in-game names such as `Field`, `Water 1`, and `Amorphous`; `appliedFilters` reports their canonical PokéAPI names. Regions with multiple dexes need a specific `pokedex`, such as `original-sinnoh` or `extended-sinnoh`.
+- Returns `id` and `name` entries for follow-up `pokeapi_get_pokemon` calls, with `totalCount` before paging. Type-only searches include forms; generation, pokédex, and egg-group filters return species. A `pokedex` filter also returns each species' regional `entryNumber` and sorts by that number before paging, including mixed-filter searches. Searches without a dex retain PokéAPI ID order.
 - `appliedFilters` echoes the filters, query tokens, `limit`, and `offset` that were applied. A call with no category returns no entries and a notice saying one is required.
 - `limit` (default 50) and `offset` (default 0) paginate the filtered set. A page past the last match keeps `totalCount` and advises `offset: 0`; zero matches advise relaxing the filters.
 
@@ -131,7 +135,7 @@ For a type opponent, use `"opponent": "electric", "opponent_kind": "type"`. Retr
 ### `pokeapi://pokemon/{identifier}` <sub>resource</sub>
 
 - Same payload as `pokeapi_get_pokemon` with `include_moves` fixed to `false`
-- `identifier` is a name or PokéAPI Pokémon-record ID, including form IDs; a species name resolves to its default variety
+- `identifier` is a name or PokéAPI Pokémon-record ID, including form IDs; a species name resolves to its default variety. URI variables are percent-decoded once: `pokeapi://pokemon/mr%2Dmime` resolves to Mr. Mime. Malformed escapes return a validation error; double-encoded values remain misses
 - `not_found` when the identifier matches no Pokémon record and no species
 
 ---
@@ -139,7 +143,7 @@ For a type opponent, use `"opponent": "electric", "opponent_kind": "type"`. Retr
 ### `pokeapi://type/{typeName}` <sub>resource</sub>
 
 - Returns the raw offensive and defensive damage-relation multiplier table for one type
-- `typeName` is one of the 18 canonical Pokémon types
+- `typeName` is a PokéAPI type name; URI variables are percent-decoded once, so `pokeapi://type/f%69re` resolves to Fire
 - `not_found` when the type name doesn't exist in PokéAPI
 
 ---
@@ -153,7 +157,7 @@ PokéAPI-specific:
 - Keyless and read-only — no API key, no auth, no configuration required to run
 - Graph-walk consolidation — `pokeapi_get_pokemon` fans out across `/pokemon`, `/pokemon-species`, `/evolution-chain`, and N `/ability` endpoints in two parallel tiers, returning one object
 - Aggressive caching — PokéAPI data is static game data; responses are cached with a configurable TTL (default 6 h) to respect PokéAPI's fair-use policy
-- Input normalization — accepts lowercase-hyphenated names or numeric IDs; trims, lowercases, and hyphenates whitespace. A blank identifier or one over 100 characters returns `not_found` (`invalid_filter` for a search filter) without an upstream request
+- Input normalization — folds display names by lowercasing, removing diacritics, apostrophes, periods, and colons, mapping `♀`/`♂` to `-f`/`-m`, and hyphenating whitespace. The result must contain only letters `a`–`z`, digits, or hyphens and fit within 100 characters. Invalid identifiers return `not_found` without a record request; an invalid search filter returns `invalid_filter` and may fetch its separate vocabulary for recovery
 - English-first — `effect_entries` and `flavor_text_entries` are always filtered to `language.name === 'en'`; absent entries surface as `null` rather than a foreign-language string
 
 Agent-friendly output:
@@ -224,7 +228,7 @@ PokéAPI's [Fair Use Policy](https://pokeapi.co/docs/v2#fairuse) asks consumers 
 
 ### Local development
 
-Requires [Bun v1.4.0](https://bun.sh/) or higher (or Node.js v24+).
+Requires [Bun v1.4.4](https://bun.sh/) or higher (or Node.js v24+).
 
 ```sh
 git clone https://github.com/cyanheads/pokeapi-mcp-server.git

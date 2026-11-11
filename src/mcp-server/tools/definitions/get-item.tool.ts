@@ -10,15 +10,12 @@ import { getPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 export const getItem = tool('pokeapi_get_item', {
   title: 'Get Item',
   description:
-    'Get item details by name or numeric ID — effect text, category, versioned purchase and sell prices, ' +
-    'fling power, item attributes (holdable, consumable, etc.), sprite URL, and Pokémon that commonly hold it.',
+    'Get item details by name or numeric ID — effect text, category, versioned purchase and sell prices, fling power, item attributes (holdable, consumable, etc.), sprite URL, and Pokémon that commonly hold it.',
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
   input: z.object({
     identifier: z
       .string()
-      .describe(
-        'Item name in lowercase hyphenated form (e.g. "choice-specs", "leftovers") or numeric ID as a string.',
-      ),
+      .describe('Item name (e.g. "Poké Ball", "choice-specs") or numeric ID as a string.'),
   }),
   output: z.object({
     id: z.number().describe('Item ID.'),
@@ -80,8 +77,7 @@ export const getItem = tool('pokeapi_get_item', {
       reason: 'not_found',
       code: JsonRpcErrorCode.NotFound,
       when: 'The identifier resolves to no item in PokéAPI.',
-      recovery:
-        'Use a valid lowercase hyphenated item name (e.g. "choice-specs") or numeric ID. Check PokéAPI for the canonical name.',
+      recovery: 'Check the item name in PokéAPI (e.g. "choice-specs") or use the numeric ID.',
     },
   ],
 
@@ -94,7 +90,7 @@ export const getItem = tool('pokeapi_get_item', {
       if (err instanceof McpError && err.code === JsonRpcErrorCode.NotFound) {
         throw ctx.fail(
           'not_found',
-          `Item "${input.identifier}" not found — use a valid lowercase hyphenated name (e.g. "choice-specs") or numeric ID.`,
+          `Item "${input.identifier}" not found — check spelling or use a numeric ID.`,
         );
       }
       throw err;

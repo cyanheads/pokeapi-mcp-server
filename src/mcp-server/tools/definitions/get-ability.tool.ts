@@ -10,16 +10,12 @@ import { getPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 export const getAbility = tool('pokeapi_get_ability', {
   title: 'Get Ability',
   description:
-    'Get ability details by name or numeric ID — full English effect text, short effect text, ' +
-    'generation introduced, and the list of Pokémon that have the ability (including hidden-ability flag and slot). ' +
-    'Ability names are returned by pokeapi_get_pokemon in the abilities array.',
+    'Get ability details by name or numeric ID — full English effect text, short effect text, generation introduced, and the list of Pokémon that have the ability (including hidden-ability flag and slot). Ability names are returned by pokeapi_get_pokemon in the abilities array.',
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
   input: z.object({
     identifier: z
       .string()
-      .describe(
-        'Ability name in lowercase hyphenated form (e.g. "overgrow", "speed-boost") or numeric ID as a string.',
-      ),
+      .describe('Ability name (e.g. "Overgrow", "speed-boost") or numeric ID as a string.'),
   }),
   output: z.object({
     id: z.number().describe('Ability ID.'),
@@ -51,8 +47,7 @@ export const getAbility = tool('pokeapi_get_ability', {
       reason: 'not_found',
       code: JsonRpcErrorCode.NotFound,
       when: 'The identifier resolves to no ability in PokéAPI.',
-      recovery:
-        'Use a valid lowercase hyphenated ability name (e.g. "speed-boost") or numeric ID. Check PokéAPI for the canonical name.',
+      recovery: 'Check the ability name in PokéAPI (e.g. "speed-boost") or use the numeric ID.',
     },
   ],
 
@@ -65,7 +60,7 @@ export const getAbility = tool('pokeapi_get_ability', {
       if (err instanceof McpError && err.code === JsonRpcErrorCode.NotFound) {
         throw ctx.fail(
           'not_found',
-          `Ability "${input.identifier}" not found — use a valid lowercase hyphenated name or numeric ID.`,
+          `Ability "${input.identifier}" not found — check spelling or use a numeric ID.`,
         );
       }
       throw err;

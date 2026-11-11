@@ -4,7 +4,7 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { createFetchMock } from '@cyanheads/mcp-ts-core/testing';
+import { createFetchMock, type FetchMockRoute } from '@cyanheads/mcp-ts-core/testing';
 import type { RawPokemon, RawPokemonSpecies } from '@/services/pokeapi/types.js';
 
 const domain = JSON.parse(
@@ -45,6 +45,7 @@ for (const [name, id, species, types] of [
   ['charmander', 4, 'charmander', ['fire']],
   ['charizard', 6, 'charizard', ['fire', 'flying']],
   ['mewtwo', 150, 'mewtwo', ['psychic']],
+  ['mr-mime', 122, 'mr-mime', ['psychic', 'fairy']],
 ] as const) {
   records[`pokemon/${name}`] = {
     ...domain.pokemon.bulbasaur,
@@ -55,6 +56,7 @@ for (const [name, id, species, types] of [
   };
   records[`pokemon-species/${species}`] = {
     ...domain.species.bulbasaur,
+    id: species === 'pikachu' ? 25 : id,
     is_legendary: species === 'mewtwo',
     is_mythical: false,
     varieties: [
@@ -72,6 +74,35 @@ for (const [path, id, name] of [
   records[path] = { ...(records[`pokemon/${name}`] as object), id };
 }
 records['item/4'] = domain.items['poke-ball'];
+const learn = (method: string, group: string, level: number) => ({
+  move_learn_method: ref(method, 'move-learn-method'),
+  version_group: ref(group, 'version-group'),
+  level_learned_at: level,
+});
+records['pokemon/charmander'] = {
+  ...(records['pokemon/charmander'] as object),
+  moves: [
+    {
+      move: ref('dragon-claw', 'move'),
+      version_group_details: [
+        learn('level-up', 'scarlet-violet', 42),
+        learn('level-up', 'scarlet-violet', 45),
+        learn('level-up', 'scarlet-violet', 42),
+        learn('machine', 'scarlet-violet', 0),
+        learn('level-up', 'sword-shield', 40),
+        learn('train', 'champions', 0),
+      ],
+    },
+  ],
+};
+for (const [name, order] of [
+  ['red-blue', 3],
+  ['sword-shield', 22],
+  ['scarlet-violet', 27],
+] as const) {
+  records[`version-group/${name}`] = { name, order };
+}
+records['version-group/unknown-group'] = new Response('Not Found', { status: 404 });
 records['ability/overgrow'] = {
   ...domain.abilities.overgrow,
   id: 65,
@@ -210,12 +241,16 @@ const missingPaths = [
   'nature/fake-nature-xyz',
   'type/faketype-xyz-999',
   'generation/fake-generation-xyz',
+  'generation?limit=100',
   'pokemon/deoxys',
   'pokemon/wormadam',
 ];
 
 /** Install with explicit matches only: an unlisted request fails instead of reaching the network. */
-export function handlerHttp(overrides: Record<string, unknown | Response> = {}) {
+export function handlerHttp(
+  overrides: Record<string, unknown | Response> = {},
+  routes: FetchMockRoute[] = [],
+) {
   const payloads: Record<string, unknown | Response> = {
     ...records,
     ...Object.fromEntries(
@@ -223,9 +258,10 @@ export function handlerHttp(overrides: Record<string, unknown | Response> = {}) 
     ),
     ...overrides,
   };
-  return createFetchMock(
-    Object.entries(payloads).map(([path, value]) => ({
-      match: (request) => {
+  return createFetchMock([
+    ...routes,
+    ...Object.entries(payloads).map(([path, value]) => ({
+      match: (request: Request) => {
         const url = new URL(request.url);
         return (
           url.origin === 'https://pokeapi.co' &&
@@ -234,5 +270,5 @@ export function handlerHttp(overrides: Record<string, unknown | Response> = {}) 
       },
       respond: () => (value instanceof Response ? value.clone() : Response.json(value)),
     })),
-  );
+  ]);
 }

@@ -3,13 +3,15 @@
  * @module tests/tools/find-pokemon.tool.test
  */
 
-import { McpError } from '@cyanheads/mcp-ts-core/errors';
+import { JsonRpcErrorCode, McpError } from '@cyanheads/mcp-ts-core/errors';
 import {
+  createFetchMock,
   createInMemoryStorage,
   createMockContext,
   getEnrichment,
+  runToolContract,
 } from '@cyanheads/mcp-ts-core/testing';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { findPokemon } from '@/mcp-server/tools/definitions/find-pokemon.tool.js';
 import { initPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 import { handlerHttp } from '../fixtures/handler-fixtures.js';
@@ -113,6 +115,210 @@ describe('findPokemon', () => {
     const input = findPokemon.input.parse({ generation: 'fake-generation-xyz' });
     await expect(findPokemon.handler(input, ctx)).rejects.toThrow(McpError);
   }, 15000);
+
+  it.each([
+    ['Field', 'ground'],
+    ['Water 1', 'water1'],
+    ['Water 2', 'water2'],
+    ['Water 3', 'water3'],
+    ['Grass', 'plant'],
+    ['Human-Like', 'humanshape'],
+    ['Amorphous', 'indeterminate'],
+    ['Undiscovered', 'no-eggs'],
+  ])('applies the egg-group alias %s as %s', async (alias, canonical) => {
+    http.restore();
+    http = handlerHttp({
+      [`egg-group/${canonical}`]: {
+        pokemon_species: [{ name: 'eevee', url: 'https://pokeapi.co/api/v2/pokemon-species/133/' }],
+      },
+      [`egg-group/${alias.toLowerCase().replace(' ', '-')}`]: new Response('', { status: 404 }),
+    });
+    http.install();
+    const result = await runToolContract(findPokemon, { egg_group: alias, limit: 1 });
+    expect(result.structuredContent).toMatchObject({
+      pokemon: [{ id: 133, name: 'eevee' }],
+      appliedFilters: { egg_group: canonical },
+      totalCount: 1,
+    });
+    expect(result.content[0]).toMatchObject({ text: expect.stringContaining('| 133 | eevee |') });
+    expect(result.content).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ text: expect.stringContaining(canonical) }),
+      ]),
+    );
+    expect(http.calls).toHaveLength(1);
+  });
+
+  it('names the failing filter and includes the complete paginated catalog on both surfaces', async () => {
+    http.restore();
+    http = handlerHttp({
+      'generation/generation-i': { pokemon_species: [] },
+      'pokedex/sinnoh': new Response('', { status: 404 }),
+      'pokedex?limit=100': {
+        count: 3,
+        next: 'https://pokeapi.co/api/v2/pokedex/?offset=1&limit=1',
+        results: [{ name: 'original-sinnoh' }],
+      },
+      'pokedex?limit=100&offset=1': {
+        count: 3,
+        next: 'https://pokeapi.co/api/v2/pokedex/?offset=2&limit=1',
+        results: [{ name: 'extended-sinnoh' }],
+      },
+      'pokedex?limit=100&offset=2': {
+        count: 3,
+        next: null,
+        results: [{ name: 'paldea' }],
+      },
+    });
+    http.install();
+    const result = await runToolContract(findPokemon, {
+      generation: 'generation-i',
+      type: 'fire',
+      pokedex: 'Sinnoh',
+    });
+    const message =
+      'Unrecognized pokedex filter "Sinnoh". Valid names: original-sinnoh, extended-sinnoh, paldea.';
+    expect(result.structuredContent).toMatchObject({
+      error: {
+        code: JsonRpcErrorCode.ValidationError,
+        message,
+        data: { reason: 'invalid_filter' },
+      },
+    });
+    expect(result.content[0]).toMatchObject({ text: expect.stringContaining(message) });
+    expect(http.calls.map(({ request }) => new URL(request.url).pathname)).toEqual([
+      '/api/v2/generation/generation-i',
+      '/api/v2/pokedex/sinnoh',
+      '/api/v2/pokedex',
+      '/api/v2/pokedex',
+      '/api/v2/pokedex',
+    ]);
+  });
+
+  it('includes all 15 current egg groups for a mixed-filter miss', async () => {
+    const names = [
+      'monster',
+      'water1',
+      'bug',
+      'flying',
+      'ground',
+      'fairy',
+      'plant',
+      'humanshape',
+      'water3',
+      'mineral',
+      'indeterminate',
+      'water2',
+      'ditto',
+      'dragon',
+      'no-eggs',
+    ];
+    http.restore();
+    http = handlerHttp({
+      'egg-group/feild': new Response('', { status: 404 }),
+      'egg-group?limit=100': { count: 15, next: null, results: names.map((name) => ({ name })) },
+    });
+    http.install();
+    const result = await runToolContract(findPokemon, { type: 'fire', egg_group: 'feild' });
+    const message = `Unrecognized egg_group filter "feild". Valid names: ${names.join(', ')}.`;
+    expect(result.structuredContent).toMatchObject({
+      error: { message, data: { reason: 'invalid_filter' } },
+    });
+    expect(result.content[0]).toMatchObject({
+      text: expect.stringContaining(message),
+    });
+    expect(http.calls).toHaveLength(2);
+  });
+
+  it.each([
+    ['HTTP 503', () => new Response('', { status: 503 })],
+    ['malformed JSON', () => new Response('{')],
+    ['malformed page', () => Response.json({ count: 1, next: null, results: [{}] })],
+    ['incomplete page', () => Response.json({ count: 1, next: null, results: [] })],
+  ])('keeps contextual recovery when the catalog returns %s', async (_label, respond) => {
+    http.restore();
+    http = handlerHttp({
+      'egg-group/feild': new Response('', { status: 404 }),
+      'egg-group?limit=100': respond(),
+    });
+    http.install();
+    const result = await runToolContract(findPokemon, { type: 'fire', egg_group: 'feild' });
+    expect(result.structuredContent).toMatchObject({
+      error: {
+        message:
+          'Unrecognized egg_group filter "feild". The list of valid names could not be retrieved.',
+        data: { reason: 'invalid_filter' },
+      },
+    });
+    expect(result.content[0]).toMatchObject({
+      text: expect.stringContaining('could not be retrieved'),
+    });
+    expect(http.calls).toHaveLength(2);
+  });
+
+  it.each([400, 403])(
+    'preserves canonical upstream HTTP %d without a recovery lookup',
+    async (status) => {
+      http.restore();
+      http = handlerHttp({ 'type/fire': new Response('', { status }) });
+      http.install();
+      const result = await runToolContract(findPokemon, { type: 'fire' });
+      expect(result.structuredContent).toMatchObject({ error: { data: { status } } });
+      expect(result.structuredContent).not.toMatchObject({
+        error: { data: { reason: 'invalid_filter' } },
+      });
+      expect(http.calls).toHaveLength(1);
+    },
+  );
+
+  it.each(['caller abort', 'catalog deadline', 'network failure'])(
+    'settles correctly when the catalog read ends in %s',
+    async (failure) => {
+      http.restore();
+      const caller = new AbortController();
+      const deadline = new AbortController();
+      const timeout = vi.spyOn(AbortSignal, 'timeout').mockReturnValue(deadline.signal);
+      http = createFetchMock([
+        {
+          match: 'https://pokeapi.co/api/v2/egg-group/feild',
+          respond: new Response('', { status: 404 }),
+        },
+        {
+          match: 'https://pokeapi.co/api/v2/egg-group?limit=100',
+          respond: () =>
+            Response.json({ count: 2, next: '?offset=1', results: [{ name: 'ground' }] }),
+        },
+        {
+          match: 'https://pokeapi.co/api/v2/egg-group?limit=100&offset=1',
+          respond: ({ signal }) => {
+            if (failure === 'caller abort') caller.abort();
+            if (failure === 'catalog deadline')
+              deadline.abort(new DOMException('Deadline elapsed', 'TimeoutError'));
+            signal.throwIfAborted();
+            throw new TypeError('Connection closed');
+          },
+        },
+      ]);
+      http.install();
+      const ctx = createMockContext({ errors: findPokemon.errors, signal: caller.signal });
+      const input = findPokemon.input.parse({ egg_group: 'feild' });
+      try {
+        await expect(findPokemon.handler(input, ctx)).rejects.toMatchObject(
+          failure === 'caller abort'
+            ? { code: JsonRpcErrorCode.RequestCancelled }
+            : {
+                message:
+                  'Unrecognized egg_group filter "feild". The list of valid names could not be retrieved.',
+                data: { reason: 'invalid_filter' },
+              },
+        );
+        expect(timeout).toHaveBeenCalledExactlyOnceWith(3_000);
+        expect(http.calls).toHaveLength(3);
+      } finally {
+        timeout.mockRestore();
+      }
+    },
+  );
 
   it('returns empty results with notice for valid filters that yield no matches (AND intersection)', async () => {
     const ctx = createMockContext({ errors: findPokemon.errors, tenantId: 'test-tenant' });

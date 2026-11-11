@@ -3,9 +3,10 @@
  * @module tests/tools/get-pokemon.tool.test
  */
 
-import { McpError } from '@cyanheads/mcp-ts-core/errors';
+import { databaseError, JsonRpcErrorCode, McpError } from '@cyanheads/mcp-ts-core/errors';
 import { createInMemoryStorage, createMockContext } from '@cyanheads/mcp-ts-core/testing';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { getServerConfig } from '@/config/server-config.js';
 import { getPokemon } from '@/mcp-server/tools/definitions/get-pokemon.tool.js';
 import { initPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 import { handlerHttp } from '../fixtures/handler-fixtures.js';
@@ -35,6 +36,15 @@ describe('getPokemon', () => {
     expect(result.abilities.length).toBeGreaterThan(0);
     expect(result.moveCount).toBeGreaterThan(0);
     expect(result.moves).toHaveLength(0); // include_moves defaults to false
+    expect(
+      http.calls.some(({ request }) => new URL(request.url).pathname.includes('/version-group/')),
+    ).toBe(false);
+    expect(result.notices).toContain('Pass include_moves=true to include the full move summary.');
+    expect(getPokemon.format!(getPokemon.output.parse(result))).toEqual([
+      expect.objectContaining({
+        text: expect.stringContaining('Pass include_moves=true to include the full move summary.'),
+      }),
+    ]);
     expect(result.generation).toBe('generation-i');
     expect(typeof result.captureRate).toBe('number');
     expect(typeof result.isLegendary).toBe('boolean');
@@ -63,6 +73,216 @@ describe('getPokemon', () => {
     expect(result.moves[0]).toHaveProperty('learnMethod');
     expect(result.moves[0]).toHaveProperty('levelLearnedAt');
   }, 15000);
+
+  it('uses PokéAPI order per method and keeps every distinct level from the chosen group', async () => {
+    const ctx = createMockContext({ errors: getPokemon.errors });
+    const input = getPokemon.input.parse({ identifier: 'charmander', include_moves: true });
+    const result = getPokemon.output.parse(await getPokemon.handler(input, ctx));
+    expect(result.moveCount).toBe(1);
+    expect(result.moves).toEqual([
+      {
+        name: 'dragon-claw',
+        learnMethod: 'level-up',
+        levelLearnedAt: 42,
+        versionGroup: 'scarlet-violet',
+      },
+      {
+        name: 'dragon-claw',
+        learnMethod: 'level-up',
+        levelLearnedAt: 45,
+        versionGroup: 'scarlet-violet',
+      },
+      {
+        name: 'dragon-claw',
+        learnMethod: 'machine',
+        levelLearnedAt: 0,
+        versionGroup: 'scarlet-violet',
+      },
+      { name: 'dragon-claw', learnMethod: 'train', levelLearnedAt: 0, versionGroup: 'champions' },
+    ]);
+    expect(getPokemon.format!(result)).toEqual([
+      expect.objectContaining({
+        text: expect.stringContaining('level: 45, version group: scarlet-violet'),
+      }),
+    ]);
+    await getPokemon.handler(input, ctx);
+    expect(
+      http.calls.filter(({ request }) => new URL(request.url).pathname.includes('/version-group/')),
+    ).toHaveLength(2);
+  });
+
+  it('scopes moves to a represented group without metadata reads', async () => {
+    const ctx = createMockContext({ errors: getPokemon.errors });
+    const input = getPokemon.input.parse({
+      identifier: 'charmander',
+      version_group: 'scarlet-violet',
+    });
+    const result = getPokemon.output.parse(await getPokemon.handler(input, ctx));
+    expect(result.moves.map((move) => move.levelLearnedAt)).toEqual([42, 45, 0]);
+    expect(result.moveCount).toBe(1);
+    expect(
+      http.calls.filter(({ request }) => new URL(request.url).pathname.includes('/version-group/')),
+    ).toHaveLength(0);
+  });
+
+  it('distinguishes a valid empty group from an unknown group', async () => {
+    const ctx = createMockContext({ errors: getPokemon.errors });
+    const input = getPokemon.input.parse({ identifier: 'charmander', version_group: 'red-blue' });
+    const result = getPokemon.output.parse(await getPokemon.handler(input, ctx));
+    expect(result.moves).toEqual([]);
+    expect(result.notices).toEqual(['No learnable moves are listed for red-blue.']);
+    expect(getPokemon.format!(result)).toEqual([
+      expect.objectContaining({ text: expect.stringContaining(result.notices[0]!) }),
+    ]);
+    await expect(
+      getPokemon.handler(
+        getPokemon.input.parse({ identifier: 'charmander', version_group: 'unknown-group' }),
+        ctx,
+      ),
+    ).rejects.toMatchObject({ data: { reason: 'invalid_version_group' } });
+  });
+
+  it.each([404, 403, 422, 429, 502])(
+    'reports source-order fallback after chronology HTTP %i',
+    async (status) => {
+      http.restore();
+      http = handlerHttp({
+        'version-group/scarlet-violet': new Response('Unavailable', { status }),
+      });
+      http.install();
+      const ctx = createMockContext({ errors: getPokemon.errors });
+      const input = getPokemon.input.parse({ identifier: 'charmander', include_moves: true });
+      const result = getPokemon.output.parse(await getPokemon.handler(input, ctx));
+      expect(result.moves[0]).toMatchObject({
+        learnMethod: 'level-up',
+        levelLearnedAt: 40,
+        versionGroup: 'sword-shield',
+      });
+      expect(result.notices).toEqual([expect.stringContaining('chronology')]);
+      expect(getPokemon.format!(result)).toEqual([
+        expect.objectContaining({ text: expect.stringContaining(result.notices[0]!) }),
+      ]);
+      expect(
+        http.calls.filter(({ request }) =>
+          new URL(request.url).pathname.endsWith('/version-group/scarlet-violet'),
+        ),
+      ).toHaveLength(1);
+    },
+  );
+
+  it.each([
+    ['malformed JSON', new Response('<html>Gateway response</html>')],
+    ['invalid metadata', Response.json({ name: 'scarlet-violet', order: null })],
+    ['mismatched name', Response.json({ name: 'red-blue', order: 3 })],
+  ])('discloses chronology fallback for %s without caching it', async (_label, response) => {
+    http.restore();
+    http = handlerHttp({ 'version-group/scarlet-violet': response });
+    http.install();
+    const ctx = createMockContext({ errors: getPokemon.errors });
+    const input = getPokemon.input.parse({ identifier: 'charmander', include_moves: true });
+    for (let call = 0; call < 2; call++) {
+      const result = getPokemon.output.parse(await getPokemon.handler(input, ctx));
+      expect(result.notices).toEqual([expect.stringContaining('chronology')]);
+      expect(result.moves[0]).toMatchObject({ learnMethod: 'level-up', levelLearnedAt: 40 });
+    }
+    expect(
+      http.calls.filter(({ request }) =>
+        new URL(request.url).pathname.endsWith('/version-group/scarlet-violet'),
+      ),
+    ).toHaveLength(2);
+  });
+
+  it.each(['caller cancellation', 'deadline', 'connection failure'])(
+    'settles correctly when a metadata request ends in %s',
+    async (failure) => {
+      http.restore();
+      const caller = new AbortController();
+      const deadline = new AbortController();
+      const abortReason = new DOMException('Caller cancelled', 'AbortError');
+      const timeout = vi.spyOn(AbortSignal, 'timeout').mockReturnValue(deadline.signal);
+      http = handlerHttp({}, [
+        {
+          match: 'https://pokeapi.co/api/v2/version-group/scarlet-violet',
+          respond: ({ signal }) => {
+            if (failure === 'caller cancellation') caller.abort(abortReason);
+            if (failure === 'deadline')
+              deadline.abort(new DOMException('Deadline elapsed', 'TimeoutError'));
+            signal.throwIfAborted();
+            throw new TypeError('Connection closed');
+          },
+        },
+      ]);
+      http.install();
+      try {
+        const ctx = createMockContext({ errors: getPokemon.errors, signal: caller.signal });
+        const input = getPokemon.input.parse({ identifier: 'charmander', include_moves: true });
+        const pending = getPokemon.handler(input, ctx);
+        if (failure === 'caller cancellation') {
+          await expect(pending).rejects.toBe(abortReason);
+        } else {
+          const result = getPokemon.output.parse(await pending);
+          expect(result.notices).toEqual([expect.stringContaining('chronology')]);
+          expect(result.moves[0]).toMatchObject({
+            levelLearnedAt: 40,
+            versionGroup: 'sword-shield',
+          });
+        }
+        expect(timeout).toHaveBeenCalledExactlyOnceWith(3_000);
+      } finally {
+        timeout.mockRestore();
+      }
+    },
+  );
+
+  it.each([
+    ['get', new McpError(JsonRpcErrorCode.SerializationError, 'Malformed metadata cache entry')],
+    ['set', databaseError('Metadata cache cannot be written')],
+  ] as const)(
+    'keeps an unscoped dossier usable when the metadata cache %s fails',
+    async (operation, error) => {
+      const ctx = createMockContext({ errors: getPokemon.errors });
+      const input = getPokemon.input.parse({ identifier: 'charmander', include_moves: true });
+      await getPokemon.handler({ ...input, include_moves: false }, ctx);
+      const original = ctx.state[operation].bind(ctx.state);
+      vi.spyOn(ctx.state, operation).mockImplementation(
+        (key: string, value: unknown, options?: { ttl?: number }) => {
+          if (key.startsWith('pokeapi/version-group-order/')) return Promise.reject(error);
+          return original(key, value, options);
+        },
+      );
+      const result = getPokemon.output.parse(await getPokemon.handler(input, ctx));
+      expect(result.moves[0]).toMatchObject({
+        learnMethod: 'level-up',
+        levelLearnedAt: 40,
+        versionGroup: 'sword-shield',
+      });
+      expect(result.notices).toEqual([expect.stringContaining('chronology')]);
+    },
+  );
+
+  it('keeps metadata on the tenant cache and rereads it after expiry', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    try {
+      const first = createMockContext({ errors: getPokemon.errors, tenantId: 'first' });
+      const other = createMockContext({ errors: getPokemon.errors, tenantId: 'other' });
+      const input = getPokemon.input.parse({ identifier: 'charmander', include_moves: true });
+      const groupReads = () =>
+        http.calls.filter(({ request }) =>
+          new URL(request.url).pathname.includes('/version-group/'),
+        ).length;
+      const initial = getPokemon.output.parse(await getPokemon.handler(input, first));
+      initial.moves[0]!.levelLearnedAt = 999;
+      expect((await getPokemon.handler(input, first)).moves[0]?.levelLearnedAt).toBe(42);
+      expect(groupReads()).toBe(2);
+      expect((await getPokemon.handler(input, other)).moves[0]?.levelLearnedAt).toBe(42);
+      expect(groupReads()).toBe(4);
+      vi.setSystemTime(Date.now() + getServerConfig().cacheTtlSeconds * 1_000 + 1);
+      expect((await getPokemon.handler(input, first)).moves[0]?.levelLearnedAt).toBe(42);
+      expect(groupReads()).toBe(6);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 
   it('resolves flavor text for a specific game_version', async () => {
     const ctx = createMockContext({ errors: getPokemon.errors, tenantId: 'test-tenant' });
@@ -149,8 +369,15 @@ describe('getPokemon', () => {
         officialArtwork: null,
       },
       moves: [],
+      notices: [],
       moveCount: 80,
+      speciesId: 1,
+      pokedexNumbers: [],
+      hatchCounter: null,
+      baseHappiness: null,
+      isBaby: false,
       speciesFlavorText: 'A strange seed was planted on its back at birth.',
+      flavorTextVersion: 'red',
       genus: 'Seed Pokémon',
       captureRate: 45,
       growthRate: 'medium-slow',
@@ -198,8 +425,15 @@ describe('getPokemon', () => {
       abilities: [],
       sprites: { frontDefault: null, frontShiny: null, officialArtwork: null },
       moves: [],
+      notices: [],
       moveCount: 0,
+      speciesId: 1,
+      pokedexNumbers: [],
+      hatchCounter: null,
+      baseHappiness: null,
+      isBaby: false,
       speciesFlavorText: null,
+      flavorTextVersion: null,
       genus: null,
       captureRate: 45,
       growthRate: 'medium-slow',

@@ -34,7 +34,7 @@ export const typeResource = resource('pokeapi://type/{typeName}', {
     'Type damage relations — offensive and defensive multiplier tables for a given type.',
   mimeType: 'application/json',
   params: z.object({
-    typeName: z.string().describe('Type name in lowercase (e.g. "fire", "psychic").'),
+    typeName: z.string().describe('Type name (e.g. "fire", "psychic").'),
   }),
 
   errors: [

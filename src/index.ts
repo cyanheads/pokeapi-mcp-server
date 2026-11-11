@@ -21,6 +21,7 @@ await createApp({
   name: 'pokeapi-mcp-server',
   title: 'pokeapi-mcp-server',
   sessionMode: 'stateless',
+  decodeResourceParams: true,
   tools: [getPokemon, getTypeMatchups, getMove, getAbility, getItem, getNature, findPokemon],
   resources: [pokemonResource, typeResource],
   skills: 'skills',

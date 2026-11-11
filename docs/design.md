@@ -6,12 +6,12 @@
 
 | Name | Description | Key Inputs | Annotations | Error Contract |
 |:-----|:------------|:-----------|:------------|:--------------|
-| `pokeapi_get_pokemon` | Denormalized Pokémon dossier — stats, types, ability effects, height/weight, complete evolution alternatives, move summaries, sprites, flavor text, varieties, capture/growth/gender rates, and legendary/mythical flags. | `identifier` (name or PokéAPI Pokémon-record ID; a species name such as `deoxys` resolves to its default variety, reported in `resolvedFromSpecies`), `include_moves` bool (default false), `game_version` for flavor text (falls back to the most recent English entry) | `readOnlyHint: true` | `not_found` (NotFound): identifier resolves to no PokéAPI entry |
+| `pokeapi_get_pokemon` | Denormalized Pokémon dossier — stats, types, ability effects, height/weight, evolution alternatives, move methods and levels, sprites, attributed flavor text, varieties, National/regional dex numbers, breeding data, capture/growth/gender rates, and legendary/mythical flags. | `identifier` (name or PokéAPI Pokémon-record ID; species names resolve to their default variety, reported in `resolvedFromSpecies`), `include_moves` bool (default false), `version_group` for a recorded learnset (implies move inclusion), `game_version` for English flavor text (fallback disclosed) | `readOnlyHint: true` | `not_found` (NotFound): identifier resolves to no PokéAPI entry; `invalid_version_group` (InvalidParams): unknown version-group name |
 | `pokeapi_get_move` | Move details by name or ID — type, damage class, power, accuracy, PP, priority, target, stat changes, status-effect chance, full English effect text, and the Pokémon that can learn it (`learned_by_pokemon`). | `identifier` (name or ID), `include_learners` bool (default false) | `readOnlyHint: true` | `not_found` (NotFound): identifier resolves to no move |
 | `pokeapi_get_ability` | Ability details by name or ID — full English effect text, short effect text, and the Pokémon that have it (with hidden-ability flag and slot). | `identifier` (name or ID) | `readOnlyHint: true` | `not_found` (NotFound): identifier resolves to no ability |
 | `pokeapi_get_type_matchups` | Computed offensive and defensive type effectiveness, with composed dual-type defenses, resolved record identity, and species-fallback attribution. | `type` (type name) or `pokemon` (name or PokéAPI Pokémon-record ID; species names resolve to their default variety) — exactly one required | `readOnlyHint: true` | `not_found` (NotFound): type or Pokémon identifier not recognized; `invalid_input` (ValidationError): neither or both inputs provided |
 | `pokeapi_get_item` | Item details by name or ID — effect text, category, cost, fling power, attributes, and Pokémon that commonly hold it. | `identifier` (name or ID) | `readOnlyHint: true` | `not_found` (NotFound): identifier resolves to no item |
-| `pokeapi_find_pokemon` | Filter Pokémon by generation, type, pokédex, or egg group. Returns names and PokéAPI IDs, pre-pagination count, normalized applied filters, and guidance for empty results or past-end pages. Type-only searches return Pokémon records; any species filter returns species rows joined by default-record ID. | `generation`, `type`, `pokedex`, `egg_group` (at least one required; a call without one returns an empty result and a notice), `query` (strict name-token matching within a category, at most 100 characters), positive integer `limit`, nonnegative integer `offset` | `readOnlyHint: true`, `openWorldHint: false` | `invalid_filter` (ValidationError): unrecognized category name; schema failures are InvalidParams |
+| `pokeapi_find_pokemon` | Filter Pokémon by generation, type, pokédex, or egg group. Returns names, PokéAPI IDs, pre-pagination count, applied filters, and empty/past-end guidance. Dex filters add regional entry numbers and order pages by them. Type-only searches return Pokémon records; species filters return species rows joined by default-record ID. | `generation`, `type`, `pokedex`, `egg_group` (at least one required; a call without one returns an empty result and a notice), `query` (strict name-token matching within a category, at most 100 characters), positive integer `limit`, nonnegative integer `offset` | `readOnlyHint: true`, `openWorldHint: false` | `invalid_filter` (ValidationError): names the unrecognized category and its accepted values when available; schema failures are InvalidParams |
 | `pokeapi_get_nature` | Nature details by name or ID — stat boost and penalty (increased/decreased stat names), preferred and disliked berry flavor. Returns all 25 natures when called without an identifier. Critical for team-building: natures apply +10%/−10% to two stats. | `identifier` (name e.g. `"modest"` or ID 1–25; omit to list all) | `readOnlyHint: true`, `openWorldHint: false` | `not_found` (NotFound): identifier resolves to no nature |
 
 ### Resources
@@ -45,9 +45,9 @@ This server's entire value proposition is consolidation. `pokeapi_get_pokemon` f
 - Read-only — all tools are `readOnlyHint: true`; no writes to PokéAPI
 - Cache aggressively — PokéAPI data is static game data; the API's fair-use policy asks consumers to cache. TTL of several hours is appropriate for a hosted deployment
 - English text — `effect_entries` and `flavor_text_entries` exist in multiple languages; always filter `language.name === 'en'`. When no English entry exists, surface `null` rather than a foreign-language string
-- Identifier input — all single-item GET tools accept a canonical name (e.g. `"bulbasaur"`, `"choice-specs"`) or numeric ID as a string; the framework repairs integer IDs to strings. Normalize names before fetching (trim, lowercase, replace spaces with hyphens); URL-encode the identifier once, where the request path is built. Blank, `.`, `..`, and identifiers over 100 characters fail as `not_found` (`invalid_filter` for search filters) without a request, and only identifiers matching `[a-z0-9-]` are used as cache keys. PokéAPI answers 400, not 404, to a path segment that needed encoding; for an identifier outside `[a-z0-9-]` that 400 is the same miss
+- Identifier input — all single-item GET tools accept canonical names, display spellings, or numeric IDs as strings; the framework repairs integer IDs to strings. Normalize before fetching: lowercase, remove diacritics, apostrophes, periods, and colons, map `♀`/`♂` to `-f`/`-m`, trim, and hyphenate whitespace. Reject an empty result, a result outside `[a-z0-9-]`, or one over 100 characters before storage or record requests. Tool misses are `not_found`; search misses are `invalid_filter`. Canonical upstream failures other than 404 remain operational errors
 - Variants awareness — Pokémon with regional/cosmetic forms (Pikachu cap variants, Alolan forms, Gigantamax, Mega) are separate entries in PokéAPI; surface the variant list so callers can request a specific form
-- Moves are large — `/pokemon/{id}` returns 100–200+ moves with multi-game version history. Default `include_moves: false`; when true, summarize to move name, learn method, and level using each move's last upstream version-group detail independently, without a common-game filter
+- Moves are large — `/pokemon/{id}` includes multi-game history. Default `include_moves: false`; when requested, retain each move and method's distinct levels from the latest version group by PokéAPI `order`. `version_group` implies inclusion and selects that group's methods and levels. Every returned row identifies its group, while `moveCount` counts distinct moves across all groups
 - 404 responses from PokéAPI return an empty body — check HTTP status, not body parsing
 
 ---
@@ -61,6 +61,8 @@ This server's entire value proposition is consolidation. `pokeapi_get_pokemon` f
 Single service — one upstream, no auth variation. Init/accessor pattern. Exposes typed fetch methods per resource type; tools compose these into their outputs. Caches responses in `ctx.state` with a long TTL (configurable, default 6 hours).
 
 The lightweight `resolvePokemon` method serves dossiers and matchups. It stores a normalized species-name → default-record-name mapping only after the default record fetch succeeds, using the same tenant-scoped state and configured TTL as response caching. No failed lookup or operational error creates a mapping.
+
+Filter recovery reads only the failed category's complete name catalog, with offset pagination and one three-second deadline. If the catalog is unavailable or incomplete, `invalid_filter` still identifies the supplied filter and value and says the accepted names could not be retrieved. Successful searches make no catalog request; caller cancellation propagates.
 
 **Resilience:**
 - Retry: up to 3 retries after the initial attempt, 500ms base backoff
@@ -113,7 +115,7 @@ Each tool is independently testable after its service methods are in place.
 
 ## Workflow Analysis
 
-### `pokeapi_get_pokemon` (up to 3 + N calls, or 4 + N for a species name; two async tiers)
+### `pokeapi_get_pokemon` (3 + N base calls, or 4 + N for a species name)
 
 Fetch the Pokémon record first, then resolve its species using `pokemon.species.name`. This preserves form lookup: a form record such as `charizard-mega-x` (10034) points to species `charizard` (6). Evolution-chain and ability fetches then run in parallel.
 
@@ -125,7 +127,10 @@ A cold name with no Pokémon record of its own that names a species (`deoxys`) c
 | 2 | `GET /pokemon-species/{pokemon.species.name}` | Flavor text, evolution-chain URL, generation, varieties, egg groups, legendary/mythical flags, capture/growth/gender rates | 1 | after Pokémon lookup |
 | 3 | `GET /evolution-chain/{id}` | Full evolution tree (URL extracted from step 2 `species.evolution_chain.url`) | 2 | always |
 | 4…N | `GET /ability/{id}` (×1–3) | Effect text for each ability (refs from step 1) | 2 | always, parallel via `Promise.all` |
-| — | Move summarization | Deduplicate + summarize moves array from step 1 | — | only when `include_moves: true` |
+| — | Move summarization | Group the moves from step 1 by move, method, version group, and distinct level | — | when `include_moves: true` or `version_group` is supplied |
+| — | `GET /version-group/{name}` | Resolve chronology, caching each group's order with the configured TTL | — | unscoped summaries with competing groups; an explicit group absent from the Pokémon's details gets one existence check |
+
+Supplementary chronology reads run with bounded concurrency and one three-second deadline. A failed chronology lookup leaves the dossier usable: each move and method uses its last group in source order, with that fallback stated in `notices`. Caller cancellation propagates. Omitted moves and groups already present in an explicitly selected learnset need no chronology requests.
 
 ### `pokeapi_get_type_matchups` (1–3 cold calls for direct queries; 4–5 for species fallback)
 
@@ -146,13 +151,17 @@ Pokémon queries return `resolvedPokemon: {id, name}` and nullable `resolvedFrom
 
 **`pokeapi_get_pokemon` as the flagship workflow tool.** The graph-walk consolidation is the entire point of this server. A single call replaces what would be 10–30 agent-initiated HTTP GETs with manual stitching. All other tools exist to answer more focused questions the flagship doesn't cover (move details, ability lookup, type matchups as a computed answer).
 
-**`include_moves: false` default.** Pikachu has 119 learnable moves in the API, each with multi-game version history. Returning the full list by default would produce a 20KB+ payload that buries the stats and evolution data. The default returns a move count; `include_moves: true` returns a summarized list (name, learn method, level), selecting each move's last upstream version-group entry independently. It does not filter the list to one game or generation.
+**`include_moves: false` default.** Keep routine dossiers focused on stats and evolution while always returning a distinct move count. An unscoped summary selects the latest group separately for each move and method, because a newer method must not hide a level-up method. `version_group` selects the recorded learnset for one group; multiple levels for the same move and method remain distinct.
+
+**Flavor-text provenance preserves selection behavior.** `game_version` selects an exact English entry when present, otherwise the last English entry in source order. `flavorTextVersion` identifies that source, and a requested-version fallback is disclosed on both surfaces. Unknown versions remain successful; missing English text yields null text and source fields with a notice.
 
 **Separate `pokeapi_get_type_matchups` tool rather than bundling into `get_pokemon`.** Matchup queries are a standalone workflow — "what beats Charizard?" or "what does Fire resist?" don't need the full Pokémon dossier. Keeping it separate lets agents call it cheaply for type questions without triggering the full fan-out.
 
 **`pokeapi_find_pokemon` uses MCP-side list filtering.** PokéAPI has no native multi-filter search (`/pokemon` only lists all). The server fetches the relevant bounded set (generation species list, pokedex entries, type members, egg group members) and filters client-side. Each sub-list is bounded (151 for Kanto, ~100–200 per type), making this appropriate. `query` parameter does strict token matching on names.
 
 **Mixed filters intersect IDs and preserve species rows.** Official PokéAPI default-record IDs equal their species IDs, while alternate forms have distinct IDs. Joining the existing lists by ID preserves suffix-named defaults without per-record fetches or suffix guessing. A type represented only by an alternate form does not qualify the default species. Type-only searches preserve all record names and IDs.
+
+**Pokédex numbers are separate from record identity.** Dossiers retain the Pokémon-record `id` and add the species `speciesId` as the National number, plus all `pokedexNumbers` entries and the species' `hatchCounter`, `baseHappiness`, and `isBaby`. The species record is already fetched, so these fields add no requests. A dex-filtered search joins `entryNumber` by species ID and sorts on it before pagination; other searches keep ID order. This preserves form identity and makes regional pages follow the game's numbering.
 
 **`pokeapi_get_nature` added.** Natures are the primary stat modifier in competitive team-building: every 1 of 25 natures gives +10% to one stat and −10% to another. "What nature should my Garchomp run?" and "which natures boost Sp. Atk?" are among the most common questions for the audience this server targets. The `/nature/{name}` endpoint is a trivial GET with a 25-item bounded domain; the omission was a gap, not a deliberate deferral.
 
@@ -162,12 +171,14 @@ Pokémon queries return `resolvedPokemon: {id, name}` and nullable `resolvedFrom
 
 **Resources as supplementary only.** `pokeapi://pokemon/{id}` and `pokeapi://type/{typeName}` are convenience resources for clients that support injectable context. All data is reachable through tools; resources add nothing for tool-only clients.
 
+**Resource decoding belongs at registration.** `createApp({ decodeResourceParams: true })` decodes URI variables once before the service normalizes them. Malformed escapes fail framework validation, and double-encoded values remain invalid identifiers. Keeping decoding out of service methods prevents a second decode on resource calls.
+
 ---
 
 ## Known Limitations
 
 - **No competitive data.** PokéAPI doesn't cover competitive tiers (Smogon OU/UU/etc.), usage stats, or meta analysis. Those belong in a hypothetical `smogon-mcp-server`.
-- **Game version filtering is limited.** `game_version` selects flavor text only. Each summarized move uses its own last upstream version-group entry, so the combined list does not establish learnability in a particular game.
+- **Game version and version group are separate.** `game_version` selects flavor text; `version_group` selects recorded move methods and levels. The unscoped summary combines groups, and even a scoped learnset does not establish competitive-format legality or transfer eligibility. A move's learner list is not version-qualified.
 - **Variants require explicit lookup.** Forms like `pikachu-alola-cap` are separate PokéAPI entries. `get_pokemon` surfaces the varieties list; callers must re-call with the specific variant name for its stats.
 - **Static data only.** PokéAPI covers mainline series data through its last-updated generation. Fan games, ROM hacks, and unofficial data are out of scope.
 
@@ -187,7 +198,7 @@ Pokémon queries return `resolvedPokemon: {id, name}` and nullable `resolvedFrom
 
 **404 behavior:** Returns HTTP 404 with an empty body (not JSON). Check `response.ok` / status before calling `.json()`.
 
-**Identifier forms:** Resources accept both lowercase-hyphenated names (`"bulbasaur"`, `"choice-specs"`) and numeric IDs. Input normalization: lowercase, trim, replace spaces with hyphens.
+**Identifier forms:** Lookups accept canonical names, numeric IDs, and display spellings such as `Mr. Mime`, `Farfetch’d`, `Nidoran♀`, and `Poké Ball`. Search additionally maps the in-game egg-group names Field, Water 1/2/3, Grass, Human-Like, Amorphous, and Undiscovered to PokéAPI's `ground`, `water1`/`water2`/`water3`, `plant`, `humanshape`, `indeterminate`, and `no-eggs` names. A region with multiple dexes requires the specific dex name; no ambiguous region alias is selected for the caller.
 
 **Evolution chain structure:** Recursive `chain.evolves_to[]` tree. The tree must be walked recursively to flatten into a linear or branching evolution path. Evolution triggers include `level-up` (with optional `min_level`, `min_happiness`), `use-item` (with `item.name`), `trade`, and others — surface the trigger and its condition.
 

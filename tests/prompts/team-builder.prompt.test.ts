@@ -70,6 +70,8 @@ describe('pokeapi_team_builder', () => {
       'base stats, not battle stats',
       'Base Speed does not establish turn order',
       'game_version selects flavor text only',
+      'version_group',
+      'versionGroup',
       'do not establish a game-legal learnset',
       'Do not guarantee wins',
       'fewer than six members',

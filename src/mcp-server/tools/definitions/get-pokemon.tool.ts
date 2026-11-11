@@ -5,7 +5,7 @@
 
 import { tool, z } from '@cyanheads/mcp-ts-core';
 import { JsonRpcErrorCode, McpError } from '@cyanheads/mcp-ts-core/errors';
-import { getPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
+import { getPokeApiService, UnknownVersionGroupError } from '@/services/pokeapi/pokeapi-service.js';
 import type { EvolutionDetail, EvolutionStep } from '@/services/pokeapi/types.js';
 
 const StatSchema = z.object({
@@ -32,7 +32,10 @@ const AbilitySchema = z.object({
 
 const MoveSummarySchema = z.object({
   name: z.string().describe('Move name.'),
-  learnMethod: z.string().describe('How the move is learned (level-up, machine, egg, tutor).'),
+  learnMethod: z
+    .string()
+    .describe('PokéAPI learn-method name, such as level-up, machine, or train.'),
+  versionGroup: z.string().describe('PokéAPI version group supplying this learn method and level.'),
   levelLearnedAt: z
     .number()
     .describe('Level at which the move is learned. Zero for non-level-up methods.'),
@@ -160,23 +163,13 @@ const VarietySchema = z.object({
 export const getPokemon = tool('pokeapi_get_pokemon', {
   title: 'Get Pokémon',
   description:
-    'Get a fully denormalized Pokémon dossier in a single call — base stats, types, abilities ' +
-    '(with full English effect text), height/weight, resolved evolution chain, sprite URLs including ' +
-    'official artwork, species flavor text, variety list, capture rate, growth rate, gender rate, ' +
-    'legendary/mythical flags, egg groups, and (optionally) a summarized learnable-move list. ' +
-    'Accepts a name (lowercase, hyphens for spaces, e.g. "bulbasaur", "mr-mime") or PokéAPI Pokémon-record ID. ' +
-    'A species name with no Pokémon record of its own (e.g. "deoxys") resolves to the default variety of that species ' +
-    '("deoxys-normal"), reported in resolvedFromSpecies. ' +
-    'Set include_moves=true to include the move summary (large); defaults to false. ' +
-    'Use game_version to select flavor text from a specific game (e.g. "sword", "red"); ' +
-    'falls back to the most recent English entry when the version is not found. ' +
-    'Use pokeapi_find_pokemon to discover Pokémon by type, generation, or egg group before calling this tool.',
+    'Get a fully denormalized Pokémon dossier in a single call — base stats, types, abilities (with full English effect text), height/weight, resolved evolution chain, sprite URLs including official artwork, species flavor text, variety list, capture rate, growth rate, gender rate, legendary/mythical flags, egg groups, and (optionally) a summarized learnable-move list. Accepts a Pokémon name (e.g. "bulbasaur", "Mr. Mime") or PokéAPI Pokémon-record ID. A species name with no Pokémon record of its own (e.g. "deoxys") resolves to the default variety of that species ("deoxys-normal"), reported in resolvedFromSpecies. Set include_moves=true to include the move summary (large); defaults to false. Use game_version to select flavor text from a specific game (e.g. "sword", "red"); falls back to the last English entry in PokéAPI source order when no English entry matches. Use pokeapi_find_pokemon to discover Pokémon by type, generation, or egg group before calling this tool.',
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
   input: z.object({
     identifier: z
       .string()
       .describe(
-        'Pokémon name (lowercase hyphenated, e.g. "bulbasaur", "charizard-mega-x") or PokéAPI Pokémon-record ID as a string (e.g. "1", "10034"). A species name (e.g. "deoxys") resolves to its default variety.',
+        'Pokémon name (e.g. "Mr. Mime", "charizard-mega-x") or PokéAPI Pokémon-record ID as a string (e.g. "1", "10034"). A species name (e.g. "deoxys") resolves to its default variety.',
       ),
     include_moves: z
       .boolean()
@@ -184,12 +177,17 @@ export const getPokemon = tool('pokeapi_get_pokemon', {
       .describe(
         'Include the full learnable-move summary. Defaults to false because the list is large (100–200+ moves).',
       ),
+    version_group: z
+      .string()
+      .optional()
+      .describe(
+        'PokéAPI version-group name (e.g. "scarlet-violet"). Includes moves and limits them to this group.',
+      ),
     game_version: z
       .string()
       .optional()
       .describe(
-        'PokéAPI version name to filter flavor text (e.g. "sword", "red", "scarlet"). ' +
-          'Falls back to the most recent English entry when the version is not found.',
+        'PokéAPI game version name for English flavor text (e.g. "sword", "red", "scarlet"). Uses the last English entry in PokéAPI source order when no English entry matches or no version is supplied. The response names the source and reports any requested-version fallback.',
       ),
   }),
   output: z.object({
@@ -197,6 +195,26 @@ export const getPokemon = tool('pokeapi_get_pokemon', {
       .number()
       .describe('PokéAPI Pokémon-record ID. Form IDs are not National Pokédex numbers.'),
     name: z.string().describe('Canonical Pokémon name in hyphenated lowercase.'),
+    speciesId: z.number().describe('Species ID, also the National Pokédex number.'),
+    pokedexNumbers: z
+      .array(
+        z
+          .object({
+            pokedex: z.string().describe('PokéAPI Pokédex name.'),
+            entryNumber: z.number().describe('Number assigned to the species in this Pokédex.'),
+          })
+          .describe('Species entry in one Pokédex.'),
+      )
+      .describe('Pokédex entries for the species.'),
+    hatchCounter: z
+      .number()
+      .nullable()
+      .describe('Species hatch counter in egg cycles. Null when unavailable.'),
+    baseHappiness: z
+      .number()
+      .nullable()
+      .describe('Species base friendship. Null when unavailable.'),
+    isBaby: z.boolean().describe('Whether PokéAPI classifies the species as a baby Pokémon.'),
     resolvedFromSpecies: z
       .string()
       .nullable()
@@ -213,14 +231,19 @@ export const getPokemon = tool('pokeapi_get_pokemon', {
     sprites: SpritesSchema.describe('Sprite URLs.'),
     moves: z
       .array(MoveSummarySchema.describe('Move summary entry — name, learn method, and level.'))
-      .describe('Learnable moves (populated when include_moves=true, empty otherwise).'),
-    moveCount: z.number().describe('Total number of learnable moves regardless of include_moves.'),
+      .describe(
+        'Learn methods and levels. Without version_group, each move and method uses its latest available group, with any fallback disclosed in notices.',
+      ),
+    moveCount: z.number().describe('Total distinct learnable moves across all version groups.'),
+    notices: z.array(z.string()).describe('Notices about selection, availability, or fallbacks.'),
     speciesFlavorText: z
       .string()
       .nullable()
-      .describe(
-        'Flavor text from the selected (or most recent) game version. Null when none available.',
-      ),
+      .describe('Selected English flavor text. Null when none is available.'),
+    flavorTextVersion: z
+      .string()
+      .nullable()
+      .describe('Game version supplying the English flavor text. Null when none is available.'),
     genus: z
       .string()
       .nullable()
@@ -252,6 +275,13 @@ export const getPokemon = tool('pokeapi_get_pokemon', {
       recovery:
         'Check the spelling against the PokéAPI name list or use a numeric PokéAPI Pokémon-record ID. Common names use hyphens, not spaces.',
     },
+    {
+      reason: 'invalid_version_group',
+      code: JsonRpcErrorCode.InvalidParams,
+      when: 'The supplied version_group is not a known PokéAPI version-group name.',
+      recovery:
+        'Use a version-group name such as scarlet-violet or sword-shield, or omit version_group.',
+    },
   ],
 
   async handler(input, ctx) {
@@ -263,8 +293,12 @@ export const getPokemon = tool('pokeapi_get_pokemon', {
         input.include_moves,
         input.game_version,
         ctx,
+        input.version_group,
       );
     } catch (err) {
+      if (err instanceof UnknownVersionGroupError) {
+        throw ctx.fail('invalid_version_group', 'Use a known PokéAPI version-group name.');
+      }
       if (err instanceof McpError && err.code === JsonRpcErrorCode.NotFound) {
         throw ctx.fail(
           'not_found',
@@ -286,14 +320,22 @@ export const getPokemon = tool('pokeapi_get_pokemon', {
     }
     lines.push(`**Genus:** ${result.genus ?? 'Not available'}`);
     lines.push(
-      result.speciesFlavorText
-        ? `\n> ${result.speciesFlavorText}`
+      result.speciesFlavorText !== null
+        ? `\n**Flavor text (${result.flavorTextVersion}):**\n\n> ${result.speciesFlavorText}`
         : '\n*(Flavor text not available.)*',
     );
 
     lines.push('\n## Overview');
     lines.push(`**Types:** ${result.types.join(', ') || 'None listed'}`);
     lines.push(`**Generation:** ${result.generation}`);
+    lines.push(`**National Pokédex number:** ${result.speciesId}`);
+    const dexEntries = result.pokedexNumbers.map(
+      ({ pokedex, entryNumber }) => `${pokedex}: ${entryNumber}`,
+    );
+    lines.push(`**Pokédex entries:** ${dexEntries.join(', ') || 'None listed'}`);
+    lines.push(`**Hatch counter:** ${result.hatchCounter ?? 'Not available'}`);
+    lines.push(`**Base happiness:** ${result.baseHappiness ?? 'Not available'}`);
+    lines.push(`**Baby:** ${result.isBaby ? 'Yes' : 'No'}`);
     // heightDm and weightHg are the raw API values; converted to SI for readability
     lines.push(
       `**Height:** ${(result.heightDm / 10).toFixed(1)} m (${result.heightDm} dm) | **Weight:** ${(result.weightHg / 10).toFixed(1)} kg (${result.weightHg} hg)`,
@@ -354,13 +396,16 @@ export const getPokemon = tool('pokeapi_get_pokemon', {
     if (result.moves.length > 0) {
       for (const m of result.moves) {
         // Always include levelLearnedAt (0 for non-level-up moves)
-        lines.push(`- ${m.name} — ${m.learnMethod} (level: ${m.levelLearnedAt})`);
+        lines.push(
+          `- ${m.name} — ${m.learnMethod} (level: ${m.levelLearnedAt}, version group: ${m.versionGroup})`,
+        );
       }
     } else if (result.moveCount === 0) {
       lines.push('No learnable moves listed.');
     } else {
-      lines.push('*(Pass include_moves=true to include the full move list.)*');
+      lines.push('No move details returned.');
     }
+    lines.push(...result.notices);
 
     return [{ type: 'text', text: lines.join('\n') }];
   },

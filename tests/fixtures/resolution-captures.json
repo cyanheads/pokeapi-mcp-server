@@ -796,6 +796,8 @@
   },
   "pokemon-species/wormadam": {
     "id": 413,
+    "is_baby": false,
+    "pokedex_numbers": [],
     "name": "wormadam",
     "gender_rate": 8,
     "capture_rate": 45,
@@ -3766,6 +3768,8 @@
   },
   "pokemon-species/deoxys": {
     "id": 386,
+    "is_baby": false,
+    "pokedex_numbers": [],
     "name": "deoxys",
     "gender_rate": -1,
     "capture_rate": 3,

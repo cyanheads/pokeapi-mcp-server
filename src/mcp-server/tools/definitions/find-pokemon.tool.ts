@@ -8,14 +8,29 @@ import { JsonRpcErrorCode, McpError } from '@cyanheads/mcp-ts-core/errors';
 import { getPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 import type { PokemonListEntry } from '@/services/pokeapi/types.js';
 
+// Species lists lead mixed searches, so their row identity survives the intersection.
+const categoryFilters = [
+  ['generation', 'generation', 'getPokemonByGeneration'],
+  ['pokedex', 'pokedex', 'getPokemonByPokedex'],
+  ['egg_group', 'egg-group', 'getPokemonByEggGroup'],
+  ['type', 'type', 'getPokemonByType'],
+] as const;
+
+const eggGroupAliases = new Map([
+  ['field', 'ground'],
+  ['water-1', 'water1'],
+  ['water-2', 'water2'],
+  ['water-3', 'water3'],
+  ['grass', 'plant'],
+  ['human-like', 'humanshape'],
+  ['amorphous', 'indeterminate'],
+  ['undiscovered', 'no-eggs'],
+]);
+
 export const findPokemon = tool('pokeapi_find_pokemon', {
   title: 'Find Pokémon',
   description:
-    'Filter Pokémon by generation, type, regional pokédex, or egg group. ' +
-    'Returns names and PokéAPI IDs; every returned name works as a pokeapi_get_pokemon identifier, where a species name resolves to its default variety. ' +
-    'At least one of generation, type, pokedex, or egg_group is required; the ones provided are combined with AND logic, ' +
-    'and query adds strict token matching on name within them. ' +
-    'A call with no category filter, with or without query, returns an empty result and a notice naming the requirement.',
+    'Filter Pokémon by generation, type, regional pokédex, or egg group. Returns names and PokéAPI IDs; every returned name works as a pokeapi_get_pokemon identifier, where a species name resolves to its default variety. Pokédex searches include regional entry numbers and sort by those numbers before pagination. At least one of generation, type, pokedex, or egg_group is required; the ones provided are combined with AND logic, and query adds strict token matching on name within them. A call with no category filter, with or without query, returns an empty result and a notice naming the requirement.',
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   input: z.object({
     generation: z
@@ -32,13 +47,13 @@ export const findPokemon = tool('pokeapi_find_pokemon', {
       .string()
       .optional()
       .describe(
-        'Regional pokédex name (e.g. "kanto", "hoenn", "galar"). Filters to entries in that dex.',
+        'PokéAPI pokédex name (e.g. "kanto", "hoenn", "original-sinnoh"). Use the specific dex for a region with multiple dexes.',
       ),
     egg_group: z
       .string()
       .optional()
       .describe(
-        'Egg group name (e.g. "monster", "fairy", "dragon"). Filters to Pokémon in this egg group.',
+        'Egg group name (e.g. "monster", "fairy", "field", "water 1"). Accepts PokéAPI names and in-game names.',
       ),
     query: z
       .string()
@@ -73,6 +88,10 @@ export const findPokemon = tool('pokeapi_find_pokemon', {
                 'PokéAPI ID: Pokémon record for type-only searches, species record whenever generation, pokedex, or egg_group is present. Form IDs are not National Pokédex numbers.',
               ),
             name: z.string().describe('Pokémon name.'),
+            entryNumber: z
+              .number()
+              .optional()
+              .describe('Number in the selected Pokédex. Present when pokedex is supplied.'),
           })
           .describe('Pokémon entry with PokéAPI ID and name.'),
       )
@@ -86,7 +105,10 @@ export const findPokemon = tool('pokeapi_find_pokemon', {
         generation: z.string().optional().describe('Normalized generation filter, when applied.'),
         type: z.string().optional().describe('Normalized type filter, when applied.'),
         pokedex: z.string().optional().describe('Normalized pokédex filter, when applied.'),
-        egg_group: z.string().optional().describe('Normalized egg-group filter, when applied.'),
+        egg_group: z
+          .string()
+          .optional()
+          .describe('Canonical PokéAPI egg-group name or ID, when applied.'),
         query: z
           .string()
           .optional()
@@ -122,26 +144,25 @@ export const findPokemon = tool('pokeapi_find_pokemon', {
       code: JsonRpcErrorCode.ValidationError,
       when: 'An unrecognized generation, type, pokédex, or egg-group name was provided.',
       recovery:
-        'Use a valid lowercase PokéAPI name (e.g. "generation-i", "fire", "kanto", "monster").',
+        'Use a valid PokéAPI name for the failed filter. See the error for its accepted names when available.',
     },
   ],
 
   async handler(input, ctx) {
     const svc = getPokeApiService();
-    const generation = input.generation?.trim()
-      ? svc.normalizeIdentifier(input.generation)
-      : undefined;
-    const typeName = input.type?.trim() ? svc.normalizeIdentifier(input.type) : undefined;
-    const pokedex = input.pokedex?.trim() ? svc.normalizeIdentifier(input.pokedex) : undefined;
-    const eggGroup = input.egg_group?.trim() ? svc.normalizeIdentifier(input.egg_group) : undefined;
+    const filters = categoryFilters.flatMap(([key, resource, method]) => {
+      const supplied = input[key];
+      if (!supplied?.trim()) return [];
+      const normalized = svc.normalizeIdentifier(supplied);
+      const value =
+        key === 'egg_group' ? (eggGroupAliases.get(normalized) ?? normalized) : normalized;
+      return [{ key, resource, method, supplied, value }];
+    });
     const tokens = input.query?.trim().toLowerCase().split(/\s+/).filter(Boolean) ?? [];
-    const hasFilter = Boolean(generation || typeName || pokedex || eggGroup);
+    const hasFilter = filters.length > 0;
     ctx.enrich({
       appliedFilters: {
-        ...(generation ? { generation } : {}),
-        ...(typeName ? { type: typeName } : {}),
-        ...(pokedex ? { pokedex } : {}),
-        ...(eggGroup ? { egg_group: eggGroup } : {}),
+        ...Object.fromEntries(filters.map(({ key, value }) => [key, value])),
         ...(hasFilter && tokens.length > 0 ? { query: tokens.join(' ') } : {}),
         limit: input.limit,
         offset: input.offset,
@@ -158,35 +179,29 @@ export const findPokemon = tool('pokeapi_find_pokemon', {
 
     // Collect candidate sets from each specified filter
     const candidateSets: PokemonListEntry[][] = [];
+    let dexNumbers: Map<number, number> | undefined;
 
-    try {
-      if (generation) {
-        const entries = await svc.getPokemonByGeneration(generation, ctx);
-        candidateSets.push(entries);
-      }
-
-      if (pokedex) {
-        const entries = await svc.getPokemonByPokedex(pokedex, ctx);
-        candidateSets.push(entries);
-      }
-
-      if (eggGroup) {
-        const entries = await svc.getPokemonByEggGroup(eggGroup, ctx);
-        candidateSets.push(entries);
-      }
-
-      if (typeName) {
-        const entries = await svc.getPokemonByType(typeName, ctx);
-        candidateSets.push(entries);
-      }
-    } catch (err) {
-      if (err instanceof McpError && err.code === JsonRpcErrorCode.NotFound) {
+    for (const { key, resource, method, supplied, value } of filters) {
+      try {
+        if (method === 'getPokemonByPokedex') {
+          const entries = await svc[method](value, ctx);
+          dexNumbers = new Map(entries.map(({ id, entryNumber }) => [id, entryNumber]));
+          candidateSets.push(entries);
+        } else {
+          candidateSets.push(await svc[method](value, ctx));
+        }
+      } catch (err) {
+        if (!(err instanceof McpError) || err.code !== JsonRpcErrorCode.NotFound) throw err;
+        const names = await svc.getFilterNames(resource, ctx);
+        const guidance = names?.length
+          ? `Valid names: ${names.join(', ')}.`
+          : 'The list of valid names could not be retrieved.';
+        const suppliedValue = JSON.stringify(supplied);
         throw ctx.fail(
           'invalid_filter',
-          `One of the provided filter values was not recognized by PokéAPI. Use valid lowercase PokéAPI names (e.g. "generation-i", "fire", "kanto", "monster").`,
+          `Unrecognized ${key} filter ${suppliedValue}. ${guidance}`,
         );
       }
-      throw err;
     }
 
     /**
@@ -213,8 +228,15 @@ export const findPokemon = tool('pokeapi_find_pokemon', {
       return { pokemon: [], totalCount: 0, shown: 0 };
     }
 
-    // Sort by id ascending
-    results.sort((a, b) => a.id - b.id);
+    if (dexNumbers) {
+      const numbered = results.flatMap((entry) => {
+        const entryNumber = dexNumbers.get(entry.id);
+        return entryNumber === undefined ? [] : [{ ...entry, entryNumber }];
+      });
+      results = numbered.sort((a, b) => a.entryNumber - b.entryNumber || a.id - b.id);
+    } else {
+      results.sort((a, b) => a.id - b.id);
+    }
 
     const totalCount = results.length;
     const page = results.slice(input.offset, input.offset + input.limit);
@@ -241,10 +263,17 @@ export const findPokemon = tool('pokeapi_find_pokemon', {
     if (result.pokemon.length === 0) {
       lines.push(result.totalCount > 0 ? '\n*(No entries on this page.)*' : '\n*(No results.)*');
     } else {
-      lines.push('\n| PokéAPI ID | Name |');
-      lines.push('|------------|------|');
+      const showDexNumbers = result.pokemon[0]?.entryNumber !== undefined;
+      lines.push(
+        showDexNumbers ? '\n| PokéAPI ID | Name | Pokédex number |' : '\n| PokéAPI ID | Name |',
+      );
+      lines.push(
+        showDexNumbers ? '|------------|------|----------------|' : '|------------|------|',
+      );
       for (const p of result.pokemon) {
-        lines.push(`| ${p.id} | ${p.name} |`);
+        lines.push(
+          `| ${p.id} | ${p.name} |${p.entryNumber === undefined ? '' : ` ${p.entryNumber} |`}`,
+        );
       }
     }
 

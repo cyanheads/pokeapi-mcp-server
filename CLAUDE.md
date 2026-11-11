@@ -2,8 +2,8 @@
 
 **Server:** pokeapi-mcp-server
 **Version:** 0.3.0
-**Framework:** [@cyanheads/mcp-ts-core](https://www.npmjs.com/package/@cyanheads/mcp-ts-core) `^0.13.18`
-**Engines:** Bun ≥1.4.0, Node ≥24.0.0
+**Framework:** [@cyanheads/mcp-ts-core](https://www.npmjs.com/package/@cyanheads/mcp-ts-core) `^0.13.22`
+**Engines:** Bun ≥1.4.4, Node ≥24.0.0
 **MCP SDK:** `@modelcontextprotocol/server` ^2.4.0
 **Zod:** ^4.6.7
 
@@ -103,6 +103,8 @@ export const getNature = tool('pokeapi_get_nature', {
 
 Tool inputs are strict at the root by default: `tools/list` advertises `additionalProperties: false`. Before validation, the framework drops undeclared client metadata keys and accepts unambiguous case-style key aliases; remaining unknown keys are rejected by name. Argument rejections carry `InvalidParams` with a reason and recovery hint. The advertised output schema accepts either the success shape or the framework's structured error envelope; the handler must satisfy the declared `output` schema. `error` is reserved in `output` and `enrichment` schemas.
 
+Handlers return the output schema's input type. The framework parses it once, and `format()` receives the parsed result. Enrichment is parsed independently and its keys must be disjoint from the output keys.
+
 ### Resource
 
 ```ts
@@ -117,7 +119,7 @@ export const pokemonResource = resource('pokeapi://pokemon/{identifier}', {
     reason: 'not_found',
     code: JsonRpcErrorCode.NotFound,
     when: 'No Pokémon matches the identifier.',
-    recovery: 'Use a valid lowercase hyphenated Pokémon name or numeric PokéAPI Pokémon-record ID.',
+    recovery: 'Use a valid Pokémon name or numeric PokéAPI Pokémon-record ID.',
   }],
   async handler(params, ctx) {
     const svc = getPokeApiService();
@@ -376,7 +378,7 @@ When you complete a skill's checklist, check the boxes and add a completion time
 
 **CI is one file.** `.github/workflows/codeql.yml` is the only GitHub Actions workflow, with repository CodeQL default setup off. Verification and release gates run locally; do not add a workflow that repeats them.
 
-`bun run bundle` produces a `.mcpb` extension bundle for one-click install in Claude Desktop. The pack step is followed by `scripts/clean-mcpb.ts`, which prunes dev dependencies (`mcpb clean`), strips dependency-shipped agent docs (`node_modules/**` `skills/`, `.claude/`, `.agents/`, `SKILL.md`), and removes incompatible native bindings that root-anchored `.mcpbignore` patterns cannot reach. MCPB is stdio-only — HTTP and Cloudflare Workers deployments are unaffected. Consumers who don't need it can delete `manifest.json` and `.mcpbignore`; `lint:packaging` skips cleanly.
+`bun run bundle` produces a stdio `.mcpb` extension bundle for one-click install in Claude Desktop. `mcpb pack` reads root-anchored `.mcpbignore` patterns, and the server's root `skills/` ships. `scripts/clean-mcpb.ts` prunes dev dependencies, platform-specific bindings, build-only files and dependency agent docs. Dependency agent directories and protocol files are stripped only at package roots, while `SKILL.md` is stripped anywhere inside dependencies. Nested runtime modules such as the SDK's `dist/ext/skills/` stay in the bundle.
 
 **Adding an env var requires both files:** `server.json` (registry discovery, `environmentVariables[]`) and `manifest.json` (bundle install UX, `mcp_config.env` + `user_config`). `lint:packaging` verifies name parity, that each `user_config` option is referenced as `${user_config.<option>}`, and that optional strings carry `"default": ""` so the host does not pass an unresolved placeholder.
 
@@ -444,7 +446,7 @@ import { getMyService } from '@/services/my-domain/my-service.js';
 - [ ] Registered in `createApp()` arrays (directly or via barrel exports)
 - [ ] Tests use `createMockContext()` from `@cyanheads/mcp-ts-core/testing`
 - [ ] PokéAPI responses: English-only text (`language.name === 'en'`) before returning; missing entries surface as `null`
-- [ ] Identifier lookups go through `PokeApiService.fetchByIdentifier`: it normalizes (trim, lowercase, hyphenate), URL-encodes once, rejects blank, `.`, `..`, unencodable, and over-`MAX_IDENTIFIER_LENGTH` identifiers as NotFound without a request, caches only identifiers matching `[a-z0-9-]`, and maps an upstream 400 for any other identifier to NotFound; TTL from `getServerConfig().cacheTtlSeconds`
+- [ ] Identifier lookups go through `PokeApiService.fetchByIdentifier`: fold display spellings, then reject empty, noncanonical, or over-`MAX_IDENTIFIER_LENGTH` results as NotFound before storage or record requests. Canonical names and IDs use tenant caching with `getServerConfig().cacheTtlSeconds`; canonical upstream errors other than 404 remain operational failures. Resource variables are decoded once by `createApp({ decodeResourceParams: true })`, never by the service
 - [ ] Pokémon dossiers, resources, and matchups share `resolvePokemon`: preserve direct form/numeric identity, resolve species names to their default record, and cache only verified successful species mappings with the configured TTL; never cache misses or failed defaults
 - [ ] Search intersections use IDs with species rows whenever generation, pokedex, or egg_group is present; type-only searches retain form record IDs and names
 - [ ] Default tests install explicit fetch fixtures; unmatched requests fail through `tests/setup.ts`, including attempts swallowed by handler error conversion

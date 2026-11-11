@@ -10,15 +10,13 @@ import { getPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 export const pokemonResource = resource('pokeapi://pokemon/{identifier}', {
   name: 'Pokémon Dossier',
   description:
-    'Pokémon dossier addressable by name or PokéAPI Pokémon-record ID, including forms. ' +
-    'A species name with no Pokémon record of its own resolves to the default variety of that species, named in resolvedFromSpecies. ' +
-    'Same payload as pokeapi_get_pokemon without move details, including every evolution alternative and its version and form metadata.',
+    'Pokémon dossier addressable by name or PokéAPI Pokémon-record ID, including forms. A species name with no Pokémon record of its own resolves to the default variety of that species, named in resolvedFromSpecies. Same payload as pokeapi_get_pokemon without move details, including flavor text provenance, species and regional dex entries, breeding fields, and every evolution alternative with its version and form metadata.',
   mimeType: 'application/json',
   params: z.object({
     identifier: z
       .string()
       .describe(
-        'Pokémon name (e.g. "bulbasaur", "charizard-mega-x") or PokéAPI Pokémon-record ID (e.g. "1", "10034").',
+        'Pokémon name (e.g. "bulbasaur", "Mr%20Mime") or PokéAPI Pokémon-record ID (e.g. "1", "10034").',
       ),
   }),
 
@@ -27,8 +25,7 @@ export const pokemonResource = resource('pokeapi://pokemon/{identifier}', {
       reason: 'not_found',
       code: JsonRpcErrorCode.NotFound,
       when: 'The identifier matches no Pokémon record and no species.',
-      recovery:
-        'Use a valid lowercase hyphenated Pokémon name or a numeric PokéAPI Pokémon-record ID.',
+      recovery: 'Use a valid Pokémon name or a numeric PokéAPI Pokémon-record ID.',
     },
   ],
 
@@ -41,7 +38,7 @@ export const pokemonResource = resource('pokeapi://pokemon/{identifier}', {
       if (err instanceof McpError && err.code === JsonRpcErrorCode.NotFound) {
         throw ctx.fail(
           'not_found',
-          `Pokémon "${params.identifier}" not found — use a valid lowercase name or numeric PokéAPI Pokémon-record ID.`,
+          `Pokémon "${params.identifier}" not found — check spelling or use a numeric PokéAPI Pokémon-record ID.`,
         );
       }
       throw err;

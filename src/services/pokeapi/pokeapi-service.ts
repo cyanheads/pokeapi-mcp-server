@@ -3,7 +3,7 @@
  * @module services/pokeapi/pokeapi-service
  */
 
-import type { Context } from '@cyanheads/mcp-ts-core';
+import { type Context, z } from '@cyanheads/mcp-ts-core';
 import type { AppConfig } from '@cyanheads/mcp-ts-core/config';
 import {
   JsonRpcErrorCode,
@@ -42,14 +42,31 @@ import type {
 } from './types.js';
 
 /**
- * Longest normalized identifier sent upstream. The longest name in the PokéAPI lists this
- * service reads is 32 characters. The bound caps the request URL for identifiers that
- * skip the cache, where the storage layer's 1024-character key limit never applies.
+ * Longest normalized identifier sent upstream. The bound limits the request path and cache key.
  */
 export const MAX_IDENTIFIER_LENGTH = 100;
 
 /** PokéAPI's name and ID alphabet — the only identifiers safe to use as a storage key. */
 const CANONICAL_IDENTIFIER = /^[a-z0-9-]+$/;
+
+const filterCatalogPage = z.object({
+  count: z.number().int().positive(),
+  next: z.string().nullable(),
+  results: z.array(z.object({ name: z.string().regex(CANONICAL_IDENTIFIER) })),
+});
+
+const versionGroupMetadata = z.object({
+  name: z.string(),
+  order: z.number().int(),
+});
+
+const MOVE_CHRONOLOGY_TIMEOUT_MS = 3_000;
+const VERSION_GROUP_CONCURRENCY = 8;
+
+/** The supplied group name matches no PokéAPI version group. */
+export class UnknownVersionGroupError extends Error {}
+
+type MoveMethods = Map<string, Map<string, Set<number>>>;
 
 export class PokeApiService {
   private readonly baseUrl: string;
@@ -69,24 +86,35 @@ export class PokeApiService {
   // Identifier normalization
   // ---------------------------------------------------------------------------
 
-  /**
-   * Trims, lowercases, and hyphenates whitespace. The result is not URL-encoded, so
-   * normalizing an already-normalized identifier returns it unchanged.
-   */
+  /** Folds in-game spellings into PokéAPI's name and ID format before validation. */
   normalizeIdentifier(identifier: string | number): string {
-    return String(identifier).trim().toLowerCase().replace(/\s+/g, '-');
+    return String(identifier)
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/\p{M}/gu, '')
+      .replace(/['’.:]/g, '')
+      .replaceAll('♀', '-f')
+      .replaceAll('♂', '-m')
+      .trim()
+      .replace(/\s+/g, '-');
+  }
+
+  private requireIdentifier(resource: string, identifier: string | number): string {
+    const id = this.normalizeIdentifier(identifier);
+    if (id.length > MAX_IDENTIFIER_LENGTH || !CANONICAL_IDENTIFIER.test(id)) {
+      throw notFound(`No PokéAPI ${resource} record matches the identifier.`, { resource });
+    }
+    return id;
   }
 
   // ---------------------------------------------------------------------------
   // Core fetch with caching
   // ---------------------------------------------------------------------------
 
-  /** Fetches `path`, reading and writing the cache only when `cacheKey` is a string. */
-  private async fetchRaw<T>(path: string, ctx: Context, cacheKey: string | null): Promise<T> {
-    if (cacheKey !== null) {
-      const cached = (await ctx.state.get(cacheKey)) as T | null;
-      if (cached !== null) return cached;
-    }
+  /** Fetches `path` on a cache miss. */
+  private async fetchRaw<T>(path: string, ctx: Context, cacheKey: string): Promise<T> {
+    const cached = await ctx.state.get<T>(cacheKey);
+    if (cached !== null) return cached;
 
     const timeoutMs = this.requestTimeoutMs;
     const baseUrl = this.baseUrl;
@@ -117,49 +145,63 @@ export class PokeApiService {
       },
     );
 
-    if (cacheKey !== null) await ctx.state.set(cacheKey, result, { ttl: this.cacheTtlSeconds });
+    await ctx.state.set(cacheKey, result, { ttl: this.cacheTtlSeconds });
     return result;
   }
 
-  /**
-   * Fetches one record of `resource` by name or ID. The identifier is URL-encoded here and
-   * nowhere else. An identifier that cannot name a record fails as NotFound without a
-   * request: blank, `.`, and `..` address the list endpoint or its parent once the URL is
-   * resolved, a lone surrogate has no URL encoding, and an overlong one exceeds any name.
-   * Only identifiers in PokéAPI's own alphabet are cached. For any other identifier, a 400
-   * is also NotFound: PokéAPI answers 400, not 404, to a path segment that needed encoding.
-   */
+  /** Fetches and caches one record. Invalid identifiers fail before storage or network access. */
   private async fetchByIdentifier<T>(
     resource: string,
     identifier: string | number,
     ctx: Context,
   ): Promise<T> {
-    const id = this.normalizeIdentifier(identifier);
-    const miss = () =>
-      notFound(`No PokéAPI ${resource} record matches the identifier.`, { resource });
-    if (
-      id === '' ||
-      id === '.' ||
-      id === '..' ||
-      id.length > MAX_IDENTIFIER_LENGTH ||
-      !id.isWellFormed()
-    ) {
-      throw miss();
-    }
-    if (CANONICAL_IDENTIFIER.test(id)) {
-      return this.fetchRaw<T>(`${resource}/${id}`, ctx, `pokeapi/${resource}/${id}`);
-    }
-    try {
-      return await this.fetchRaw<T>(`${resource}/${encodeURIComponent(id)}`, ctx, null);
-    } catch (err) {
-      if (err instanceof McpError && err.data?.status === 400) throw miss();
-      throw err;
-    }
+    const id = this.requireIdentifier(resource, identifier);
+    return await this.fetchRaw<T>(`${resource}/${id}`, ctx, `pokeapi/${resource}/${id}`);
   }
 
   // ---------------------------------------------------------------------------
   // Resource-specific fetchers
   // ---------------------------------------------------------------------------
+
+  /** Fetches the complete filter vocabulary on demand. Returns undefined if PokéAPI cannot supply it. */
+  async getFilterNames(
+    resource: 'generation' | 'type' | 'pokedex' | 'egg-group',
+    ctx: Context,
+  ): Promise<string[] | undefined> {
+    // Recovery is supplementary. One deadline covers all pages and their response bodies.
+    const deadline = AbortSignal.timeout(3_000);
+    const signal = AbortSignal.any([ctx.signal, deadline]);
+    const names: string[] = [];
+    const pageUrl = new URL(`${this.baseUrl}/${resource}`);
+    pageUrl.searchParams.set('limit', '100');
+
+    try {
+      while (!deadline.aborted) {
+        ctx.signal.throwIfAborted();
+        const response = await fetchWithTimeout(pageUrl.href, this.requestTimeoutMs, ctx, {
+          signal,
+          headers: { Accept: 'application/json' },
+          expectedStatuses: [404],
+        });
+        const page = filterCatalogPage.safeParse(await response.json());
+        ctx.signal.throwIfAborted();
+        if (!page.success) return undefined;
+        for (const { name } of page.data.results) names.push(name);
+        if (page.data.next === null) return names.length === page.data.count ? names : undefined;
+        if (page.data.results.length === 0) return undefined;
+        // Stay on the configured endpoint when advancing PokéAPI's offset pagination.
+        pageUrl.searchParams.set('offset', String(names.length));
+      }
+    } catch (err) {
+      if (err instanceof McpError && err.code === JsonRpcErrorCode.RequestCancelled) {
+        throw err;
+      }
+      ctx.signal.throwIfAborted();
+      if (!(err instanceof McpError || err instanceof SyntaxError)) throw err;
+    }
+    ctx.signal.throwIfAborted();
+    return undefined;
+  }
 
   fetchPokemon(identifier: string | number, ctx: Context): Promise<RawPokemon> {
     return this.fetchByIdentifier<RawPokemon>('pokemon', identifier, ctx);
@@ -237,11 +279,9 @@ export class PokeApiService {
     identifier: string | number,
     ctx: Context,
   ): Promise<{ pokemon: RawPokemon; resolvedFromSpecies: string | null }> {
-    const id = this.normalizeIdentifier(identifier);
-    const mappingKey =
-      CANONICAL_IDENTIFIER.test(id) && id.length <= MAX_IDENTIFIER_LENGTH && !/^\d+$/.test(id)
-        ? `pokeapi/species-resolution/${id}`
-        : null;
+    const id = this.requireIdentifier('pokemon', identifier);
+    const isNumeric = /^\d+$/.test(id);
+    const mappingKey = isNumeric ? null : `pokeapi/species-resolution/${id}`;
     if (mappingKey !== null) {
       const recordName = await ctx.state.get<string>(mappingKey);
       if (recordName !== null) {
@@ -249,11 +289,11 @@ export class PokeApiService {
       }
     }
     try {
-      return { pokemon: await this.fetchPokemon(identifier, ctx), resolvedFromSpecies: null };
+      return { pokemon: await this.fetchPokemon(id, ctx), resolvedFromSpecies: null };
     } catch (err) {
       const isMiss = err instanceof McpError && err.code === JsonRpcErrorCode.NotFound;
-      if (!isMiss || /^\d+$/.test(id)) throw err;
-      const species = await this.fetchSpecies(identifier, ctx);
+      if (!isMiss || isNumeric) throw err;
+      const species = await this.fetchSpecies(id, ctx);
       const defaultVariety = species.varieties.find((variety) => variety.is_default);
       if (!defaultVariety) throw err;
       const pokemon = await this.fetchPokemon(defaultVariety.pokemon.name, ctx);
@@ -267,12 +307,13 @@ export class PokeApiService {
     }
   }
 
-  /** Full denormalized Pokémon dossier — up to 3+N calls in two async tiers. */
+  /** Full denormalized Pokémon dossier, with optional version-group learnset selection. */
   async getPokemonDossier(
     identifier: string | number,
     includesMoves: boolean,
     gameVersion: string | undefined,
     ctx: Context,
+    requestedVersionGroup?: string,
   ): Promise<PokemonDossier> {
     // Tier 1: fetch the pokemon entry first to resolve the canonical species name.
     // For variant forms (e.g. "pikachu-rock-star"), pokemon.species.name is the base
@@ -287,9 +328,6 @@ export class PokeApiService {
       this.fetchEvolutionChain(species.evolution_chain.url, ctx),
       ...pokemon.abilities.map((a) => this.fetchAbility(a.ability.name, ctx)),
     ]);
-
-    // Resolve flavor text
-    const flavorText = this.resolveFlavorText(species.flavor_text_entries, gameVersion);
 
     // Resolve genus
     const genusEntry = species.genera.find((g) => g.language.name === 'en');
@@ -314,10 +352,33 @@ export class PokeApiService {
       effort: s.effort,
     }));
 
-    // Resolve moves (summarized)
-    let moves: PokemonMoveSummary[] = [];
-    if (includesMoves) {
-      moves = this.summarizeMoves(pokemon.moves);
+    const notices: string[] = [];
+    const englishEntries = species.flavor_text_entries.filter(
+      (entry) => entry.language.name === 'en',
+    );
+    const versionName = gameVersion?.toLowerCase().trim();
+    const match = gameVersion
+      ? englishEntries.find((entry) => entry.version.name === versionName)
+      : undefined;
+    const flavorEntry = match ?? englishEntries.at(-1);
+    if (!flavorEntry) {
+      notices.push(
+        gameVersion
+          ? `No English flavor text is available for ${gameVersion} or any other version.`
+          : 'No English flavor text is available.',
+      );
+    } else if (gameVersion && !match) {
+      notices.push(
+        `No English flavor text is available for ${gameVersion}. Showing the entry from ${flavorEntry.version.name}.`,
+      );
+    }
+    const shouldIncludeMoves = includesMoves || requestedVersionGroup !== undefined;
+    const moves = shouldIncludeMoves
+      ? await this.summarizeMoves(pokemon.moves, requestedVersionGroup, notices, ctx)
+      : [];
+    const moveCount = new Set(pokemon.moves.map(({ move }) => move.name)).size;
+    if (!shouldIncludeMoves && moveCount > 0) {
+      notices.push('Pass include_moves=true to include the full move summary.');
     }
 
     // Walk evolution chain
@@ -331,6 +392,14 @@ export class PokeApiService {
 
     return {
       id: pokemon.id,
+      speciesId: species.id,
+      pokedexNumbers: species.pokedex_numbers.map(({ pokedex, entry_number }) => ({
+        pokedex: pokedex.name,
+        entryNumber: entry_number,
+      })),
+      hatchCounter: species.hatch_counter ?? null,
+      baseHappiness: species.base_happiness ?? null,
+      isBaby: species.is_baby,
       name: pokemon.name,
       resolvedFromSpecies,
       heightDm: pokemon.height,
@@ -344,8 +413,10 @@ export class PokeApiService {
         officialArtwork: pokemon.sprites.other?.['official-artwork']?.front_default ?? null,
       },
       moves,
-      moveCount: pokemon.moves.length,
-      speciesFlavorText: flavorText,
+      moveCount,
+      notices,
+      speciesFlavorText: flavorEntry?.flavor_text.replace(/[\f\n]/g, ' ') ?? null,
+      flavorTextVersion: flavorEntry?.version.name ?? null,
       genus: genusEntry?.genus ?? null,
       captureRate: species.capture_rate,
       growthRate: species.growth_rate.name,
@@ -520,14 +591,18 @@ export class PokeApiService {
     });
   }
 
-  /** Filter by regional pokédex, preserving species IDs rather than regional entry numbers. */
-  async getPokemonByPokedex(pokedex: string, ctx: Context): Promise<PokemonListEntry[]> {
+  /** Filter by regional pokédex, preserving species IDs and regional entry numbers. */
+  async getPokemonByPokedex(
+    pokedex: string,
+    ctx: Context,
+  ): Promise<Array<PokemonListEntry & { entryNumber: number }>> {
     const raw = await this.fetchPokedex(pokedex, ctx);
     return raw.pokemon_entries.map((e) => {
       const idMatch = e.pokemon_species.url.match(/\/(\d+)\/?$/);
       return {
         id: idMatch ? Number(idMatch[1]) : 0,
         name: e.pokemon_species.name,
+        entryNumber: e.entry_number,
       };
     });
   }
@@ -548,39 +623,158 @@ export class PokeApiService {
   // Internal helpers
   // ---------------------------------------------------------------------------
 
-  private resolveFlavorText(
-    entries: RawPokemonSpecies['flavor_text_entries'],
-    gameVersion: string | undefined,
-  ): string | null {
-    const enEntries = entries.filter((e) => e.language.name === 'en');
-    if (enEntries.length === 0) return null;
+  private async readVersionGroup(name: string, ctx: Context, signal: AbortSignal): Promise<number> {
+    const key = `pokeapi/version-group-order/${name}`;
+    signal.throwIfAborted();
+    const cached = await ctx.state.get<number>(key);
+    signal.throwIfAborted();
+    if (cached !== null) return cached;
 
-    if (gameVersion) {
-      const match = enEntries.find((e) => e.version.name === gameVersion.toLowerCase().trim());
-      if (match) {
-        return match.flavor_text.replace(/\f/g, ' ').replace(/\n/g, ' ');
+    const response = await fetchWithTimeout(
+      `${this.baseUrl}/version-group/${name}`,
+      this.requestTimeoutMs,
+      ctx,
+      {
+        signal,
+        headers: { Accept: 'application/json' },
+        expectedStatuses: [404],
+      },
+    );
+    const group = versionGroupMetadata.safeParse(await response.json());
+    signal.throwIfAborted();
+    if (!group.success || group.data.name !== name) {
+      throw serviceUnavailable('PokéAPI returned invalid version-group metadata.');
+    }
+    await ctx.state.set(key, group.data.order, { ttl: this.cacheTtlSeconds });
+    return group.data.order;
+  }
+
+  private async readMoveChronology(
+    names: Set<string>,
+    ctx: Context,
+  ): Promise<Map<string, number> | undefined> {
+    if (names.size === 0) return new Map();
+    const deadline = AbortSignal.timeout(MOVE_CHRONOLOGY_TIMEOUT_MS);
+    const signal = AbortSignal.any([ctx.signal, deadline]);
+    const orders = new Map<string, number>();
+    const groups = [...names];
+    for (let i = 0; i < groups.length; i += VERSION_GROUP_CONCURRENCY) {
+      const results = await Promise.allSettled(
+        groups.slice(i, i + VERSION_GROUP_CONCURRENCY).map(async (name) => {
+          if (!CANONICAL_IDENTIFIER.test(name) || name.length > MAX_IDENTIFIER_LENGTH) {
+            throw serviceUnavailable('PokéAPI returned an invalid version-group name.');
+          }
+          orders.set(name, await this.readVersionGroup(name, ctx, signal));
+        }),
+      );
+      ctx.signal.throwIfAborted();
+      let unavailable = false;
+      for (const result of results) {
+        if (result.status === 'fulfilled') continue;
+        const err: unknown = result.reason;
+        if (
+          err instanceof SyntaxError ||
+          (err instanceof McpError &&
+            (err.data?.errorSource === 'FetchHttpError' ||
+              err.code === JsonRpcErrorCode.DatabaseError ||
+              err.code === JsonRpcErrorCode.SerializationError ||
+              err.code === JsonRpcErrorCode.ServiceUnavailable ||
+              err.code === JsonRpcErrorCode.Timeout)) ||
+          (deadline.aborted &&
+            (err === deadline.reason ||
+              (err instanceof McpError && err.code === JsonRpcErrorCode.RequestCancelled)))
+        ) {
+          unavailable = true;
+        } else {
+          throw err;
+        }
+      }
+      if (unavailable) return undefined;
+    }
+    return orders;
+  }
+
+  private async summarizeMoves(
+    moves: RawPokemon['moves'],
+    requestedVersionGroup: string | undefined,
+    notices: string[],
+    ctx: Context,
+  ): Promise<PokemonMoveSummary[]> {
+    const scope =
+      requestedVersionGroup === undefined
+        ? undefined
+        : this.normalizeIdentifier(requestedVersionGroup);
+    if (
+      scope !== undefined &&
+      (scope.length > MAX_IDENTIFIER_LENGTH ||
+        !CANONICAL_IDENTIFIER.test(scope) ||
+        /^\d+$/.test(scope))
+    ) {
+      throw new UnknownVersionGroupError();
+    }
+
+    const byMove = new Map<string, MoveMethods>();
+    for (const { move, version_group_details } of moves) {
+      for (const detail of version_group_details) {
+        const group = detail.version_group.name;
+        if (scope !== undefined && group !== scope) continue;
+        const method = detail.move_learn_method.name;
+        const methods = byMove.get(move.name) ?? new Map();
+        const groups = methods.get(method) ?? new Map<string, Set<number>>();
+        const levels = groups.get(group) ?? new Set<number>();
+        levels.add(detail.level_learned_at);
+        // Preserve each group's last source position for the disclosed fallback.
+        groups.delete(group);
+        groups.set(group, levels);
+        methods.set(method, groups);
+        byMove.set(move.name, methods);
       }
     }
 
-    // Fall back to most recent available English entry
-    const first = enEntries[enEntries.length - 1];
-    if (!first) return null;
-    return first.flavor_text.replace(/\f/g, ' ').replace(/\n/g, ' ');
-  }
-
-  private summarizeMoves(moves: RawPokemon['moves']): PokemonMoveSummary[] {
-    // Deduplicate by move name, picking the most recent version group detail
-    const seen = new Map<string, PokemonMoveSummary>();
-    for (const m of moves) {
-      const detail = m.version_group_details[m.version_group_details.length - 1];
-      if (!detail) continue;
-      seen.set(m.move.name, {
-        name: m.move.name,
-        learnMethod: detail.move_learn_method.name,
-        levelLearnedAt: detail.level_learned_at,
-      });
+    if (scope !== undefined && byMove.size === 0) {
+      try {
+        await this.readVersionGroup(scope, ctx, ctx.signal);
+      } catch (err) {
+        if (err instanceof McpError && err.code === JsonRpcErrorCode.NotFound) {
+          throw new UnknownVersionGroupError();
+        }
+        throw err;
+      }
+      notices.push(`No learnable moves are listed for ${scope}.`);
     }
-    return Array.from(seen.values()).sort((a, b) => a.name.localeCompare(b.name));
+
+    const ambiguous = new Set<string>();
+    for (const methods of byMove.values()) {
+      for (const groups of methods.values()) {
+        if (groups.size > 1) for (const group of groups.keys()) ambiguous.add(group);
+      }
+    }
+    const orders = await this.readMoveChronology(ambiguous, ctx);
+    if (!orders) {
+      notices.push(
+        'Version-group chronology could not be established. Each move and method uses its last group in PokéAPI source order.',
+      );
+    }
+
+    const summaries: PokemonMoveSummary[] = [];
+    for (const [name, methods] of byMove) {
+      for (const [learnMethod, groups] of methods) {
+        let versionGroup = '';
+        let levels = new Set<number>();
+        let latestOrder = -Infinity;
+        for (const [group, groupLevels] of groups) {
+          const order = orders?.get(group) ?? -Infinity;
+          if (order < latestOrder) continue;
+          versionGroup = group;
+          levels = groupLevels;
+          latestOrder = order;
+        }
+        for (const levelLearnedAt of levels) {
+          summaries.push({ name, learnMethod, levelLearnedAt, versionGroup });
+        }
+      }
+    }
+    return summaries.sort((a, b) => a.name.localeCompare(b.name));
   }
 
   private walkEvolutionChain(link: RawChainLink): EvolutionStep {

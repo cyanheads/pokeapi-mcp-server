@@ -1,5 +1,5 @@
 /**
- * @fileoverview Identifier encoding, rejection, and declared-reason contracts for every lookup surface.
+ * @fileoverview Identifier normalization, rejection, and declared-reason contracts for lookup surfaces.
  * @module tests/tools/identifier-contracts.test
  */
 
@@ -112,19 +112,6 @@ function notFoundHttp() {
   ]);
 }
 
-/** PokéAPI answers 400, not 404, to a path segment that carries percent-encoding. */
-function badRequestHttp() {
-  return createFetchMock([
-    {
-      match: /^https:\/\/pokeapi\.co\/api\/v2\//,
-      respond: (request) =>
-        request.url.includes('%')
-          ? new Response('Bad Request', { status: 400 })
-          : new Response('Not Found', { status: 404 }),
-    },
-  ]);
-}
-
 function textOf(result: ToolResult) {
   return result.content
     .filter((block) => block.type === 'text')
@@ -146,13 +133,13 @@ beforeEach(() => {
 });
 
 describe('lookup tools', () => {
-  it.each(LOOKUPS)('$name encodes the identifier once and returns not_found', async (lookup) => {
+  it.each(LOOKUPS)('$name returns not_found for an invented canonical name', async (lookup) => {
     const http = notFoundHttp();
     http.install();
     try {
-      const result = await lookup.run(' Missing/Type Value ');
+      const result = await lookup.run(' Missing Type Value ');
       expect(http.calls.map((call) => call.request.url)).toEqual(
-        lookup.paths.map((path) => `${BASE}/${path}/missing%2Ftype-value`),
+        lookup.paths.map((path) => `${BASE}/${path}/missing-type-value`),
       );
       expectDeclared(result, JsonRpcErrorCode.NotFound, 'not_found', lookup.recovery);
     } finally {
@@ -160,27 +147,25 @@ describe('lookup tools', () => {
     }
   });
 
-  it.each([
-    ['flabébé', 'flab%C3%A9b%C3%A9'],
-    ['a?b=c#d', 'a%3Fb%3Dc%23d'],
-    ['A%2Fb', 'a%252fb'],
-    ['../type/fire', '..%2Ftype%2Ffire'],
-  ])('pokeapi_get_ability sends %j as the single path segment %j', async (identifier, segment) => {
-    const http = notFoundHttp();
-    http.install();
-    try {
-      const result = await runToolContract(getAbility, { identifier });
-      expect(http.calls.map((call) => call.request.url)).toEqual([`${BASE}/ability/${segment}`]);
-      expectDeclared(
-        result,
-        JsonRpcErrorCode.NotFound,
-        'not_found',
-        recoveryOf(getAbility.errors, 'not_found'),
-      );
-    } finally {
-      http.restore();
-    }
-  });
+  it.each(['a?b=c#d', 'A%2Fb', '../type/fire', 'a_b'])(
+    'pokeapi_get_ability rejects %j locally',
+    async (identifier) => {
+      const http = notFoundHttp();
+      http.install();
+      try {
+        const result = await runToolContract(getAbility, { identifier });
+        expect(http.calls).toHaveLength(0);
+        expectDeclared(
+          result,
+          JsonRpcErrorCode.NotFound,
+          'not_found',
+          recoveryOf(getAbility.errors, 'not_found'),
+        );
+      } finally {
+        http.restore();
+      }
+    },
+  );
 
   it.each(LOOKUPS)(
     '$name rejects blank, dot, overlong, and unencodable identifiers without a request',
@@ -221,10 +206,10 @@ describe('lookup tools', () => {
     }
   });
 
-  it('returns a record for an identifier outside [a-z0-9-] that upstream accepts', async () => {
+  it('returns the canonical record for a display spelling', async () => {
     const http = createFetchMock([
       {
-        match: (request) => request.url === `${BASE}/nature/h%C3%A1rdy`,
+        match: (request) => request.url === `${BASE}/nature/hardy`,
         respond: () => Response.json({ id: 1, name: 'hardy' }),
       },
     ]);
@@ -245,16 +230,16 @@ describe('lookup tools', () => {
 });
 
 describe('resources', () => {
-  it.each(RESOURCES)('$name encodes the identifier once and fails as not_found', async (entry) => {
+  it.each(RESOURCES)('$name returns not_found for an invented canonical name', async (entry) => {
     const http = notFoundHttp();
     http.install();
     try {
-      await expect(entry.read(' Missing/Type Value ')).rejects.toMatchObject({
+      await expect(entry.read(' Missing Type Value ')).rejects.toMatchObject({
         code: JsonRpcErrorCode.NotFound,
         data: { reason: 'not_found' },
       });
       expect(http.calls.map((call) => call.request.url)).toEqual(
-        entry.paths.map((path) => `${BASE}/${path}/missing%2Ftype-value`),
+        entry.paths.map((path) => `${BASE}/${path}/missing-type-value`),
       );
     } finally {
       http.restore();
@@ -281,33 +266,29 @@ describe('resources', () => {
   );
 });
 
-describe('upstream 400 for an identifier that needs encoding', () => {
-  it.each(LOOKUPS)('$name returns not_found after one request per path', async (lookup) => {
-    const http = badRequestHttp();
+describe('noncanonical identifiers and upstream error classification', () => {
+  it.each(LOOKUPS)('$name returns not_found without a request', async (lookup) => {
+    const http = notFoundHttp();
     http.install();
     try {
       const result = await lookup.run('a/b');
       expectDeclared(result, JsonRpcErrorCode.NotFound, 'not_found', lookup.recovery);
       expect(JSON.stringify(result)).not.toContain('Fetch failed');
-      expect(http.calls.map((call) => call.request.url)).toEqual(
-        lookup.paths.map((path) => `${BASE}/${path}/a%2Fb`),
-      );
+      expect(http.calls).toHaveLength(0);
     } finally {
       http.restore();
     }
   });
 
   it.each(RESOURCES)('$name fails as not_found', async (entry) => {
-    const http = badRequestHttp();
+    const http = notFoundHttp();
     http.install();
     try {
-      await expect(entry.read('flabébé')).rejects.toMatchObject({
+      await expect(entry.read('a/b')).rejects.toMatchObject({
         code: JsonRpcErrorCode.NotFound,
         data: { reason: 'not_found' },
       });
-      expect(http.calls.map((call) => call.request.url)).toEqual(
-        entry.paths.map((path) => `${BASE}/${path}/flab%C3%A9b%C3%A9`),
-      );
+      expect(http.calls).toHaveLength(0);
     } finally {
       http.restore();
     }
@@ -318,10 +299,10 @@ describe('upstream 400 for an identifier that needs encoding', () => {
     ['generation', 'generation'],
     ['pokedex', 'pokedex'],
     ['egg_group', 'egg-group'],
-  ] as const)(
-    'pokeapi_find_pokemon returns invalid_filter for the %s filter',
-    async (key, path) => {
-      const http = badRequestHttp();
+  ])(
+    'pokeapi_find_pokemon only fetches the catalog for a noncanonical %s filter',
+    async (key, resource) => {
+      const http = notFoundHttp();
       http.install();
       try {
         expectDeclared(
@@ -330,18 +311,23 @@ describe('upstream 400 for an identifier that needs encoding', () => {
           'invalid_filter',
           recoveryOf(findPokemon.errors, 'invalid_filter'),
         );
-        expect(http.calls.map((call) => call.request.url)).toEqual([`${BASE}/${path}/a%2Fb`]);
+        expect(http.calls.map(({ request }) => request.url)).toEqual([
+          `${BASE}/${resource}?limit=100`,
+        ]);
       } finally {
         http.restore();
       }
     },
   );
 
-  it('keeps a 400 for an identifier in PokéAPI’s own alphabet as an upstream failure', async () => {
+  it.each([
+    [400, JsonRpcErrorCode.InvalidParams],
+    [403, JsonRpcErrorCode.Forbidden],
+  ])('preserves canonical upstream HTTP %d as an operational failure', async (status, code) => {
     const http = createFetchMock([
       {
         match: `${BASE}/ability/levitate`,
-        respond: () => new Response('Bad Request', { status: 400 }),
+        respond: () => new Response('Upstream error', { status }),
       },
     ]);
     http.install();
@@ -349,7 +335,7 @@ describe('upstream 400 for an identifier that needs encoding', () => {
       const result = await runToolContract(getAbility, { identifier: 'levitate' });
       expect(result.isError).toBe(true);
       expect(result.structuredContent).toMatchObject({
-        error: { code: JsonRpcErrorCode.InvalidParams },
+        error: { code },
       });
       expect(result.structuredContent).not.toMatchObject({
         error: { data: { reason: 'not_found' } },
@@ -361,9 +347,14 @@ describe('upstream 400 for an identifier that needs encoding', () => {
 });
 
 describe('pokeapi_find_pokemon category filters', () => {
-  it.each(['type', 'generation', 'pokedex', 'egg_group'] as const)(
-    'rejects a dot, overlong, or unencodable %s filter as invalid_filter without a request',
-    async (key) => {
+  it.each([
+    ['type', 'type'],
+    ['generation', 'generation'],
+    ['pokedex', 'pokedex'],
+    ['egg_group', 'egg-group'],
+  ] as const)(
+    'rejects a dot, overlong, or unencodable %s filter without a record request',
+    async (key, resource) => {
       const http = notFoundHttp();
       http.install();
       try {
@@ -375,7 +366,9 @@ describe('pokeapi_find_pokemon category filters', () => {
             recoveryOf(findPokemon.errors, 'invalid_filter'),
           );
         }
-        expect(http.calls).toHaveLength(0);
+        expect(http.calls.map(({ request }) => request.url)).toEqual(
+          Array(5).fill(`${BASE}/${resource}?limit=100`),
+        );
       } finally {
         http.restore();
       }
@@ -392,7 +385,9 @@ describe('pokeapi_find_pokemon category filters', () => {
         'invalid_filter',
         recoveryOf(findPokemon.errors, 'invalid_filter'),
       );
-      expect(http.calls).toHaveLength(0);
+      expect(http.calls.map(({ request }) => request.url)).toEqual([
+        `${BASE}/generation?limit=100`,
+      ]);
     } finally {
       http.restore();
     }

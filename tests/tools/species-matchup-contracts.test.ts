@@ -90,9 +90,13 @@ describe('species-aware matchups', () => {
     http = handlerHttp();
     http.install();
     const ctx = createMockContext({ errors: getTypeMatchups.errors });
-    const dossier = await getPokemon.handler(getPokemon.input.parse({ identifier: 'deoxys' }), ctx);
+    const dossierCtx = { ...createMockContext({ errors: getPokemon.errors }), state: ctx.state };
+    const dossier = await getPokemon.handler(
+      getPokemon.input.parse({ identifier: 'deoxys' }),
+      dossierCtx,
+    );
     expect(dossier.resolvedFromSpecies).toBe('deoxys');
-    expect(getPokemon.format!(dossier)[0]).toMatchObject({
+    expect(getPokemon.format!(getPokemon.output!.parse(dossier))[0]).toMatchObject({
       text: expect.stringContaining('Resolved from species'),
     });
     const resource = await pokemonResource.handler({ identifier: ' DEOXYS ' }, ctx);

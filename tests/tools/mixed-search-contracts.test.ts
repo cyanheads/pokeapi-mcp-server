@@ -26,6 +26,59 @@ const species = [ref('deoxys', 'pokemon-species', 386), ref('wormadam', 'pokemon
 const filters = { generation: 'generation-iii', pokedex: 'fixture-dex', egg_group: 'fixture-egg' };
 
 describe('mixed-filter search', () => {
+  it('joins dex numbers by species ID and orders the whole intersection before paging', async () => {
+    const chansey = ref('chansey', 'pokemon-species', 113);
+    const psyduck = ref('psyduck', 'pokemon-species', 54);
+    const raichu = ref('raichu', 'pokemon-species', 26);
+    http = handlerHttp({
+      'generation/generation-i': { pokemon_species: [raichu, psyduck, chansey] },
+      'pokedex/paldea': {
+        pokemon_entries: [
+          { pokemon_species: psyduck, entry_number: 55 },
+          { pokemon_species: chansey, entry_number: 44 },
+          { pokemon_species: raichu, entry_number: 75 },
+        ],
+      },
+    });
+    http.install();
+    for (const [offset, id, name, entryNumber] of [
+      [0, 113, 'chansey', 44],
+      [1, 54, 'psyduck', 55],
+      [2, 26, 'raichu', 75],
+    ] as const) {
+      const result = await runToolContract(findPokemon, {
+        generation: 'generation-i',
+        pokedex: 'paldea',
+        offset,
+        limit: 1,
+      });
+      expect(result.structuredContent).toMatchObject({
+        pokemon: [{ id, name, entryNumber }],
+        totalCount: 3,
+        shown: 1,
+      });
+      expect(textOf(result)).toContain(`| ${id} | ${name} | ${entryNumber} |`);
+    }
+    const past = await runToolContract(findPokemon, {
+      generation: 'generation-i',
+      pokedex: 'paldea',
+      offset: 3,
+      limit: 1,
+    });
+    expect(past.structuredContent).toMatchObject({
+      pokemon: [],
+      totalCount: 3,
+      shown: 0,
+      notice: expect.stringContaining('Offset 3'),
+    });
+    expect(textOf(past)).toContain('No entries on this page.');
+    expect(
+      http.calls.every(({ request }) =>
+        /\/(?:generation|pokedex)\//.test(new URL(request.url).pathname),
+      ),
+    ).toBe(true);
+  });
+
   it('characterizes type-only record names, IDs, tokens, and re-sliced pages', async () => {
     http = handlerHttp();
     http.install();

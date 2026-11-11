@@ -361,6 +361,7 @@ export interface PokemonMoveSummary {
   learnMethod: string;
   levelLearnedAt: number;
   name: string;
+  versionGroup: string;
 }
 
 export interface EvolutionStep {
@@ -414,24 +415,31 @@ export interface EvolutionDetail {
 
 export interface PokemonDossier {
   abilities: PokemonAbilityRef[];
+  baseHappiness: number | null;
   captureRate: number;
   eggGroups: string[];
   evolutionChain: EvolutionStep | null;
+  flavorTextVersion: string | null;
   genderRate: number;
   generation: string;
   genus: string | null;
   growthRate: string;
+  hatchCounter: number | null;
   heightDm: number;
   /** Pokémon-record ID, including form IDs; not necessarily a National Pokédex number. */
   id: number;
+  isBaby: boolean;
   isLegendary: boolean;
   isMythical: boolean;
   moveCount: number;
   moves: PokemonMoveSummary[];
   name: string;
+  notices: string[];
+  pokedexNumbers: Array<{ pokedex: string; entryNumber: number }>;
   /** Species name the identifier matched instead of a Pokémon record; null for a direct match. */
   resolvedFromSpecies: string | null;
   speciesFlavorText: string | null;
+  speciesId: number;
   sprites: {
     frontDefault: string | null;
     frontShiny: string | null;
@@ -517,6 +525,7 @@ export interface NatureDetails {
 }
 
 export interface PokemonListEntry {
+  entryNumber?: number;
   /** Pokémon-record ID for type catalogs; species ID for generation, pokédex and egg groups. */
   id: number;
   name: string;

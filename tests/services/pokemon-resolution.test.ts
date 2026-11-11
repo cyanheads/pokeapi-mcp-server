@@ -115,14 +115,11 @@ describe('species resolution cache', () => {
   });
 
   it.each(['', ' ', '.', '..', 'x'.repeat(101), '\ud800', 'deoxys/normal', 'deoxys?x=1'])(
-    'does not consult or write resolution state for unsafe identifier %j',
+    'does not consult storage or upstream for unsafe identifier %j',
     async (identifier) => {
-      http = createFetchMock(
-        ['pokemon', 'pokemon-species'].map((resource) => ({
-          match: `https://pokeapi.co/api/v2/${resource}/${encodeURIComponent(identifier.toWellFormed())}`,
-          respond: () => new Response('', { status: 400 }),
-        })),
-      );
+      http = createFetchMock([
+        { match: () => true, respond: () => new Response('', { status: 404 }) },
+      ]);
       http.install();
       const ctx = createMockContext();
       const reads = vi.spyOn(ctx.state, 'get');
@@ -132,7 +129,7 @@ describe('species resolution cache', () => {
       });
       expect(reads).not.toHaveBeenCalled();
       expect(writes).not.toHaveBeenCalled();
-      expect(http.calls).toHaveLength(identifier.includes('/') || identifier.includes('?') ? 2 : 0);
+      expect(http.calls).toHaveLength(0);
     },
   );
 

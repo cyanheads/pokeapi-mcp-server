@@ -162,6 +162,10 @@ describe('framework error contracts', () => {
         match: 'https://pokeapi.co/api/v2/generation/missing',
         respond: new Response('Not Found', { status: 404 }),
       },
+      {
+        match: 'https://pokeapi.co/api/v2/generation?limit=100',
+        respond: new Response('Not Found', { status: 404 }),
+      },
     ]);
     http.install();
     try {

@@ -29,6 +29,7 @@ describe('pokemonResource', () => {
 
     expect(result).toHaveProperty('id', 25);
     expect(result).toHaveProperty('name', 'pikachu');
+    expect(result).toHaveProperty('flavorTextVersion', 'shield');
     expect((result as Record<string, unknown>).types).toBeInstanceOf(Array);
     expect((result as Record<string, unknown>).stats).toBeInstanceOf(Array);
   }, 15000);
@@ -40,6 +41,7 @@ describe('pokemonResource', () => {
 
     expect(result).toHaveProperty('id', 1);
     expect(result).toHaveProperty('name', 'bulbasaur');
+    expect(result).toMatchObject({ speciesId: 1, isBaby: false });
   }, 15000);
 
   it('does not include moves (resource returns dossier without move details)', async () => {

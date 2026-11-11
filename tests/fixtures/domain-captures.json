@@ -3469,6 +3469,9 @@
   },
   "species": {
     "inkay": {
+      "id": 686,
+      "is_baby": false,
+      "pokedex_numbers": [],
       "evolution_chain": {
         "url": "https://pokeapi.co/api/v2/evolution-chain/352/"
       },
@@ -3674,6 +3677,14 @@
       ]
     },
     "bulbasaur": {
+      "id": 1,
+      "is_baby": false,
+      "pokedex_numbers": [
+        {
+          "entry_number": 1,
+          "pokedex": { "name": "national", "url": "https://pokeapi.co/api/v2/pokedex/1/" }
+        }
+      ],
       "evolution_chain": {
         "url": "https://pokeapi.co/api/v2/evolution-chain/1/"
       },
@@ -4099,6 +4110,9 @@
       ]
     },
     "charizard": {
+      "id": 6,
+      "is_baby": false,
+      "pokedex_numbers": [],
       "evolution_chain": {
         "url": "https://pokeapi.co/api/v2/evolution-chain/2/"
       },

@@ -171,7 +171,7 @@ describe('search and format characterization', () => {
         limit: 1,
       });
       expect(combined.structuredContent).toMatchObject({
-        pokemon: [{ id: 4, name: 'charmander' }],
+        pokemon: [{ id: 5, name: 'charmeleon', entryNumber: 1 }],
         totalCount: 3,
         shown: 1,
       });
@@ -314,22 +314,24 @@ describe('search and format characterization', () => {
     try {
       const result = await runToolContract(getPokemon, {
         identifier: 'bulbasaur',
-        include_moves: true,
+        version_group: 'scarlet-violet',
       });
       const output = getPokemon.output.parse(result.structuredContent);
       expect(output.moves.length).toBeGreaterThan(0);
       for (const entry of output.moves)
         expect(textOf(result)).toContain(
-          `- ${entry.name} — ${entry.learnMethod} (level: ${entry.levelLearnedAt})`,
+          `- ${entry.name} — ${entry.learnMethod} (level: ${entry.levelLearnedAt}, version group: ${entry.versionGroup})`,
         );
       expect(textOf(result)).toContain('**Legendary:** No');
       expect(textOf(result)).toContain('**Mythical:** No');
       const form = await runToolContract(getPokemon, { identifier: '10034' });
       expect(form.structuredContent).toMatchObject({
         id: 10034,
+        speciesId: 6,
         name: 'charizard-mega-x',
         evolutionChain: { species: 'charmander' },
       });
+      expect(textOf(form)).toContain('**National Pokédex number:** 6');
       expect(http.calls.map((call) => call.request.url)).toContain(
         'https://pokeapi.co/api/v2/pokemon-species/charizard',
       );
@@ -382,7 +384,7 @@ describe('effective search filters and empty-page guidance', () => {
     ['generation', 'generation'],
     ['pokedex', 'pokedex'],
     ['egg_group', 'egg-group'],
-  ] as const)('encodes the %s filter once at the upstream boundary', async (key, path) => {
+  ] as const)('rejects a noncanonical %s filter before a record request', async (key, resource) => {
     const http = createFetchMock([
       {
         match: /^https:\/\/pokeapi.co\/api\/v2\//,
@@ -392,8 +394,8 @@ describe('effective search filters and empty-page guidance', () => {
     http.install();
     try {
       const result = await runToolContract(findPokemon, { [key]: ' Missing/Type Value ' });
-      expect(http.calls.map((call) => call.request.url)).toEqual([
-        `https://pokeapi.co/api/v2/${path}/missing%2Ftype-value`,
+      expect(http.calls.map(({ request }) => request.url)).toEqual([
+        `https://pokeapi.co/api/v2/${resource}?limit=100`,
       ]);
       expect(result.structuredContent).toMatchObject({
         error: { code: JsonRpcErrorCode.ValidationError, data: { reason: 'invalid_filter' } },
@@ -993,6 +995,37 @@ describe('meaningful sparse values', () => {
     }
   });
 
+  it.each([
+    ['red', 'red', []],
+    [
+      'nonexistent-version',
+      'shield',
+      [
+        'No English flavor text is available for nonexistent-version. Showing the entry from shield.',
+      ],
+    ],
+    [undefined, 'shield', []],
+  ])(
+    'reports the flavor text source for game version %s',
+    async (game_version, version, notices) => {
+      const http = fixtureHttp();
+      http.install();
+      try {
+        const result = await runToolContract(getPokemon, {
+          identifier: 'bulbasaur',
+          game_version,
+          version_group: 'scarlet-violet',
+        });
+        expect(result.structuredContent).toMatchObject({ flavorTextVersion: version, notices });
+        expect(textOf(result)).toContain(`Flavor text (${version})`);
+        for (const notice of notices) expect(textOf(result)).toContain(notice);
+        if (notices.length === 0) expect(textOf(result)).not.toContain('Showing the entry');
+      } finally {
+        http.restore();
+      }
+    },
+  );
+
   it('renders absent dossier scalars and keeps explicit ability and variety categories', async () => {
     const raw = captures.pokemon.bulbasaur!;
     const http = fixtureHttp({
@@ -1004,7 +1037,13 @@ describe('meaningful sparse values', () => {
       'pokemon-species/bulbasaur': {
         ...captures.species.bulbasaur,
         genera: [],
-        flavor_text_entries: [],
+        hatch_counter: null,
+        base_happiness: 0,
+        is_baby: false,
+        pokedex_numbers: [{ pokedex: ref('national'), entry_number: 1 }],
+        flavor_text_entries: [
+          { language: ref('ja'), version: ref('red'), flavor_text: 'フシギダネ' },
+        ],
         varieties: [
           { pokemon: ref('bulbasaur'), is_default: true },
           { pokemon: ref('fixture-alternative'), is_default: false },
@@ -1022,10 +1061,17 @@ describe('meaningful sparse values', () => {
       const result = await runToolContract(getPokemon, {
         identifier: 'bulbasaur',
         include_moves: true,
+        game_version: 'red',
       });
       expect(result.structuredContent).toMatchObject({
         genus: null,
         speciesFlavorText: null,
+        flavorTextVersion: null,
+        hatchCounter: null,
+        baseHappiness: 0,
+        isBaby: false,
+        pokedexNumbers: [{ pokedex: 'national', entryNumber: 1 }],
+        notices: ['No English flavor text is available for red or any other version.'],
         sprites: { officialArtwork: null, frontDefault: null, frontShiny: null },
         moves: [],
         moveCount: 0,
@@ -1033,6 +1079,11 @@ describe('meaningful sparse values', () => {
       for (const value of [
         '**Genus:** Not available',
         'Flavor text not available',
+        '**Hatch counter:** Not available',
+        '**Base happiness:** 0',
+        '**Baby:** No',
+        'national: 1',
+        'No English flavor text is available for red or any other version.',
         '**Effect:** Not available',
         '**Short:** Not available',
         '**Official Artwork:** Not available',
