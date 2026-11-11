@@ -130,7 +130,7 @@ A cold name with no Pokémon record of its own that names a species (`deoxys`) c
 | — | Move summarization | Group the moves from step 1 by move, method, version group, and distinct level | — | when `include_moves: true` or `version_group` is supplied |
 | — | `GET /version-group/{name}` | Resolve chronology, caching each group's order with the configured TTL | — | unscoped summaries with competing groups; an explicit group absent from the Pokémon's details gets one existence check |
 
-Supplementary chronology reads run with bounded concurrency and one three-second deadline. A failed chronology lookup leaves the dossier usable: each move and method uses its last group in source order, with that fallback stated in `notices`. Caller cancellation propagates. Omitted moves and groups already present in an explicitly selected learnset need no chronology requests.
+Supplementary chronology requests to PokéAPI run with bounded concurrency and share a three-second deadline across fetches and response bodies. In-flight cache reads and writes await the storage provider. A failed chronology lookup leaves the dossier usable: each move and method uses its last group in source order, with that fallback stated in `notices`. Caller cancellation propagates. Omitted moves and groups already present in an explicitly selected learnset need no chronology requests.
 
 ### `pokeapi_get_type_matchups` (1–3 cold calls for direct queries; 4–5 for species fallback)
 
