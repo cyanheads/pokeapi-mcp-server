@@ -30,8 +30,8 @@ const MAX_RATE_LIMIT_PAUSE_MS = 60_000;
 /**
  * Machine-record reads are a side lookup beside each call's main read. Once PokéAPI rate-limits
  * one, every call skips them for at least 5 s, or until the `Retry-After` passes when that is
- * later, leaving the request budget to the main reads. The service holds one instance for the
- * process.
+ * later (at most 60 s), leaving the request budget to the main reads. The service holds one
+ * instance for the process.
  */
 export class MachineReadPause {
   #untilMs = 0;
