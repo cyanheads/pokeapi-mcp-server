@@ -2,6 +2,10 @@
 
 All notable changes to this project. Each entry links to its full per-version file in [changelog/](changelog/).
 
+## [0.3.2](changelog/0.3.x/0.3.2.md) — 2026-11-25
+
+Type matchups and Pokémon dossiers answer for older generations, TM/TR/HM numbers resolve per version group, type matchups take two types, and moves and items without PokéAPI effect text fall back to in-game text.
+
 ## [0.3.1](changelog/0.3.x/0.3.1.md) — 2026-11-11
 
 Version-group learnsets and regional Pokédex discovery
