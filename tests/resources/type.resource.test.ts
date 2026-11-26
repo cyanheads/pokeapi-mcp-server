@@ -37,6 +37,39 @@ describe('typeResource', () => {
     expect(defensive).toHaveProperty('immuneTo');
   }, 15000);
 
+  it('returns one type record and its current relations, with one request', async () => {
+    const ctx = createMockContext({ errors: typeResource.errors, tenantId: 'test-tenant' });
+    const result = await typeResource.handler(
+      typeResource.params!.parse({ typeName: 'Fire' }),
+      ctx,
+    );
+
+    expect(result).toEqual({
+      typeName: 'fire',
+      offensiveRelations: {
+        superEffectiveTo: ['bug', 'steel', 'grass', 'ice'],
+        notVeryEffectiveTo: ['rock', 'fire', 'water', 'dragon'],
+        noEffectTo: [],
+      },
+      defensiveRelations: {
+        weakTo: ['ground', 'rock', 'water'],
+        resists: ['bug', 'steel', 'fire', 'grass', 'ice', 'fairy'],
+        immuneTo: [],
+      },
+    });
+    expect(http.calls.map((call) => call.request.url)).toEqual([
+      'https://pokeapi.co/api/v2/type/fire',
+    ]);
+  });
+
+  it('serves one type name and never splits two-type spellings', async () => {
+    const ctx = createMockContext({ errors: typeResource.errors, tenantId: 'test-tenant' });
+    await expect(typeResource.handler({ typeName: 'water/ground' }, ctx)).rejects.toMatchObject({
+      data: { reason: 'not_found' },
+    });
+    expect(http.calls).toHaveLength(0);
+  });
+
   it('water type is weak to electric', async () => {
     const ctx = createMockContext({ errors: typeResource.errors, tenantId: 'test-tenant' });
     const params = typeResource.params!.parse({ typeName: 'water' });

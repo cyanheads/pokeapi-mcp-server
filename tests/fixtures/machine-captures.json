@@ -1,0 +1,1309 @@
+{
+  "items": {
+    "tm25": {
+      "id": 329,
+      "name": "tm25",
+      "category": {
+        "name": "all-machines",
+        "url": "https://pokeapi.co/api/v2/item-category/37/"
+      },
+      "prices": [],
+      "fling_power": null,
+      "effect_entries": [
+        {
+          "effect": "Teaches Thunder to a compatible Pokémon.",
+          "short_effect": "Teaches Thunder to a compatible Pokémon.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          }
+        }
+      ],
+      "attributes": [],
+      "held_by_pokemon": [],
+      "sprites": {
+        "default": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/tm-normal.png"
+      },
+      "machines": [
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/530/"
+          },
+          "version_group": {
+            "name": "red-blue",
+            "url": "https://pokeapi.co/api/v2/version-group/1/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/531/"
+          },
+          "version_group": {
+            "name": "yellow",
+            "url": "https://pokeapi.co/api/v2/version-group/2/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/532/"
+          },
+          "version_group": {
+            "name": "gold-silver",
+            "url": "https://pokeapi.co/api/v2/version-group/3/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/533/"
+          },
+          "version_group": {
+            "name": "crystal",
+            "url": "https://pokeapi.co/api/v2/version-group/4/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/534/"
+          },
+          "version_group": {
+            "name": "ruby-sapphire",
+            "url": "https://pokeapi.co/api/v2/version-group/5/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/535/"
+          },
+          "version_group": {
+            "name": "emerald",
+            "url": "https://pokeapi.co/api/v2/version-group/6/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/536/"
+          },
+          "version_group": {
+            "name": "firered-leafgreen",
+            "url": "https://pokeapi.co/api/v2/version-group/7/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/537/"
+          },
+          "version_group": {
+            "name": "diamond-pearl",
+            "url": "https://pokeapi.co/api/v2/version-group/8/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/538/"
+          },
+          "version_group": {
+            "name": "platinum",
+            "url": "https://pokeapi.co/api/v2/version-group/9/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/539/"
+          },
+          "version_group": {
+            "name": "heartgold-soulsilver",
+            "url": "https://pokeapi.co/api/v2/version-group/10/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/540/"
+          },
+          "version_group": {
+            "name": "black-white",
+            "url": "https://pokeapi.co/api/v2/version-group/11/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/541/"
+          },
+          "version_group": {
+            "name": "colosseum",
+            "url": "https://pokeapi.co/api/v2/version-group/12/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/542/"
+          },
+          "version_group": {
+            "name": "xd",
+            "url": "https://pokeapi.co/api/v2/version-group/13/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/543/"
+          },
+          "version_group": {
+            "name": "black-2-white-2",
+            "url": "https://pokeapi.co/api/v2/version-group/14/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/544/"
+          },
+          "version_group": {
+            "name": "x-y",
+            "url": "https://pokeapi.co/api/v2/version-group/15/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/545/"
+          },
+          "version_group": {
+            "name": "omega-ruby-alpha-sapphire",
+            "url": "https://pokeapi.co/api/v2/version-group/16/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/546/"
+          },
+          "version_group": {
+            "name": "sun-moon",
+            "url": "https://pokeapi.co/api/v2/version-group/17/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/547/"
+          },
+          "version_group": {
+            "name": "ultra-sun-ultra-moon",
+            "url": "https://pokeapi.co/api/v2/version-group/18/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/548/"
+          },
+          "version_group": {
+            "name": "lets-go-pikachu-lets-go-eevee",
+            "url": "https://pokeapi.co/api/v2/version-group/19/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/549/"
+          },
+          "version_group": {
+            "name": "sword-shield",
+            "url": "https://pokeapi.co/api/v2/version-group/20/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/550/"
+          },
+          "version_group": {
+            "name": "red-green-japan",
+            "url": "https://pokeapi.co/api/v2/version-group/28/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/551/"
+          },
+          "version_group": {
+            "name": "blue-japan",
+            "url": "https://pokeapi.co/api/v2/version-group/29/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/1823/"
+          },
+          "version_group": {
+            "name": "brilliant-diamond-shining-pearl",
+            "url": "https://pokeapi.co/api/v2/version-group/23/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/1923/"
+          },
+          "version_group": {
+            "name": "scarlet-violet",
+            "url": "https://pokeapi.co/api/v2/version-group/25/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/2320/"
+          },
+          "version_group": {
+            "name": "legends-za",
+            "url": "https://pokeapi.co/api/v2/version-group/30/"
+          }
+        }
+      ]
+    }
+  },
+  "moves": {
+    "earthquake": {
+      "id": 89,
+      "name": "earthquake",
+      "type": {
+        "name": "ground",
+        "url": "https://pokeapi.co/api/v2/type/5/"
+      },
+      "damage_class": {
+        "name": "physical",
+        "url": "https://pokeapi.co/api/v2/move-damage-class/2/"
+      },
+      "power": 100,
+      "accuracy": 100,
+      "pp": 10,
+      "priority": 0,
+      "effect_chance": null,
+      "effect_entries": [
+        {
+          "effect": "Inflicts regular damage.\n\nIf the target is in the first turn of Dig, this move will hit with double power.",
+          "short_effect": "Inflicts regular damage and can hit Dig users.",
+          "language": {
+            "name": "en",
+            "url": "https://pokeapi.co/api/v2/language/9/"
+          }
+        }
+      ],
+      "target": {
+        "name": "all-other-pokemon",
+        "url": "https://pokeapi.co/api/v2/move-target/9/"
+      },
+      "stat_changes": [],
+      "learned_by_pokemon": [
+        {
+          "name": "venusaur",
+          "url": "https://pokeapi.co/api/v2/pokemon/3/"
+        },
+        {
+          "name": "charizard",
+          "url": "https://pokeapi.co/api/v2/pokemon/6/"
+        }
+      ],
+      "machines": [
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/552/"
+          },
+          "version_group": {
+            "name": "red-blue",
+            "url": "https://pokeapi.co/api/v2/version-group/1/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/553/"
+          },
+          "version_group": {
+            "name": "yellow",
+            "url": "https://pokeapi.co/api/v2/version-group/2/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/554/"
+          },
+          "version_group": {
+            "name": "gold-silver",
+            "url": "https://pokeapi.co/api/v2/version-group/3/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/555/"
+          },
+          "version_group": {
+            "name": "crystal",
+            "url": "https://pokeapi.co/api/v2/version-group/4/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/556/"
+          },
+          "version_group": {
+            "name": "ruby-sapphire",
+            "url": "https://pokeapi.co/api/v2/version-group/5/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/557/"
+          },
+          "version_group": {
+            "name": "emerald",
+            "url": "https://pokeapi.co/api/v2/version-group/6/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/558/"
+          },
+          "version_group": {
+            "name": "firered-leafgreen",
+            "url": "https://pokeapi.co/api/v2/version-group/7/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/559/"
+          },
+          "version_group": {
+            "name": "diamond-pearl",
+            "url": "https://pokeapi.co/api/v2/version-group/8/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/560/"
+          },
+          "version_group": {
+            "name": "platinum",
+            "url": "https://pokeapi.co/api/v2/version-group/9/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/561/"
+          },
+          "version_group": {
+            "name": "heartgold-soulsilver",
+            "url": "https://pokeapi.co/api/v2/version-group/10/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/562/"
+          },
+          "version_group": {
+            "name": "black-white",
+            "url": "https://pokeapi.co/api/v2/version-group/11/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/563/"
+          },
+          "version_group": {
+            "name": "colosseum",
+            "url": "https://pokeapi.co/api/v2/version-group/12/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/564/"
+          },
+          "version_group": {
+            "name": "xd",
+            "url": "https://pokeapi.co/api/v2/version-group/13/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/565/"
+          },
+          "version_group": {
+            "name": "black-2-white-2",
+            "url": "https://pokeapi.co/api/v2/version-group/14/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/566/"
+          },
+          "version_group": {
+            "name": "x-y",
+            "url": "https://pokeapi.co/api/v2/version-group/15/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/567/"
+          },
+          "version_group": {
+            "name": "omega-ruby-alpha-sapphire",
+            "url": "https://pokeapi.co/api/v2/version-group/16/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/568/"
+          },
+          "version_group": {
+            "name": "sun-moon",
+            "url": "https://pokeapi.co/api/v2/version-group/17/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/569/"
+          },
+          "version_group": {
+            "name": "ultra-sun-ultra-moon",
+            "url": "https://pokeapi.co/api/v2/version-group/18/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/572/"
+          },
+          "version_group": {
+            "name": "red-green-japan",
+            "url": "https://pokeapi.co/api/v2/version-group/28/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/573/"
+          },
+          "version_group": {
+            "name": "blue-japan",
+            "url": "https://pokeapi.co/api/v2/version-group/29/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/900/"
+          },
+          "version_group": {
+            "name": "lets-go-pikachu-lets-go-eevee",
+            "url": "https://pokeapi.co/api/v2/version-group/19/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/1709/"
+          },
+          "version_group": {
+            "name": "sword-shield",
+            "url": "https://pokeapi.co/api/v2/version-group/20/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/1824/"
+          },
+          "version_group": {
+            "name": "brilliant-diamond-shining-pearl",
+            "url": "https://pokeapi.co/api/v2/version-group/23/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/2047/"
+          },
+          "version_group": {
+            "name": "scarlet-violet",
+            "url": "https://pokeapi.co/api/v2/version-group/25/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/2237/"
+          },
+          "version_group": {
+            "name": "the-indigo-disk",
+            "url": "https://pokeapi.co/api/v2/version-group/27/"
+          }
+        },
+        {
+          "machine": {
+            "url": "https://pokeapi.co/api/v2/machine/2364/"
+          },
+          "version_group": {
+            "name": "legends-za",
+            "url": "https://pokeapi.co/api/v2/version-group/30/"
+          }
+        }
+      ]
+    }
+  },
+  "machines": {
+    "530": {
+      "id": 530,
+      "item": {
+        "name": "tm25",
+        "url": "https://pokeapi.co/api/v2/item/329/"
+      },
+      "version_group": {
+        "name": "red-blue",
+        "url": "https://pokeapi.co/api/v2/version-group/1/"
+      },
+      "move": {
+        "name": "thunder",
+        "url": "https://pokeapi.co/api/v2/move/87/"
+      }
+    },
+    "531": {
+      "id": 531,
+      "item": {
+        "name": "tm25",
+        "url": "https://pokeapi.co/api/v2/item/329/"
+      },
+      "version_group": {
+        "name": "yellow",
+        "url": "https://pokeapi.co/api/v2/version-group/2/"
+      },
+      "move": {
+        "name": "thunder",
+        "url": "https://pokeapi.co/api/v2/move/87/"
+      }
+    },
+    "532": {
+      "id": 532,
+      "item": {
+        "name": "tm25",
+        "url": "https://pokeapi.co/api/v2/item/329/"
+      },
+      "version_group": {
+        "name": "gold-silver",
+        "url": "https://pokeapi.co/api/v2/version-group/3/"
+      },
+      "move": {
+        "name": "thunder",
+        "url": "https://pokeapi.co/api/v2/move/87/"
+      }
+    },
+    "533": {
+      "id": 533,
+      "item": {
+        "name": "tm25",
+        "url": "https://pokeapi.co/api/v2/item/329/"
+      },
+      "version_group": {
+        "name": "crystal",
+        "url": "https://pokeapi.co/api/v2/version-group/4/"
+      },
+      "move": {
+        "name": "thunder",
+        "url": "https://pokeapi.co/api/v2/move/87/"
+      }
+    },
+    "534": {
+      "id": 534,
+      "item": {
+        "name": "tm25",
+        "url": "https://pokeapi.co/api/v2/item/329/"
+      },
+      "version_group": {
+        "name": "ruby-sapphire",
+        "url": "https://pokeapi.co/api/v2/version-group/5/"
+      },
+      "move": {
+        "name": "thunder",
+        "url": "https://pokeapi.co/api/v2/move/87/"
+      }
+    },
+    "535": {
+      "id": 535,
+      "item": {
+        "name": "tm25",
+        "url": "https://pokeapi.co/api/v2/item/329/"
+      },
+      "version_group": {
+        "name": "emerald",
+        "url": "https://pokeapi.co/api/v2/version-group/6/"
+      },
+      "move": {
+        "name": "thunder",
+        "url": "https://pokeapi.co/api/v2/move/87/"
+      }
+    },
+    "536": {
+      "id": 536,
+      "item": {
+        "name": "tm25",
+        "url": "https://pokeapi.co/api/v2/item/329/"
+      },
+      "version_group": {
+        "name": "firered-leafgreen",
+        "url": "https://pokeapi.co/api/v2/version-group/7/"
+      },
+      "move": {
+        "name": "thunder",
+        "url": "https://pokeapi.co/api/v2/move/87/"
+      }
+    },
+    "537": {
+      "id": 537,
+      "item": {
+        "name": "tm25",
+        "url": "https://pokeapi.co/api/v2/item/329/"
+      },
+      "version_group": {
+        "name": "diamond-pearl",
+        "url": "https://pokeapi.co/api/v2/version-group/8/"
+      },
+      "move": {
+        "name": "thunder",
+        "url": "https://pokeapi.co/api/v2/move/87/"
+      }
+    },
+    "538": {
+      "id": 538,
+      "item": {
+        "name": "tm25",
+        "url": "https://pokeapi.co/api/v2/item/329/"
+      },
+      "version_group": {
+        "name": "platinum",
+        "url": "https://pokeapi.co/api/v2/version-group/9/"
+      },
+      "move": {
+        "name": "thunder",
+        "url": "https://pokeapi.co/api/v2/move/87/"
+      }
+    },
+    "539": {
+      "id": 539,
+      "item": {
+        "name": "tm25",
+        "url": "https://pokeapi.co/api/v2/item/329/"
+      },
+      "version_group": {
+        "name": "heartgold-soulsilver",
+        "url": "https://pokeapi.co/api/v2/version-group/10/"
+      },
+      "move": {
+        "name": "thunder",
+        "url": "https://pokeapi.co/api/v2/move/87/"
+      }
+    },
+    "540": {
+      "id": 540,
+      "item": {
+        "name": "tm25",
+        "url": "https://pokeapi.co/api/v2/item/329/"
+      },
+      "version_group": {
+        "name": "black-white",
+        "url": "https://pokeapi.co/api/v2/version-group/11/"
+      },
+      "move": {
+        "name": "thunder",
+        "url": "https://pokeapi.co/api/v2/move/87/"
+      }
+    },
+    "541": {
+      "id": 541,
+      "item": {
+        "name": "tm25",
+        "url": "https://pokeapi.co/api/v2/item/329/"
+      },
+      "version_group": {
+        "name": "colosseum",
+        "url": "https://pokeapi.co/api/v2/version-group/12/"
+      },
+      "move": {
+        "name": "thunder",
+        "url": "https://pokeapi.co/api/v2/move/87/"
+      }
+    },
+    "542": {
+      "id": 542,
+      "item": {
+        "name": "tm25",
+        "url": "https://pokeapi.co/api/v2/item/329/"
+      },
+      "version_group": {
+        "name": "xd",
+        "url": "https://pokeapi.co/api/v2/version-group/13/"
+      },
+      "move": {
+        "name": "thunder",
+        "url": "https://pokeapi.co/api/v2/move/87/"
+      }
+    },
+    "543": {
+      "id": 543,
+      "item": {
+        "name": "tm25",
+        "url": "https://pokeapi.co/api/v2/item/329/"
+      },
+      "version_group": {
+        "name": "black-2-white-2",
+        "url": "https://pokeapi.co/api/v2/version-group/14/"
+      },
+      "move": {
+        "name": "thunder",
+        "url": "https://pokeapi.co/api/v2/move/87/"
+      }
+    },
+    "544": {
+      "id": 544,
+      "item": {
+        "name": "tm25",
+        "url": "https://pokeapi.co/api/v2/item/329/"
+      },
+      "version_group": {
+        "name": "x-y",
+        "url": "https://pokeapi.co/api/v2/version-group/15/"
+      },
+      "move": {
+        "name": "thunder",
+        "url": "https://pokeapi.co/api/v2/move/87/"
+      }
+    },
+    "545": {
+      "id": 545,
+      "item": {
+        "name": "tm25",
+        "url": "https://pokeapi.co/api/v2/item/329/"
+      },
+      "version_group": {
+        "name": "omega-ruby-alpha-sapphire",
+        "url": "https://pokeapi.co/api/v2/version-group/16/"
+      },
+      "move": {
+        "name": "thunder",
+        "url": "https://pokeapi.co/api/v2/move/87/"
+      }
+    },
+    "546": {
+      "id": 546,
+      "item": {
+        "name": "tm25",
+        "url": "https://pokeapi.co/api/v2/item/329/"
+      },
+      "version_group": {
+        "name": "sun-moon",
+        "url": "https://pokeapi.co/api/v2/version-group/17/"
+      },
+      "move": {
+        "name": "thunder",
+        "url": "https://pokeapi.co/api/v2/move/87/"
+      }
+    },
+    "547": {
+      "id": 547,
+      "item": {
+        "name": "tm25",
+        "url": "https://pokeapi.co/api/v2/item/329/"
+      },
+      "version_group": {
+        "name": "ultra-sun-ultra-moon",
+        "url": "https://pokeapi.co/api/v2/version-group/18/"
+      },
+      "move": {
+        "name": "thunder",
+        "url": "https://pokeapi.co/api/v2/move/87/"
+      }
+    },
+    "548": {
+      "id": 548,
+      "item": {
+        "name": "tm25",
+        "url": "https://pokeapi.co/api/v2/item/329/"
+      },
+      "version_group": {
+        "name": "lets-go-pikachu-lets-go-eevee",
+        "url": "https://pokeapi.co/api/v2/version-group/19/"
+      },
+      "move": {
+        "name": "waterfall",
+        "url": "https://pokeapi.co/api/v2/move/127/"
+      }
+    },
+    "549": {
+      "id": 549,
+      "item": {
+        "name": "tm25",
+        "url": "https://pokeapi.co/api/v2/item/329/"
+      },
+      "version_group": {
+        "name": "sword-shield",
+        "url": "https://pokeapi.co/api/v2/version-group/20/"
+      },
+      "move": {
+        "name": "protect",
+        "url": "https://pokeapi.co/api/v2/move/182/"
+      }
+    },
+    "550": {
+      "id": 550,
+      "item": {
+        "name": "tm25",
+        "url": "https://pokeapi.co/api/v2/item/329/"
+      },
+      "version_group": {
+        "name": "red-green-japan",
+        "url": "https://pokeapi.co/api/v2/version-group/28/"
+      },
+      "move": {
+        "name": "thunder",
+        "url": "https://pokeapi.co/api/v2/move/87/"
+      }
+    },
+    "551": {
+      "id": 551,
+      "item": {
+        "name": "tm25",
+        "url": "https://pokeapi.co/api/v2/item/329/"
+      },
+      "version_group": {
+        "name": "blue-japan",
+        "url": "https://pokeapi.co/api/v2/version-group/29/"
+      },
+      "move": {
+        "name": "thunder",
+        "url": "https://pokeapi.co/api/v2/move/87/"
+      }
+    },
+    "552": {
+      "id": 552,
+      "item": {
+        "name": "tm26",
+        "url": "https://pokeapi.co/api/v2/item/330/"
+      },
+      "version_group": {
+        "name": "red-blue",
+        "url": "https://pokeapi.co/api/v2/version-group/1/"
+      },
+      "move": {
+        "name": "earthquake",
+        "url": "https://pokeapi.co/api/v2/move/89/"
+      }
+    },
+    "553": {
+      "id": 553,
+      "item": {
+        "name": "tm26",
+        "url": "https://pokeapi.co/api/v2/item/330/"
+      },
+      "version_group": {
+        "name": "yellow",
+        "url": "https://pokeapi.co/api/v2/version-group/2/"
+      },
+      "move": {
+        "name": "earthquake",
+        "url": "https://pokeapi.co/api/v2/move/89/"
+      }
+    },
+    "554": {
+      "id": 554,
+      "item": {
+        "name": "tm26",
+        "url": "https://pokeapi.co/api/v2/item/330/"
+      },
+      "version_group": {
+        "name": "gold-silver",
+        "url": "https://pokeapi.co/api/v2/version-group/3/"
+      },
+      "move": {
+        "name": "earthquake",
+        "url": "https://pokeapi.co/api/v2/move/89/"
+      }
+    },
+    "555": {
+      "id": 555,
+      "item": {
+        "name": "tm26",
+        "url": "https://pokeapi.co/api/v2/item/330/"
+      },
+      "version_group": {
+        "name": "crystal",
+        "url": "https://pokeapi.co/api/v2/version-group/4/"
+      },
+      "move": {
+        "name": "earthquake",
+        "url": "https://pokeapi.co/api/v2/move/89/"
+      }
+    },
+    "556": {
+      "id": 556,
+      "item": {
+        "name": "tm26",
+        "url": "https://pokeapi.co/api/v2/item/330/"
+      },
+      "version_group": {
+        "name": "ruby-sapphire",
+        "url": "https://pokeapi.co/api/v2/version-group/5/"
+      },
+      "move": {
+        "name": "earthquake",
+        "url": "https://pokeapi.co/api/v2/move/89/"
+      }
+    },
+    "557": {
+      "id": 557,
+      "item": {
+        "name": "tm26",
+        "url": "https://pokeapi.co/api/v2/item/330/"
+      },
+      "version_group": {
+        "name": "emerald",
+        "url": "https://pokeapi.co/api/v2/version-group/6/"
+      },
+      "move": {
+        "name": "earthquake",
+        "url": "https://pokeapi.co/api/v2/move/89/"
+      }
+    },
+    "558": {
+      "id": 558,
+      "item": {
+        "name": "tm26",
+        "url": "https://pokeapi.co/api/v2/item/330/"
+      },
+      "version_group": {
+        "name": "firered-leafgreen",
+        "url": "https://pokeapi.co/api/v2/version-group/7/"
+      },
+      "move": {
+        "name": "earthquake",
+        "url": "https://pokeapi.co/api/v2/move/89/"
+      }
+    },
+    "559": {
+      "id": 559,
+      "item": {
+        "name": "tm26",
+        "url": "https://pokeapi.co/api/v2/item/330/"
+      },
+      "version_group": {
+        "name": "diamond-pearl",
+        "url": "https://pokeapi.co/api/v2/version-group/8/"
+      },
+      "move": {
+        "name": "earthquake",
+        "url": "https://pokeapi.co/api/v2/move/89/"
+      }
+    },
+    "560": {
+      "id": 560,
+      "item": {
+        "name": "tm26",
+        "url": "https://pokeapi.co/api/v2/item/330/"
+      },
+      "version_group": {
+        "name": "platinum",
+        "url": "https://pokeapi.co/api/v2/version-group/9/"
+      },
+      "move": {
+        "name": "earthquake",
+        "url": "https://pokeapi.co/api/v2/move/89/"
+      }
+    },
+    "561": {
+      "id": 561,
+      "item": {
+        "name": "tm26",
+        "url": "https://pokeapi.co/api/v2/item/330/"
+      },
+      "version_group": {
+        "name": "heartgold-soulsilver",
+        "url": "https://pokeapi.co/api/v2/version-group/10/"
+      },
+      "move": {
+        "name": "earthquake",
+        "url": "https://pokeapi.co/api/v2/move/89/"
+      }
+    },
+    "562": {
+      "id": 562,
+      "item": {
+        "name": "tm26",
+        "url": "https://pokeapi.co/api/v2/item/330/"
+      },
+      "version_group": {
+        "name": "black-white",
+        "url": "https://pokeapi.co/api/v2/version-group/11/"
+      },
+      "move": {
+        "name": "earthquake",
+        "url": "https://pokeapi.co/api/v2/move/89/"
+      }
+    },
+    "563": {
+      "id": 563,
+      "item": {
+        "name": "tm26",
+        "url": "https://pokeapi.co/api/v2/item/330/"
+      },
+      "version_group": {
+        "name": "colosseum",
+        "url": "https://pokeapi.co/api/v2/version-group/12/"
+      },
+      "move": {
+        "name": "earthquake",
+        "url": "https://pokeapi.co/api/v2/move/89/"
+      }
+    },
+    "564": {
+      "id": 564,
+      "item": {
+        "name": "tm26",
+        "url": "https://pokeapi.co/api/v2/item/330/"
+      },
+      "version_group": {
+        "name": "xd",
+        "url": "https://pokeapi.co/api/v2/version-group/13/"
+      },
+      "move": {
+        "name": "earthquake",
+        "url": "https://pokeapi.co/api/v2/move/89/"
+      }
+    },
+    "565": {
+      "id": 565,
+      "item": {
+        "name": "tm26",
+        "url": "https://pokeapi.co/api/v2/item/330/"
+      },
+      "version_group": {
+        "name": "black-2-white-2",
+        "url": "https://pokeapi.co/api/v2/version-group/14/"
+      },
+      "move": {
+        "name": "earthquake",
+        "url": "https://pokeapi.co/api/v2/move/89/"
+      }
+    },
+    "566": {
+      "id": 566,
+      "item": {
+        "name": "tm26",
+        "url": "https://pokeapi.co/api/v2/item/330/"
+      },
+      "version_group": {
+        "name": "x-y",
+        "url": "https://pokeapi.co/api/v2/version-group/15/"
+      },
+      "move": {
+        "name": "earthquake",
+        "url": "https://pokeapi.co/api/v2/move/89/"
+      }
+    },
+    "567": {
+      "id": 567,
+      "item": {
+        "name": "tm26",
+        "url": "https://pokeapi.co/api/v2/item/330/"
+      },
+      "version_group": {
+        "name": "omega-ruby-alpha-sapphire",
+        "url": "https://pokeapi.co/api/v2/version-group/16/"
+      },
+      "move": {
+        "name": "earthquake",
+        "url": "https://pokeapi.co/api/v2/move/89/"
+      }
+    },
+    "568": {
+      "id": 568,
+      "item": {
+        "name": "tm26",
+        "url": "https://pokeapi.co/api/v2/item/330/"
+      },
+      "version_group": {
+        "name": "sun-moon",
+        "url": "https://pokeapi.co/api/v2/version-group/17/"
+      },
+      "move": {
+        "name": "earthquake",
+        "url": "https://pokeapi.co/api/v2/move/89/"
+      }
+    },
+    "569": {
+      "id": 569,
+      "item": {
+        "name": "tm26",
+        "url": "https://pokeapi.co/api/v2/item/330/"
+      },
+      "version_group": {
+        "name": "ultra-sun-ultra-moon",
+        "url": "https://pokeapi.co/api/v2/version-group/18/"
+      },
+      "move": {
+        "name": "earthquake",
+        "url": "https://pokeapi.co/api/v2/move/89/"
+      }
+    },
+    "572": {
+      "id": 572,
+      "item": {
+        "name": "tm26",
+        "url": "https://pokeapi.co/api/v2/item/330/"
+      },
+      "version_group": {
+        "name": "red-green-japan",
+        "url": "https://pokeapi.co/api/v2/version-group/28/"
+      },
+      "move": {
+        "name": "earthquake",
+        "url": "https://pokeapi.co/api/v2/move/89/"
+      }
+    },
+    "573": {
+      "id": 573,
+      "item": {
+        "name": "tm26",
+        "url": "https://pokeapi.co/api/v2/item/330/"
+      },
+      "version_group": {
+        "name": "blue-japan",
+        "url": "https://pokeapi.co/api/v2/version-group/29/"
+      },
+      "move": {
+        "name": "earthquake",
+        "url": "https://pokeapi.co/api/v2/move/89/"
+      }
+    },
+    "900": {
+      "id": 900,
+      "item": {
+        "name": "tm41",
+        "url": "https://pokeapi.co/api/v2/item/345/"
+      },
+      "version_group": {
+        "name": "lets-go-pikachu-lets-go-eevee",
+        "url": "https://pokeapi.co/api/v2/version-group/19/"
+      },
+      "move": {
+        "name": "earthquake",
+        "url": "https://pokeapi.co/api/v2/move/89/"
+      }
+    },
+    "1709": {
+      "id": 1709,
+      "item": {
+        "name": "tr10",
+        "url": "https://pokeapi.co/api/v2/item/1198/"
+      },
+      "version_group": {
+        "name": "sword-shield",
+        "url": "https://pokeapi.co/api/v2/version-group/20/"
+      },
+      "move": {
+        "name": "earthquake",
+        "url": "https://pokeapi.co/api/v2/move/89/"
+      }
+    },
+    "1823": {
+      "id": 1823,
+      "item": {
+        "name": "tm25",
+        "url": "https://pokeapi.co/api/v2/item/329/"
+      },
+      "version_group": {
+        "name": "brilliant-diamond-shining-pearl",
+        "url": "https://pokeapi.co/api/v2/version-group/23/"
+      },
+      "move": {
+        "name": "thunder",
+        "url": "https://pokeapi.co/api/v2/move/87/"
+      }
+    },
+    "1824": {
+      "id": 1824,
+      "item": {
+        "name": "tm26",
+        "url": "https://pokeapi.co/api/v2/item/330/"
+      },
+      "version_group": {
+        "name": "brilliant-diamond-shining-pearl",
+        "url": "https://pokeapi.co/api/v2/version-group/23/"
+      },
+      "move": {
+        "name": "earthquake",
+        "url": "https://pokeapi.co/api/v2/move/89/"
+      }
+    },
+    "1923": {
+      "id": 1923,
+      "item": {
+        "name": "tm25",
+        "url": "https://pokeapi.co/api/v2/item/329/"
+      },
+      "version_group": {
+        "name": "scarlet-violet",
+        "url": "https://pokeapi.co/api/v2/version-group/25/"
+      },
+      "move": {
+        "name": "facade",
+        "url": "https://pokeapi.co/api/v2/move/263/"
+      }
+    },
+    "2047": {
+      "id": 2047,
+      "item": {
+        "name": "tm149",
+        "url": "https://pokeapi.co/api/v2/item/1992/"
+      },
+      "version_group": {
+        "name": "scarlet-violet",
+        "url": "https://pokeapi.co/api/v2/version-group/25/"
+      },
+      "move": {
+        "name": "earthquake",
+        "url": "https://pokeapi.co/api/v2/move/89/"
+      }
+    },
+    "2237": {
+      "id": 2237,
+      "item": {
+        "name": "tm149",
+        "url": "https://pokeapi.co/api/v2/item/1992/"
+      },
+      "version_group": {
+        "name": "the-indigo-disk",
+        "url": "https://pokeapi.co/api/v2/version-group/27/"
+      },
+      "move": {
+        "name": "earthquake",
+        "url": "https://pokeapi.co/api/v2/move/89/"
+      }
+    },
+    "2320": {
+      "id": 2320,
+      "item": {
+        "name": "tm25",
+        "url": "https://pokeapi.co/api/v2/item/329/"
+      },
+      "version_group": {
+        "name": "legends-za",
+        "url": "https://pokeapi.co/api/v2/version-group/30/"
+      },
+      "move": {
+        "name": "crunch",
+        "url": "https://pokeapi.co/api/v2/move/242/"
+      }
+    },
+    "2364": {
+      "id": 2364,
+      "item": {
+        "name": "tm69",
+        "url": "https://pokeapi.co/api/v2/item/373/"
+      },
+      "version_group": {
+        "name": "legends-za",
+        "url": "https://pokeapi.co/api/v2/version-group/30/"
+      },
+      "move": {
+        "name": "earthquake",
+        "url": "https://pokeapi.co/api/v2/move/89/"
+      }
+    }
+  },
+  "versionGroups": {
+    "legends-arceus": {
+      "name": "legends-arceus",
+      "order": 26
+    }
+  }
+}

@@ -2,7 +2,7 @@
  * @fileoverview Positive species resolution caching through the service and fetch seam.
  * @module tests/services/pokemon-resolution.test
  */
-import { JsonRpcErrorCode } from '@cyanheads/mcp-ts-core/errors';
+import { databaseError, JsonRpcErrorCode } from '@cyanheads/mcp-ts-core/errors';
 import {
   createFetchMock,
   createInMemoryStorage,
@@ -12,6 +12,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getServerConfig } from '@/config/server-config.js';
 import { getPokeApiService, initPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 import { handlerHttp, resolutionCaptures } from '../fixtures/handler-fixtures.js';
+import { capacityError } from '../fixtures/storage-failures.js';
 
 let http: ReturnType<typeof handlerHttp>;
 beforeEach(() =>
@@ -134,7 +135,13 @@ describe('species resolution cache', () => {
   );
 
   it.each([
-    ['missing default record', { 'pokemon/deoxys-normal': new Response('', { status: 404 }) }, 5],
+    // The species names a default record PokéAPI does not serve: an upstream gap, not a miss.
+    [
+      'missing default record',
+      { 'pokemon/deoxys-normal': new Response('', { status: 404 }) },
+      5,
+      JsonRpcErrorCode.ServiceUnavailable,
+    ],
     [
       'no default variety',
       {
@@ -144,16 +151,15 @@ describe('species resolution cache', () => {
         },
       },
       3,
+      JsonRpcErrorCode.NotFound,
     ],
-  ] as const)('does not cache a resolution with %s', async (_case, overrides, requests) => {
+  ] as const)('does not cache a resolution with %s', async (_case, overrides, requests, code) => {
     http = handlerHttp(overrides);
     http.install();
     const ctx = createMockContext();
     const writes = vi.spyOn(ctx.state, 'set');
     for (let i = 0; i < 2; i++)
-      await expect(dossier('deoxys', ctx)).rejects.toMatchObject({
-        code: JsonRpcErrorCode.NotFound,
-      });
+      await expect(dossier('deoxys', ctx)).rejects.toMatchObject({ code });
     expect(http.calls).toHaveLength(requests);
     expect(writes.mock.calls.map(([key]) => key)).not.toContain(
       'pokeapi/species-resolution/deoxys',
@@ -173,6 +179,8 @@ describe('species resolution cache', () => {
     const writes = vi.spyOn(ctx.state, 'set');
     const failed = expect(dossier('deoxys', ctx)).rejects.toMatchObject({
       code: JsonRpcErrorCode.ServiceUnavailable,
+      // The exhausted-retry label names the operation, never the request path.
+      data: { operation: 'PokéAPI request', retryAttempts: 4 },
     });
     await vi.runAllTimersAsync();
     await failed;
@@ -200,5 +208,49 @@ describe('species resolution cache', () => {
     expect(writes.mock.calls.map(([key]) => key)).not.toContain(
       'pokeapi/species-resolution/deoxys',
     );
+  });
+
+  it('resolves a species and resolves it again when the store cannot hold the mapping', async () => {
+    http = handlerHttp();
+    http.install();
+    const capacity = await capacityError();
+    const ctx = createMockContext();
+    const original = ctx.state.set.bind(ctx.state);
+    const writes = vi
+      .spyOn(ctx.state, 'set')
+      .mockImplementation((key, value, options) =>
+        key.startsWith('pokeapi/species-resolution/')
+          ? Promise.reject(capacity)
+          : original(key, value, options),
+      );
+    const cold = await dossier('deoxys', ctx);
+    expect(cold).toMatchObject({ name: 'deoxys-normal', resolvedFromSpecies: 'deoxys' });
+    expect(http.calls).toHaveLength(5);
+    // Without the mapping, the warm call misses pokemon/deoxys again; every other record is cached.
+    expect(await dossier(' DEOXYS ', ctx)).toEqual(cold);
+    expect(http.calls.map((call) => new URL(call.request.url).pathname).slice(5)).toEqual([
+      '/api/v2/pokemon/deoxys',
+    ]);
+    expect(writes.mock.calls.map(([key]) => key)).toContain('pokeapi/species-resolution/deoxys');
+  });
+
+  it('resolves a species through its records when the store fails the mapping read', async () => {
+    http = handlerHttp();
+    http.install();
+    const ctx = createMockContext();
+    await dossier('deoxys', ctx);
+    const original = ctx.state.get.bind(ctx.state);
+    vi.spyOn(ctx.state, 'get').mockImplementation(<T>(key: string) =>
+      key.startsWith('pokeapi/species-resolution/')
+        ? Promise.reject(databaseError('Store offline'))
+        : original<T>(key),
+    );
+    expect(await dossier('deoxys', ctx)).toMatchObject({
+      name: 'deoxys-normal',
+      resolvedFromSpecies: 'deoxys',
+    });
+    expect(http.calls.map((call) => new URL(call.request.url).pathname).slice(5)).toEqual([
+      '/api/v2/pokemon/deoxys',
+    ]);
   });
 });

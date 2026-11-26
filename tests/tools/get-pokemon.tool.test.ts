@@ -3,12 +3,14 @@
  * @module tests/tools/get-pokemon.tool.test
  */
 
+import { readFileSync } from 'node:fs';
 import { databaseError, JsonRpcErrorCode, McpError } from '@cyanheads/mcp-ts-core/errors';
 import { createInMemoryStorage, createMockContext } from '@cyanheads/mcp-ts-core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getServerConfig } from '@/config/server-config.js';
 import { getPokemon } from '@/mcp-server/tools/definitions/get-pokemon.tool.js';
 import { initPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
+import type { RawPokemonSpecies } from '@/services/pokeapi/types.js';
 import { handlerHttp } from '../fixtures/handler-fixtures.js';
 
 // Use a mock AppConfig — the service only reads server config from env vars
@@ -17,11 +19,73 @@ const mockStorage = createInMemoryStorage();
 let http: ReturnType<typeof handlerHttp>;
 afterEach(() => http.restore());
 
+const bulbasaurSpecies = (
+  JSON.parse(
+    readFileSync(new URL('../fixtures/domain-captures.json', import.meta.url), 'utf8'),
+  ) as { species: Record<string, RawPokemonSpecies> }
+).species.bulbasaur!;
+const versionRef = (name: string) => ({ name, url: 'https://pokeapi.co/api/v2/version/1/' });
+const english = { name: 'en', url: 'https://pokeapi.co/api/v2/language/9/' };
+const MOVES_NOTICE = 'Pass include_moves=true to include the full move summary.';
+
+async function dossier(input: Record<string, unknown>) {
+  const ctx = createMockContext({ errors: getPokemon.errors });
+  const result = getPokemon.output.parse(
+    await getPokemon.handler(getPokemon.input.parse(input), ctx),
+  );
+  return { result, text: (getPokemon.format!(result)[0] as { text: string }).text };
+}
+
+function serveSpecies(flavorEntries: RawPokemonSpecies['flavor_text_entries']) {
+  http.restore();
+  http = handlerHttp({
+    'pokemon-species/bulbasaur': { ...bulbasaurSpecies, flavor_text_entries: flavorEntries },
+  });
+  http.install();
+}
+
 describe('getPokemon', () => {
   beforeEach(() => {
     http = handlerHttp();
     http.install();
     initPokeApiService(mockAppConfig, mockStorage);
+  });
+
+  it.each([
+    ['its species', 'pokemon-species/bulbasaur', 'gap-species'],
+    ['its evolution chain', 'evolution-chain/1', 'gap-chain'],
+    ['one of its abilities', 'ability/chlorophyll', 'gap-ability'],
+  ])(
+    'reports a 404 on %s as an upstream failure, not a missing Pokémon',
+    async (_label, path, tenantId) => {
+      http.restore();
+      http = handlerHttp({ [path]: new Response('Not Found', { status: 404 }) });
+      http.install();
+      const ctx = createMockContext({ errors: getPokemon.errors, tenantId });
+      const failure = await Promise.resolve()
+        .then(() => getPokemon.handler(getPokemon.input.parse({ identifier: 'bulbasaur' }), ctx))
+        .catch((err: unknown) => err);
+      expect(failure).toBeInstanceOf(McpError);
+      expect(failure).toMatchObject({ code: JsonRpcErrorCode.ServiceUnavailable });
+      expect((failure as McpError).data?.reason).not.toBe('not_found');
+    },
+  );
+
+  it.each([
+    ['read from its species', false],
+    ['a verified species mapping names', true],
+  ])('reports a 404 on the default variety %s as an upstream failure', async (_label, mapped) => {
+    http.restore();
+    http = handlerHttp({ 'pokemon/deoxys-normal': new Response('Not Found', { status: 404 }) });
+    http.install();
+    const ctx = createMockContext({ errors: getPokemon.errors, tenantId: `gap-variety-${mapped}` });
+    if (mapped) await ctx.state.set('pokeapi/species-resolution/deoxys', 'deoxys-normal');
+    const failure = await Promise.resolve()
+      .then(() => getPokemon.handler(getPokemon.input.parse({ identifier: 'deoxys' }), ctx))
+      .catch((err: unknown) => err);
+    expect(failure).toBeInstanceOf(McpError);
+    expect(failure).toMatchObject({ code: JsonRpcErrorCode.ServiceUnavailable });
+    expect((failure as McpError).data?.reason).not.toBe('not_found');
   });
 
   it('returns dossier for a well-known Pokémon by name', async () => {
@@ -238,7 +302,7 @@ describe('getPokemon', () => {
     ['get', new McpError(JsonRpcErrorCode.SerializationError, 'Malformed metadata cache entry')],
     ['set', databaseError('Metadata cache cannot be written')],
   ] as const)(
-    'keeps an unscoped dossier usable when the metadata cache %s fails',
+    'reads move chronology past a metadata cache %s the store fails',
     async (operation, error) => {
       const ctx = createMockContext({ errors: getPokemon.errors });
       const input = getPokemon.input.parse({ identifier: 'charmander', include_moves: true });
@@ -253,10 +317,10 @@ describe('getPokemon', () => {
       const result = getPokemon.output.parse(await getPokemon.handler(input, ctx));
       expect(result.moves[0]).toMatchObject({
         learnMethod: 'level-up',
-        levelLearnedAt: 40,
-        versionGroup: 'sword-shield',
+        levelLearnedAt: 42,
+        versionGroup: 'scarlet-violet',
       });
-      expect(result.notices).toEqual([expect.stringContaining('chronology')]);
+      expect(result.notices).toEqual([]);
     },
   );
 
@@ -305,6 +369,139 @@ describe('getPokemon', () => {
     // Should fall back gracefully — still returns flavor text, just not version-specific
     expect(result.speciesFlavorText).not.toBeNull();
   }, 15000);
+
+  it('selects every canonical version name that has an English entry', async () => {
+    const versions = bulbasaurSpecies.flavor_text_entries.map((entry) => entry.version.name);
+    expect(versions).toHaveLength(28);
+    for (const version of versions) {
+      const { result, text } = await dossier({ identifier: 'bulbasaur', game_version: version });
+      expect(result.flavorTextVersion, version).toBe(version);
+      expect(result.notices, version).toEqual([MOVES_NOTICE]);
+      expect(text).toContain(`Flavor text (${version})`);
+    }
+  });
+
+  it.each([
+    ['Omega Ruby', 'omega-ruby'],
+    ["Let's Go, Pikachu!", 'lets-go-pikachu'],
+    ['Lets Go Eevee', 'lets-go-eevee'],
+    ['Black 2', 'black-2'],
+    ['Fire Red', 'firered'],
+    ['FIRERED', 'firered'],
+    [' Alpha Sapphire ', 'alpha-sapphire'],
+  ])('matches the in-game spelling %j to %s', async (game_version, version) => {
+    const { result, text } = await dossier({ identifier: 'bulbasaur', game_version });
+    expect(result).toMatchObject({ flavorTextVersion: version, notices: [MOVES_NOTICE] });
+    expect(text).toContain(`Flavor text (${version})`);
+    expect(text).not.toContain('No English flavor text');
+  });
+
+  it('matches "Legends: Z-A" ahead of the source-order fallback', async () => {
+    serveSpecies([
+      { flavor_text: 'Fixture Z-A entry.', language: english, version: versionRef('legends-za') },
+      ...bulbasaurSpecies.flavor_text_entries,
+    ]);
+    const { result, text } = await dossier({
+      identifier: 'bulbasaur',
+      game_version: 'Legends: Z-A',
+    });
+    expect(result).toMatchObject({
+      flavorTextVersion: 'legends-za',
+      speciesFlavorText: 'Fixture Z-A entry.',
+      notices: [MOVES_NOTICE],
+    });
+    expect(text).toContain('Flavor text (legends-za)');
+  });
+
+  it.each(['blarg', 'sword-shield', 'Pokémon Sword'])(
+    'keeps the source-order fallback and names the unmatched %j on both surfaces',
+    async (game_version) => {
+      const notice = `No English flavor text matches ${game_version}. Showing the entry from shield.`;
+      const { result, text } = await dossier({ identifier: 'bulbasaur', game_version });
+      expect(result).toMatchObject({
+        flavorTextVersion: 'shield',
+        notices: [notice, MOVES_NOTICE],
+      });
+      expect(text).toContain('Flavor text (shield)');
+      expect(text).toContain(notice);
+    },
+  );
+
+  it.each(['   ', '\t\n'])(
+    'treats the whitespace-only game_version %j as omitted',
+    async (game_version) => {
+      const { result, text } = await dossier({ identifier: 'bulbasaur', game_version });
+      expect(result).toMatchObject({ flavorTextVersion: 'shield', notices: [MOVES_NOTICE] });
+      expect(text).not.toContain('No English flavor text');
+      serveSpecies([
+        {
+          flavor_text: 'フシギダネ',
+          language: { name: 'ja', url: english.url },
+          version: versionRef('red'),
+        },
+      ]);
+      const missing = await dossier({ identifier: 'bulbasaur', game_version });
+      expect(missing.result.notices).toEqual([
+        'No English flavor text is available.',
+        MOVES_NOTICE,
+      ]);
+      expect(missing.text).toContain('No English flavor text is available.\n');
+    },
+  );
+
+  it('reports past typing, abilities, and stats on both surfaces', async () => {
+    const { result, text } = await dossier({ identifier: 'pikachu' });
+    expect(result.pastTypes).toEqual([]);
+    expect(result.pastAbilities).toEqual([
+      { throughGeneration: 'generation-iv', abilities: [{ name: null, isHidden: true, slot: 3 }] },
+    ]);
+    expect(result.pastStats).toEqual([
+      { throughGeneration: 'generation-i', stats: [{ name: 'special', baseStat: 50, effort: 0 }] },
+      {
+        throughGeneration: 'generation-v',
+        stats: [
+          { name: 'defense', baseStat: 30, effort: 0 },
+          { name: 'special-defense', baseStat: 40, effort: 0 },
+        ],
+      },
+    ]);
+    for (const line of [
+      '## Past Generations',
+      '**Past types:** None recorded',
+      '**Abilities through generation-iv:** slot 3 hidden: empty',
+      '**Stats through generation-i:** special 50 (EV: 0)',
+      '**Stats through generation-v:** defense 30 (EV: 0), special-defense 40 (EV: 0)',
+    ])
+      expect(text).toContain(line);
+
+    const clefairy = await dossier({ identifier: 'clefairy' });
+    expect(clefairy.result).toMatchObject({
+      types: ['fairy'],
+      pastTypes: [{ throughGeneration: 'generation-v', types: ['normal'] }],
+      pastAbilities: [
+        {
+          throughGeneration: 'generation-iii',
+          abilities: [{ name: null, isHidden: false, slot: 2 }],
+        },
+        {
+          throughGeneration: 'generation-iv',
+          abilities: [{ name: null, isHidden: true, slot: 3 }],
+        },
+      ],
+      pastStats: [
+        {
+          throughGeneration: 'generation-i',
+          stats: [{ name: 'special', baseStat: 60, effort: 0 }],
+        },
+      ],
+    });
+    for (const line of [
+      '**Types through generation-v:** normal',
+      '**Abilities through generation-iii:** slot 2 regular: empty',
+      '**Stats through generation-i:** special 60 (EV: 0)',
+    ])
+      expect(clefairy.text).toContain(line);
+  });
 
   it('handles legendary Pokémon correctly', async () => {
     const ctx = createMockContext({ errors: getPokemon.errors, tenantId: 'test-tenant' });
@@ -396,6 +593,9 @@ describe('getPokemon', () => {
       varieties: [{ name: 'bulbasaur', isDefault: true }],
       generation: 'generation-i',
       eggGroups: ['monster', 'grass'],
+      pastTypes: [],
+      pastAbilities: [],
+      pastStats: [],
     });
 
     const blocks = getPokemon.format!(result);
@@ -411,6 +611,9 @@ describe('getPokemon', () => {
     expect(text).toContain('Seed Pokémon');
     expect(text).toContain('**Legendary:** No');
     expect(text).toContain('**Mythical:** No');
+    expect(text).toContain(
+      '**Past types:** None recorded\n**Past abilities:** None recorded\n**Past stats:** None recorded',
+    );
   });
 
   it('formats evolution chain correctly', () => {
@@ -462,11 +665,72 @@ describe('getPokemon', () => {
       varieties: [{ name: 'bulbasaur', isDefault: true }],
       generation: 'generation-i',
       eggGroups: ['monster'],
+      pastTypes: [],
+      pastAbilities: [],
+      pastStats: [],
     });
 
     const blocks = getPokemon.format!(result);
     const text = (blocks[0] as { text: string }).text;
     expect(text).toContain('ivysaur');
     expect(text).toContain('level-up');
+    expect(text).toContain('  → **ivysaur** *(trigger: level-up, level 16+)*\n');
+  });
+
+  it('renders a summary level or item that the condition does not already state', () => {
+    const step = {
+      species: 'fixture-evolution',
+      trigger: 'use-item',
+      minLevel: 7,
+      item: 'fixture-stone',
+      condition: 'fixture requirement',
+      evolutionDetails: [],
+      evolvesTo: [],
+    };
+    const result = getPokemon.output.parse({
+      id: 1,
+      name: 'bulbasaur',
+      resolvedFromSpecies: null,
+      heightDm: 7,
+      weightHg: 69,
+      types: [],
+      stats: [],
+      abilities: [],
+      sprites: { frontDefault: null, frontShiny: null, officialArtwork: null },
+      moves: [],
+      notices: [],
+      moveCount: 0,
+      speciesId: 1,
+      pokedexNumbers: [],
+      hatchCounter: null,
+      baseHappiness: null,
+      isBaby: false,
+      speciesFlavorText: null,
+      flavorTextVersion: null,
+      genus: null,
+      captureRate: 45,
+      growthRate: 'medium-slow',
+      genderRate: 4,
+      isLegendary: false,
+      isMythical: false,
+      evolutionChain: {
+        ...step,
+        species: 'bulbasaur',
+        evolvesTo: [step, { ...step, condition: 'level 7+, use fixture-stone' }],
+      },
+      varieties: [],
+      generation: 'generation-i',
+      eggGroups: [],
+      pastTypes: [],
+      pastAbilities: [],
+      pastStats: [],
+    });
+    const text = (getPokemon.format!(result)[0] as { text: string }).text;
+    expect(text).toContain(
+      '→ **bulbasaur** *(trigger: use-item, fixture requirement, minimum level: 7, item: fixture-stone)*',
+    );
+    expect(text).toContain(
+      '  → **fixture-evolution** *(trigger: use-item, level 7+, use fixture-stone)*\n',
+    );
   });
 });

@@ -65,6 +65,7 @@ const move = {
     { stat: ref('speed'), change: 2 },
   ],
   learned_by_pokemon: [ref('charmander'), ref('charizard-mega-x')],
+  machines: [],
 };
 const ability = {
   id: 65,
@@ -340,7 +341,7 @@ describe('search and format characterization', () => {
     }
   });
 
-  it('retains positive relations and explicit unavailable dual-type offense', async () => {
+  it('retains positive relations and per-type dual-type offense', async () => {
     const http = fixtureHttp();
     http.install();
     try {
@@ -367,11 +368,21 @@ describe('search and format characterization', () => {
       ])
         expect(textOf(single)).toContain(value);
       const dual = await runToolContract(getTypeMatchups, { pokemon: 'charizard-mega-x' });
+      const offense = {
+        superEffectiveTo: ['grass'],
+        notVeryEffectiveTo: ['water'],
+        noEffectTo: ['fixture-immune'],
+      };
       expect(dual.structuredContent).toMatchObject({
         offensiveRelations: null,
+        offensiveByType: { fire: offense, dragon: offense },
         resolvedTypes: ['fire', 'dragon'],
       });
-      expect(textOf(dual)).toContain('Offensive breakdown unavailable for dual-type');
+      for (const type of ['fire', 'dragon'])
+        expect(textOf(dual)).toContain(
+          `## Offensive Relations: ${type}\n**Super Effective (2×):** grass\n**Not Very Effective (0.5×):** water\n**No Effect (0×):** fixture-immune`,
+        );
+      expect(textOf(dual)).not.toContain('unavailable');
     } finally {
       http.restore();
     }
@@ -876,8 +887,21 @@ describe('species names as Pokémon identifiers', () => {
     }
   });
 
+  it('reports an upstream failure for a species whose listed default variety has no Pokémon record', async () => {
+    const http = upstream({ 'pokemon-species/deoxys': deoxysSpecies });
+    http.install();
+    try {
+      const result = await runToolContract(getPokemon, { identifier: 'deoxys' });
+      expect(result.structuredContent).toMatchObject({
+        error: { code: JsonRpcErrorCode.ServiceUnavailable },
+      });
+      expect(pathsOf(http)).toHaveLength(3);
+    } finally {
+      http.restore();
+    }
+  });
+
   it.each([
-    ['its default variety has no Pokémon record', { 'pokemon-species/deoxys': deoxysSpecies }, 3],
     [
       'it lists no default variety',
       {
@@ -1000,9 +1024,7 @@ describe('meaningful sparse values', () => {
     [
       'nonexistent-version',
       'shield',
-      [
-        'No English flavor text is available for nonexistent-version. Showing the entry from shield.',
-      ],
+      ['No English flavor text matches nonexistent-version. Showing the entry from shield.'],
     ],
     [undefined, 'shield', []],
   ])(

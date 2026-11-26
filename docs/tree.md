@@ -1,6 +1,6 @@
 # pokeapi-mcp-server - Directory Structure
 
-Generated on: 2026-10-30 09:20:01
+Generated on: 2026-11-26 02:13:26
 
 ```text
 pokeapi-mcp-server/
@@ -163,15 +163,26 @@ pokeapi-mcp-server/
 │   │           └── get-type-matchups.tool.ts
 │   ├── services/
 │   │   └── pokeapi/
+│   │       ├── effect-text.ts
+│   │       ├── evolution-chain.ts
+│   │       ├── machine-reads.ts
 │   │       ├── pokeapi-service.ts
-│   │       └── types.ts
+│   │       ├── state-cache.ts
+│   │       ├── type-matchups.ts
+│   │       ├── types.ts
+│   │       └── upstream-failure.ts
 │   └── index.ts
 ├── tests/
 │   ├── fixtures/
 │   │   ├── domain-captures.json
+│   │   ├── effect-text-captures.json
+│   │   ├── generation-captures.json
+│   │   ├── generation-fixtures.ts
 │   │   ├── handler-fixtures.ts
+│   │   ├── machine-captures.json
 │   │   ├── README.md
-│   │   └── resolution-captures.json
+│   │   ├── resolution-captures.json
+│   │   └── storage-failures.ts
 │   ├── prompts/
 │   │   ├── team-builder-registration.test.ts
 │   │   └── team-builder.prompt.test.ts
@@ -181,8 +192,13 @@ pokeapi-mcp-server/
 │   ├── scripts/
 │   │   └── bundle-runtime.test.ts
 │   ├── services/
+│   │   ├── effect-text.test.ts
+│   │   ├── evolution-chain.test.ts
+│   │   ├── machine-reads.test.ts
 │   │   ├── pokeapi-service.test.ts
-│   │   └── pokemon-resolution.test.ts
+│   │   ├── pokemon-resolution.test.ts
+│   │   ├── state-cache.test.ts
+│   │   └── upstream-failure.test.ts
 │   ├── tools/
 │   │   ├── domain-contracts.test.ts
 │   │   ├── find-pokemon.tool.test.ts

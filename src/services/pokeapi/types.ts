@@ -23,6 +23,8 @@ export interface RawPokemon {
     ability: NamedResource;
   }>;
   base_experience?: number | null;
+  /** Form records of this Pokémon; each form record names the version group that introduced it. */
+  forms: NamedResource[];
   height: number;
   held_items?: Array<{
     item: NamedResource;
@@ -43,6 +45,38 @@ export interface RawPokemon {
   }>;
   name: string;
   order: number;
+  /**
+   * Ability slots as they stood through `generation` (the last generation the old value applied).
+   * Lists only changed slots; a null `ability` means the slot was empty then.
+   */
+  past_abilities: Array<{
+    generation: NamedResource;
+    abilities: Array<{
+      ability: NamedResource | null;
+      is_hidden: boolean;
+      slot: number;
+    }>;
+  }>;
+  /**
+   * Base stats and effort yields as they stood through `generation`. Lists only changed stats;
+   * Gen 1 `special` appears here under its own stat name.
+   */
+  past_stats: Array<{
+    generation: NamedResource;
+    stats: Array<{
+      base_stat: number;
+      effort: number;
+      stat: NamedResource;
+    }>;
+  }>;
+  /** Complete typing as it stood through `generation` (the last generation the old typing applied). */
+  past_types: Array<{
+    generation: NamedResource;
+    types: Array<{
+      slot: number;
+      type: NamedResource;
+    }>;
+  }>;
   species: NamedResource;
   sprites: {
     front_default: string | null;
@@ -113,7 +147,7 @@ export interface RawEvolutionDetail {
   allowed_natures?: NamedResource[] | null;
   condition_expression?: {
     expression: string;
-    percentage_chance: number;
+    percentage_chance: number | null;
     variables: NamedResource[];
   } | null;
   evolved_pokemon_form?: NamedResource | null;
@@ -178,15 +212,17 @@ export interface RawAbility {
   }>;
 }
 
+export interface RawDamageRelations {
+  double_damage_from: NamedResource[];
+  double_damage_to: NamedResource[];
+  half_damage_from: NamedResource[];
+  half_damage_to: NamedResource[];
+  no_damage_from: NamedResource[];
+  no_damage_to: NamedResource[];
+}
+
 export interface RawType {
-  damage_relations: {
-    no_damage_to: NamedResource[];
-    half_damage_to: NamedResource[];
-    double_damage_to: NamedResource[];
-    no_damage_from: NamedResource[];
-    half_damage_from: NamedResource[];
-    double_damage_from: NamedResource[];
-  };
+  damage_relations: RawDamageRelations;
   game_indices: unknown[];
   generation: NamedResource;
   id: number;
@@ -194,8 +230,18 @@ export interface RawType {
   moves: NamedResource[];
   name: string;
   names: Array<{ name: string; language: NamedResource }>;
-  past_damage_relations: unknown[];
+  /** Complete damage relations as they stood through `generation` (the last generation they applied). */
+  past_damage_relations: Array<{
+    generation: NamedResource;
+    damage_relations: RawDamageRelations;
+  }>;
   pokemon: Array<{ slot: number; pokemon: NamedResource }>;
+}
+
+/** One TM, TR, or HM row on an item or move: the machine record that applies in one version group. */
+export interface RawMachineRef {
+  machine: { url: string };
+  version_group: NamedResource;
 }
 
 export interface RawMove {
@@ -219,7 +265,7 @@ export interface RawMove {
   generation: NamedResource;
   id: number;
   learned_by_pokemon: NamedResource[];
-  machines: unknown[];
+  machines: RawMachineRef[];
   meta?: {
     ailment: NamedResource;
     category: NamedResource;
@@ -275,7 +321,7 @@ export interface RawItem {
     version_details: Array<{ rarity: number; version: NamedResource }>;
   }>;
   id: number;
-  machines: unknown[];
+  machines: RawMachineRef[];
   name: string;
   names: Array<{ name: string; language: NamedResource }>;
   prices?: Array<{
@@ -316,6 +362,13 @@ export interface RawGeneration {
   pokemon_species: NamedResource[];
   types: NamedResource[];
   version_groups: NamedResource[];
+}
+
+export interface RawPokemonForm {
+  id: number;
+  name: string;
+  /** Version group that introduced this form. */
+  version_group: NamedResource;
 }
 
 export interface RawPokedex {
@@ -379,7 +432,7 @@ export interface EvolutionDetail {
   allowedNatures: string[] | null;
   conditionExpression: {
     expression: string;
-    percentageChance: number;
+    percentageChance: number | null;
     variables: string[];
   } | null;
   evolvedPokemonForm: string | null;
@@ -435,6 +488,15 @@ export interface PokemonDossier {
   moves: PokemonMoveSummary[];
   name: string;
   notices: string[];
+  /** Ability slots that differed, each through the last generation it applied to; null name = empty slot. */
+  pastAbilities: Array<{
+    abilities: Array<{ isHidden: boolean; name: string | null; slot: number }>;
+    throughGeneration: string;
+  }>;
+  /** Base stats and effort yields that differed, each through the last generation it applied to. */
+  pastStats: Array<{ stats: PokemonStat[]; throughGeneration: string }>;
+  /** Complete earlier typings, each through the last generation it applied to. */
+  pastTypes: Array<{ throughGeneration: string; types: string[] }>;
   pokedexNumbers: Array<{ pokedex: string; entryNumber: number }>;
   /** Species name the identifier matched instead of a Pokémon record; null for a direct match. */
   resolvedFromSpecies: string | null;
@@ -451,23 +513,29 @@ export interface PokemonDossier {
   weightHg: number;
 }
 
+/** Damage one attacking type deals, by multiplier. */
+export interface TypeRelations {
+  noEffectTo: string[];
+  notVeryEffectiveTo: string[];
+  superEffectiveTo: string[];
+}
+
 export interface TypeMatchups {
   defensiveRelations: {
     weakTo: string[];
     resists: string[];
     immuneTo: string[];
   };
-  offensiveRelations: {
-    superEffectiveTo: string[];
-    notVeryEffectiveTo: string[];
-    noEffectTo: string[];
-  };
+  offensiveRelations: TypeRelations;
   typeName: string;
 }
 
-export interface DualTypeMatchups {
-  defensiveMatchups: Record<string, number>;
-  types: string[];
+/** Matchups for one or two defending types, derived from one read of each type record. */
+export interface TypeSetMatchups {
+  /** Attacking type → multiplier against the composed defending types. */
+  composedMultipliers: Record<string, number>;
+  /** Offensive relations of each type, keyed in query order. */
+  offensiveByType: Record<string, TypeRelations>;
 }
 
 export interface MoveDetails {
@@ -475,9 +543,14 @@ export interface MoveDetails {
   damageClass: string | null;
   effectChance: number | null;
   effectText: string | null;
+  /** Version group of the flavor text standing in for effect prose; null for prose or no text. */
+  effectTextVersionGroup: string | null;
   id: number;
   learnedByPokemon: string[];
+  /** TM, TR, or HM item teaching the move in each version group, in upstream order. */
+  machines: Array<{ versionGroup: string; item: string | null }>;
   name: string;
+  notices: string[];
   power: number | null;
   pp: number | null;
   priority: number;
@@ -501,10 +574,15 @@ export interface ItemDetails {
   category: string;
   cost: number | null;
   effectText: string | null;
+  /** Version group of the flavor text standing in for effect prose; null for prose or no text. */
+  effectTextVersionGroup: string | null;
   flingPower: number | null;
   heldByPokemon: string[];
   id: number;
+  /** Move this TM, TR, or HM teaches in each version group, in upstream order. */
+  machines: Array<{ versionGroup: string; move: string | null }>;
   name: string;
+  notices: string[];
   prices: Array<{
     versionGroup: string;
     currency: string;

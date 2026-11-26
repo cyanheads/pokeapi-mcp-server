@@ -4,7 +4,7 @@ description: Use pokeapi_* tools for form-aware Pokémon discovery, evolution re
 license: Apache-2.0
 metadata:
   author: "cyanheads"
-  version: "1.1"
+  version: "1.2"
 ---
 
 ## Scope
@@ -21,9 +21,11 @@ Use the dossier's `varieties` names to request a particular form. Use its move a
 
 - Before reporting no matches, inspect the search notice and total. A missing category filter is not a completed search; an empty page beyond the total is not an empty result set. Follow pagination until the requested set is covered before claiming an exhaustive list.
 - Before ruling out an alternate form by type, distinguish type-only searches from mixed searches. Mixed searches intersect species/default-record IDs; a type found only on an alternate form does not qualify its species. Use a type-only search and inspect the relevant form dossiers when alternate forms matter.
-- Before claiming a Pokémon can learn a move in a particular game, request that game's version group and inspect the returned methods, levels, and source groups. The unscoped summary combines groups, and a move's learner list has no game-version qualification. Neither proves competitive-format legality or transfer eligibility. `game_version` selects flavor text only; use its returned source and fallback notice when attributing a Pokédex quotation.
-- Before explaining an evolution, inspect the relevant branch's complete `evolutionDetails`. Requirements combine within one alternative, not across alternatives. Preserve version and form qualifiers; the compatibility summary covers only the first alternative. An unevaluated condition expression is not a verified satisfied condition.
-- Before recommending a battle counter, separate type effectiveness from the battle outcome. The matchup calculation uses type relations; consult the actual form's ability effects and relevant move/item details rather than treating its multiplier table as a damage calculation or win guarantee.
+- Before claiming a Pokémon can learn a move in a particular game, request that game's version group and inspect the returned methods, levels, and source groups. The unscoped summary combines groups, and a move's learner list has no game-version qualification. Neither proves competitive-format legality or transfer eligibility. `game_version` selects flavor text only, by version name or in-game title ("Fire Red"); use its returned source and fallback notice when attributing a Pokédex quotation.
+- Before naming a TM, TR, or HM for a game, request that game's version group on `pokeapi_get_move` or `pokeapi_get_item` and read the `machines` rows. A machine item's effect text is one description for every game and can name a different move than the row does; a null row and its notice mean the record was not read, not that no machine exists. An item or move's `effectText` can be one game's in-game text, attributed by `effectTextVersionGroup`.
+- Before reporting a Pokémon's typing, abilities, or stats for an older game, read the dossier's `pastTypes`, `pastAbilities`, and `pastStats`: each entry holds values through its `throughGeneration`, and anything it omits comes from the next later entry, then the current data. The current fields are not the older game's values.
+- Before explaining an evolution, inspect the relevant branch's complete `evolutionDetails`. Requirements combine within one alternative, not across alternatives. Preserve version and form qualifiers; the stage summary covers one alternative (the first marked default, else the first), and `evolutionDetails` is the complete record. An unevaluated condition expression is not a verified satisfied condition.
+- Before recommending a battle counter, separate type effectiveness from the battle outcome. The matchup calculation uses type relations; consult the actual form's ability effects and relevant move/item details rather than treating its multiplier table as a damage calculation or win guarantee. A move's `statChanges` do not say whether they land on the user or the target; read its `effectText`.
 
 ## Core chain
 
@@ -31,6 +33,8 @@ Discover candidates with `pokeapi_find_pokemon`, then inspect returned names wit
 
 ## Workflows
 
-For a type-coverage comparison, query each resolved form with `pokeapi_get_type_matchups`. Retain the numeric composed multipliers so a 4× weakness remains distinct from a 2× weakness. For offensive coverage, inspect the actual moves with `pokeapi_get_move`; a dual-type Pokémon's unavailable offensive breakdown does not imply it has no useful attacks.
+For a type-coverage comparison, query each resolved form with `pokeapi_get_type_matchups`, which also takes a two-type `type` such as "water/ground". Retain the numeric composed multipliers so a 4× weakness remains distinct from a 2× weakness. For offensive coverage, read each type's attacks in `offensiveByType`, then inspect the actual moves with `pokeapi_get_move`; a type's attacking relations do not say which moves the Pokémon has. For an older game, pass its `generation`: relations and typings are then as they stood then, and `not_in_generation` means a type or form did not exist yet.
+
+For "which TM teaches X in game Y", call `pokeapi_get_move` with `version_group`; for "what is TM25 in game Y", call `pokeapi_get_item` with `version_group`.
 
 For evolution research, walk the dossier's tree to the requested starting stage, then follow the desired descendant branch. Read every applicable evolution alternative at each step. Resolve named items or moves with their detail tools when the user needs their effects, keeping unknown version/form conditions explicit.

@@ -1833,6 +1833,7 @@
     "choice-specs": {
       "id": 274,
       "name": "choice-specs",
+      "machines": [],
       "category": {
         "name": "choice",
         "url": "https://pokeapi.co/api/v2/item-category/13/"
@@ -1867,6 +1868,7 @@
     "master-ball": {
       "id": 1,
       "name": "master-ball",
+      "machines": [],
       "category": {
         "name": "standard-balls",
         "url": "https://pokeapi.co/api/v2/item-category/34/"
@@ -1982,6 +1984,7 @@
     "leftovers": {
       "id": 211,
       "name": "leftovers",
+      "machines": [],
       "category": {
         "name": "held-items",
         "url": "https://pokeapi.co/api/v2/item-category/12/"
@@ -2299,6 +2302,7 @@
     "poke-ball": {
       "id": 4,
       "name": "poke-ball",
+      "machines": [],
       "category": {
         "name": "standard-balls",
         "url": "https://pokeapi.co/api/v2/item-category/34/"
@@ -2341,6 +2345,7 @@
     "ultra-ball": {
       "id": 2,
       "name": "ultra-ball",
+      "machines": [],
       "category": {
         "name": "standard-balls",
         "url": "https://pokeapi.co/api/v2/item-category/34/"
@@ -2674,6 +2679,9 @@
     "inkay": {
       "id": 686,
       "name": "inkay",
+      "past_abilities": [],
+      "past_stats": [],
+      "past_types": [],
       "height": 4,
       "weight": 35,
       "species": {
@@ -2867,6 +2875,40 @@
     "bulbasaur": {
       "id": 1,
       "name": "bulbasaur",
+      "past_abilities": [
+        {
+          "generation": {
+            "name": "generation-iv",
+            "url": "https://pokeapi.co/api/v2/generation/4/"
+          },
+          "abilities": [
+            {
+              "is_hidden": true,
+              "slot": 3,
+              "ability": null
+            }
+          ]
+        }
+      ],
+      "past_stats": [
+        {
+          "generation": {
+            "name": "generation-i",
+            "url": "https://pokeapi.co/api/v2/generation/1/"
+          },
+          "stats": [
+            {
+              "base_stat": 65,
+              "effort": 0,
+              "stat": {
+                "name": "special",
+                "url": "https://pokeapi.co/api/v2/stat/9/"
+              }
+            }
+          ]
+        }
+      ],
+      "past_types": [],
       "height": 7,
       "weight": 69,
       "species": {
@@ -3244,6 +3286,9 @@
     "charizard-mega-x": {
       "id": 10034,
       "name": "charizard-mega-x",
+      "past_abilities": [],
+      "past_stats": [],
+      "past_types": [],
       "height": 17,
       "weight": 1105,
       "species": {

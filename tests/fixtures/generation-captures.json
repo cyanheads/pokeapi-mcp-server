@@ -1,0 +1,2570 @@
+{
+  "generation?limit=100": {
+    "count": 9,
+    "next": null,
+    "previous": null,
+    "results": [
+      {
+        "name": "generation-i",
+        "url": "https://pokeapi.co/api/v2/generation/1/"
+      },
+      {
+        "name": "generation-ii",
+        "url": "https://pokeapi.co/api/v2/generation/2/"
+      },
+      {
+        "name": "generation-iii",
+        "url": "https://pokeapi.co/api/v2/generation/3/"
+      },
+      {
+        "name": "generation-iv",
+        "url": "https://pokeapi.co/api/v2/generation/4/"
+      },
+      {
+        "name": "generation-v",
+        "url": "https://pokeapi.co/api/v2/generation/5/"
+      },
+      {
+        "name": "generation-vi",
+        "url": "https://pokeapi.co/api/v2/generation/6/"
+      },
+      {
+        "name": "generation-vii",
+        "url": "https://pokeapi.co/api/v2/generation/7/"
+      },
+      {
+        "name": "generation-viii",
+        "url": "https://pokeapi.co/api/v2/generation/8/"
+      },
+      {
+        "name": "generation-ix",
+        "url": "https://pokeapi.co/api/v2/generation/9/"
+      }
+    ]
+  },
+  "generation/generation-i": {
+    "id": 1,
+    "name": "generation-i",
+    "types": [
+      {
+        "name": "normal",
+        "url": "https://pokeapi.co/api/v2/type/1/"
+      },
+      {
+        "name": "fighting",
+        "url": "https://pokeapi.co/api/v2/type/2/"
+      },
+      {
+        "name": "flying",
+        "url": "https://pokeapi.co/api/v2/type/3/"
+      },
+      {
+        "name": "poison",
+        "url": "https://pokeapi.co/api/v2/type/4/"
+      },
+      {
+        "name": "ground",
+        "url": "https://pokeapi.co/api/v2/type/5/"
+      },
+      {
+        "name": "rock",
+        "url": "https://pokeapi.co/api/v2/type/6/"
+      },
+      {
+        "name": "bug",
+        "url": "https://pokeapi.co/api/v2/type/7/"
+      },
+      {
+        "name": "ghost",
+        "url": "https://pokeapi.co/api/v2/type/8/"
+      },
+      {
+        "name": "fire",
+        "url": "https://pokeapi.co/api/v2/type/10/"
+      },
+      {
+        "name": "water",
+        "url": "https://pokeapi.co/api/v2/type/11/"
+      },
+      {
+        "name": "grass",
+        "url": "https://pokeapi.co/api/v2/type/12/"
+      },
+      {
+        "name": "electric",
+        "url": "https://pokeapi.co/api/v2/type/13/"
+      },
+      {
+        "name": "psychic",
+        "url": "https://pokeapi.co/api/v2/type/14/"
+      },
+      {
+        "name": "ice",
+        "url": "https://pokeapi.co/api/v2/type/15/"
+      },
+      {
+        "name": "dragon",
+        "url": "https://pokeapi.co/api/v2/type/16/"
+      }
+    ],
+    "version_groups": [
+      {
+        "name": "red-blue",
+        "url": "https://pokeapi.co/api/v2/version-group/1/"
+      },
+      {
+        "name": "yellow",
+        "url": "https://pokeapi.co/api/v2/version-group/2/"
+      },
+      {
+        "name": "red-green-japan",
+        "url": "https://pokeapi.co/api/v2/version-group/28/"
+      },
+      {
+        "name": "blue-japan",
+        "url": "https://pokeapi.co/api/v2/version-group/29/"
+      }
+    ]
+  },
+  "generation/generation-ii": {
+    "id": 2,
+    "name": "generation-ii",
+    "types": [
+      {
+        "name": "steel",
+        "url": "https://pokeapi.co/api/v2/type/9/"
+      },
+      {
+        "name": "dark",
+        "url": "https://pokeapi.co/api/v2/type/17/"
+      },
+      {
+        "name": "unknown",
+        "url": "https://pokeapi.co/api/v2/type/10001/"
+      }
+    ],
+    "version_groups": [
+      {
+        "name": "gold-silver",
+        "url": "https://pokeapi.co/api/v2/version-group/3/"
+      },
+      {
+        "name": "crystal",
+        "url": "https://pokeapi.co/api/v2/version-group/4/"
+      }
+    ]
+  },
+  "generation/generation-iii": {
+    "id": 3,
+    "name": "generation-iii",
+    "types": [
+      {
+        "name": "shadow",
+        "url": "https://pokeapi.co/api/v2/type/10002/"
+      }
+    ],
+    "version_groups": [
+      {
+        "name": "ruby-sapphire",
+        "url": "https://pokeapi.co/api/v2/version-group/5/"
+      },
+      {
+        "name": "emerald",
+        "url": "https://pokeapi.co/api/v2/version-group/6/"
+      },
+      {
+        "name": "firered-leafgreen",
+        "url": "https://pokeapi.co/api/v2/version-group/7/"
+      },
+      {
+        "name": "colosseum",
+        "url": "https://pokeapi.co/api/v2/version-group/12/"
+      },
+      {
+        "name": "xd",
+        "url": "https://pokeapi.co/api/v2/version-group/13/"
+      }
+    ]
+  },
+  "generation/generation-iv": {
+    "id": 4,
+    "name": "generation-iv",
+    "types": [],
+    "version_groups": [
+      {
+        "name": "diamond-pearl",
+        "url": "https://pokeapi.co/api/v2/version-group/8/"
+      },
+      {
+        "name": "platinum",
+        "url": "https://pokeapi.co/api/v2/version-group/9/"
+      },
+      {
+        "name": "heartgold-soulsilver",
+        "url": "https://pokeapi.co/api/v2/version-group/10/"
+      }
+    ]
+  },
+  "generation/generation-v": {
+    "id": 5,
+    "name": "generation-v",
+    "types": [],
+    "version_groups": [
+      {
+        "name": "black-white",
+        "url": "https://pokeapi.co/api/v2/version-group/11/"
+      },
+      {
+        "name": "black-2-white-2",
+        "url": "https://pokeapi.co/api/v2/version-group/14/"
+      }
+    ]
+  },
+  "generation/generation-vi": {
+    "id": 6,
+    "name": "generation-vi",
+    "types": [
+      {
+        "name": "fairy",
+        "url": "https://pokeapi.co/api/v2/type/18/"
+      }
+    ],
+    "version_groups": [
+      {
+        "name": "x-y",
+        "url": "https://pokeapi.co/api/v2/version-group/15/"
+      },
+      {
+        "name": "omega-ruby-alpha-sapphire",
+        "url": "https://pokeapi.co/api/v2/version-group/16/"
+      }
+    ]
+  },
+  "generation/generation-vii": {
+    "id": 7,
+    "name": "generation-vii",
+    "types": [],
+    "version_groups": [
+      {
+        "name": "sun-moon",
+        "url": "https://pokeapi.co/api/v2/version-group/17/"
+      },
+      {
+        "name": "ultra-sun-ultra-moon",
+        "url": "https://pokeapi.co/api/v2/version-group/18/"
+      },
+      {
+        "name": "lets-go-pikachu-lets-go-eevee",
+        "url": "https://pokeapi.co/api/v2/version-group/19/"
+      }
+    ]
+  },
+  "generation/generation-viii": {
+    "id": 8,
+    "name": "generation-viii",
+    "types": [],
+    "version_groups": [
+      {
+        "name": "sword-shield",
+        "url": "https://pokeapi.co/api/v2/version-group/20/"
+      },
+      {
+        "name": "the-isle-of-armor",
+        "url": "https://pokeapi.co/api/v2/version-group/21/"
+      },
+      {
+        "name": "the-crown-tundra",
+        "url": "https://pokeapi.co/api/v2/version-group/22/"
+      },
+      {
+        "name": "brilliant-diamond-shining-pearl",
+        "url": "https://pokeapi.co/api/v2/version-group/23/"
+      },
+      {
+        "name": "legends-arceus",
+        "url": "https://pokeapi.co/api/v2/version-group/24/"
+      }
+    ]
+  },
+  "generation/generation-ix": {
+    "id": 9,
+    "name": "generation-ix",
+    "types": [
+      {
+        "name": "stellar",
+        "url": "https://pokeapi.co/api/v2/type/19/"
+      }
+    ],
+    "version_groups": [
+      {
+        "name": "scarlet-violet",
+        "url": "https://pokeapi.co/api/v2/version-group/25/"
+      },
+      {
+        "name": "the-teal-mask",
+        "url": "https://pokeapi.co/api/v2/version-group/26/"
+      },
+      {
+        "name": "the-indigo-disk",
+        "url": "https://pokeapi.co/api/v2/version-group/27/"
+      },
+      {
+        "name": "legends-za",
+        "url": "https://pokeapi.co/api/v2/version-group/30/"
+      },
+      {
+        "name": "mega-dimension",
+        "url": "https://pokeapi.co/api/v2/version-group/31/"
+      },
+      {
+        "name": "champions",
+        "url": "https://pokeapi.co/api/v2/version-group/32/"
+      }
+    ]
+  },
+  "type/normal": {
+    "id": 1,
+    "name": "normal",
+    "generation": {
+      "name": "generation-i",
+      "url": "https://pokeapi.co/api/v2/generation/1/"
+    },
+    "damage_relations": {
+      "no_damage_to": [
+        {
+          "name": "ghost",
+          "url": "https://pokeapi.co/api/v2/type/8/"
+        }
+      ],
+      "half_damage_to": [
+        {
+          "name": "rock",
+          "url": "https://pokeapi.co/api/v2/type/6/"
+        },
+        {
+          "name": "steel",
+          "url": "https://pokeapi.co/api/v2/type/9/"
+        }
+      ],
+      "double_damage_to": [],
+      "no_damage_from": [
+        {
+          "name": "ghost",
+          "url": "https://pokeapi.co/api/v2/type/8/"
+        }
+      ],
+      "half_damage_from": [],
+      "double_damage_from": [
+        {
+          "name": "fighting",
+          "url": "https://pokeapi.co/api/v2/type/2/"
+        }
+      ]
+    },
+    "past_damage_relations": []
+  },
+  "type/fighting": {
+    "id": 2,
+    "name": "fighting",
+    "generation": {
+      "name": "generation-i",
+      "url": "https://pokeapi.co/api/v2/generation/1/"
+    },
+    "damage_relations": {
+      "no_damage_to": [
+        {
+          "name": "ghost",
+          "url": "https://pokeapi.co/api/v2/type/8/"
+        }
+      ],
+      "half_damage_to": [
+        {
+          "name": "flying",
+          "url": "https://pokeapi.co/api/v2/type/3/"
+        },
+        {
+          "name": "poison",
+          "url": "https://pokeapi.co/api/v2/type/4/"
+        },
+        {
+          "name": "bug",
+          "url": "https://pokeapi.co/api/v2/type/7/"
+        },
+        {
+          "name": "psychic",
+          "url": "https://pokeapi.co/api/v2/type/14/"
+        },
+        {
+          "name": "fairy",
+          "url": "https://pokeapi.co/api/v2/type/18/"
+        }
+      ],
+      "double_damage_to": [
+        {
+          "name": "normal",
+          "url": "https://pokeapi.co/api/v2/type/1/"
+        },
+        {
+          "name": "rock",
+          "url": "https://pokeapi.co/api/v2/type/6/"
+        },
+        {
+          "name": "steel",
+          "url": "https://pokeapi.co/api/v2/type/9/"
+        },
+        {
+          "name": "ice",
+          "url": "https://pokeapi.co/api/v2/type/15/"
+        },
+        {
+          "name": "dark",
+          "url": "https://pokeapi.co/api/v2/type/17/"
+        }
+      ],
+      "no_damage_from": [],
+      "half_damage_from": [
+        {
+          "name": "rock",
+          "url": "https://pokeapi.co/api/v2/type/6/"
+        },
+        {
+          "name": "bug",
+          "url": "https://pokeapi.co/api/v2/type/7/"
+        },
+        {
+          "name": "dark",
+          "url": "https://pokeapi.co/api/v2/type/17/"
+        }
+      ],
+      "double_damage_from": [
+        {
+          "name": "flying",
+          "url": "https://pokeapi.co/api/v2/type/3/"
+        },
+        {
+          "name": "psychic",
+          "url": "https://pokeapi.co/api/v2/type/14/"
+        },
+        {
+          "name": "fairy",
+          "url": "https://pokeapi.co/api/v2/type/18/"
+        }
+      ]
+    },
+    "past_damage_relations": []
+  },
+  "type/flying": {
+    "id": 3,
+    "name": "flying",
+    "generation": {
+      "name": "generation-i",
+      "url": "https://pokeapi.co/api/v2/generation/1/"
+    },
+    "damage_relations": {
+      "no_damage_to": [],
+      "half_damage_to": [
+        {
+          "name": "rock",
+          "url": "https://pokeapi.co/api/v2/type/6/"
+        },
+        {
+          "name": "steel",
+          "url": "https://pokeapi.co/api/v2/type/9/"
+        },
+        {
+          "name": "electric",
+          "url": "https://pokeapi.co/api/v2/type/13/"
+        }
+      ],
+      "double_damage_to": [
+        {
+          "name": "fighting",
+          "url": "https://pokeapi.co/api/v2/type/2/"
+        },
+        {
+          "name": "bug",
+          "url": "https://pokeapi.co/api/v2/type/7/"
+        },
+        {
+          "name": "grass",
+          "url": "https://pokeapi.co/api/v2/type/12/"
+        }
+      ],
+      "no_damage_from": [
+        {
+          "name": "ground",
+          "url": "https://pokeapi.co/api/v2/type/5/"
+        }
+      ],
+      "half_damage_from": [
+        {
+          "name": "fighting",
+          "url": "https://pokeapi.co/api/v2/type/2/"
+        },
+        {
+          "name": "bug",
+          "url": "https://pokeapi.co/api/v2/type/7/"
+        },
+        {
+          "name": "grass",
+          "url": "https://pokeapi.co/api/v2/type/12/"
+        }
+      ],
+      "double_damage_from": [
+        {
+          "name": "rock",
+          "url": "https://pokeapi.co/api/v2/type/6/"
+        },
+        {
+          "name": "electric",
+          "url": "https://pokeapi.co/api/v2/type/13/"
+        },
+        {
+          "name": "ice",
+          "url": "https://pokeapi.co/api/v2/type/15/"
+        }
+      ]
+    },
+    "past_damage_relations": []
+  },
+  "type/poison": {
+    "id": 4,
+    "name": "poison",
+    "generation": {
+      "name": "generation-i",
+      "url": "https://pokeapi.co/api/v2/generation/1/"
+    },
+    "damage_relations": {
+      "no_damage_to": [
+        {
+          "name": "steel",
+          "url": "https://pokeapi.co/api/v2/type/9/"
+        }
+      ],
+      "half_damage_to": [
+        {
+          "name": "poison",
+          "url": "https://pokeapi.co/api/v2/type/4/"
+        },
+        {
+          "name": "ground",
+          "url": "https://pokeapi.co/api/v2/type/5/"
+        },
+        {
+          "name": "rock",
+          "url": "https://pokeapi.co/api/v2/type/6/"
+        },
+        {
+          "name": "ghost",
+          "url": "https://pokeapi.co/api/v2/type/8/"
+        }
+      ],
+      "double_damage_to": [
+        {
+          "name": "grass",
+          "url": "https://pokeapi.co/api/v2/type/12/"
+        },
+        {
+          "name": "fairy",
+          "url": "https://pokeapi.co/api/v2/type/18/"
+        }
+      ],
+      "no_damage_from": [],
+      "half_damage_from": [
+        {
+          "name": "fighting",
+          "url": "https://pokeapi.co/api/v2/type/2/"
+        },
+        {
+          "name": "poison",
+          "url": "https://pokeapi.co/api/v2/type/4/"
+        },
+        {
+          "name": "bug",
+          "url": "https://pokeapi.co/api/v2/type/7/"
+        },
+        {
+          "name": "grass",
+          "url": "https://pokeapi.co/api/v2/type/12/"
+        },
+        {
+          "name": "fairy",
+          "url": "https://pokeapi.co/api/v2/type/18/"
+        }
+      ],
+      "double_damage_from": [
+        {
+          "name": "ground",
+          "url": "https://pokeapi.co/api/v2/type/5/"
+        },
+        {
+          "name": "psychic",
+          "url": "https://pokeapi.co/api/v2/type/14/"
+        }
+      ]
+    },
+    "past_damage_relations": [
+      {
+        "generation": {
+          "name": "generation-i",
+          "url": "https://pokeapi.co/api/v2/generation/1/"
+        },
+        "damage_relations": {
+          "no_damage_to": [],
+          "half_damage_to": [
+            {
+              "name": "poison",
+              "url": "https://pokeapi.co/api/v2/type/4/"
+            },
+            {
+              "name": "ground",
+              "url": "https://pokeapi.co/api/v2/type/5/"
+            },
+            {
+              "name": "rock",
+              "url": "https://pokeapi.co/api/v2/type/6/"
+            },
+            {
+              "name": "ghost",
+              "url": "https://pokeapi.co/api/v2/type/8/"
+            }
+          ],
+          "double_damage_to": [
+            {
+              "name": "grass",
+              "url": "https://pokeapi.co/api/v2/type/12/"
+            },
+            {
+              "name": "bug",
+              "url": "https://pokeapi.co/api/v2/type/7/"
+            }
+          ],
+          "no_damage_from": [],
+          "half_damage_from": [
+            {
+              "name": "fighting",
+              "url": "https://pokeapi.co/api/v2/type/2/"
+            },
+            {
+              "name": "poison",
+              "url": "https://pokeapi.co/api/v2/type/4/"
+            },
+            {
+              "name": "grass",
+              "url": "https://pokeapi.co/api/v2/type/12/"
+            }
+          ],
+          "double_damage_from": [
+            {
+              "name": "ground",
+              "url": "https://pokeapi.co/api/v2/type/5/"
+            },
+            {
+              "name": "psychic",
+              "url": "https://pokeapi.co/api/v2/type/14/"
+            },
+            {
+              "name": "bug",
+              "url": "https://pokeapi.co/api/v2/type/7/"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "type/ground": {
+    "id": 5,
+    "name": "ground",
+    "generation": {
+      "name": "generation-i",
+      "url": "https://pokeapi.co/api/v2/generation/1/"
+    },
+    "damage_relations": {
+      "no_damage_to": [
+        {
+          "name": "flying",
+          "url": "https://pokeapi.co/api/v2/type/3/"
+        }
+      ],
+      "half_damage_to": [
+        {
+          "name": "bug",
+          "url": "https://pokeapi.co/api/v2/type/7/"
+        },
+        {
+          "name": "grass",
+          "url": "https://pokeapi.co/api/v2/type/12/"
+        }
+      ],
+      "double_damage_to": [
+        {
+          "name": "poison",
+          "url": "https://pokeapi.co/api/v2/type/4/"
+        },
+        {
+          "name": "rock",
+          "url": "https://pokeapi.co/api/v2/type/6/"
+        },
+        {
+          "name": "steel",
+          "url": "https://pokeapi.co/api/v2/type/9/"
+        },
+        {
+          "name": "fire",
+          "url": "https://pokeapi.co/api/v2/type/10/"
+        },
+        {
+          "name": "electric",
+          "url": "https://pokeapi.co/api/v2/type/13/"
+        }
+      ],
+      "no_damage_from": [
+        {
+          "name": "electric",
+          "url": "https://pokeapi.co/api/v2/type/13/"
+        }
+      ],
+      "half_damage_from": [
+        {
+          "name": "poison",
+          "url": "https://pokeapi.co/api/v2/type/4/"
+        },
+        {
+          "name": "rock",
+          "url": "https://pokeapi.co/api/v2/type/6/"
+        }
+      ],
+      "double_damage_from": [
+        {
+          "name": "water",
+          "url": "https://pokeapi.co/api/v2/type/11/"
+        },
+        {
+          "name": "grass",
+          "url": "https://pokeapi.co/api/v2/type/12/"
+        },
+        {
+          "name": "ice",
+          "url": "https://pokeapi.co/api/v2/type/15/"
+        }
+      ]
+    },
+    "past_damage_relations": []
+  },
+  "type/rock": {
+    "id": 6,
+    "name": "rock",
+    "generation": {
+      "name": "generation-i",
+      "url": "https://pokeapi.co/api/v2/generation/1/"
+    },
+    "damage_relations": {
+      "no_damage_to": [],
+      "half_damage_to": [
+        {
+          "name": "fighting",
+          "url": "https://pokeapi.co/api/v2/type/2/"
+        },
+        {
+          "name": "ground",
+          "url": "https://pokeapi.co/api/v2/type/5/"
+        },
+        {
+          "name": "steel",
+          "url": "https://pokeapi.co/api/v2/type/9/"
+        }
+      ],
+      "double_damage_to": [
+        {
+          "name": "flying",
+          "url": "https://pokeapi.co/api/v2/type/3/"
+        },
+        {
+          "name": "bug",
+          "url": "https://pokeapi.co/api/v2/type/7/"
+        },
+        {
+          "name": "fire",
+          "url": "https://pokeapi.co/api/v2/type/10/"
+        },
+        {
+          "name": "ice",
+          "url": "https://pokeapi.co/api/v2/type/15/"
+        }
+      ],
+      "no_damage_from": [],
+      "half_damage_from": [
+        {
+          "name": "normal",
+          "url": "https://pokeapi.co/api/v2/type/1/"
+        },
+        {
+          "name": "flying",
+          "url": "https://pokeapi.co/api/v2/type/3/"
+        },
+        {
+          "name": "poison",
+          "url": "https://pokeapi.co/api/v2/type/4/"
+        },
+        {
+          "name": "fire",
+          "url": "https://pokeapi.co/api/v2/type/10/"
+        }
+      ],
+      "double_damage_from": [
+        {
+          "name": "fighting",
+          "url": "https://pokeapi.co/api/v2/type/2/"
+        },
+        {
+          "name": "ground",
+          "url": "https://pokeapi.co/api/v2/type/5/"
+        },
+        {
+          "name": "steel",
+          "url": "https://pokeapi.co/api/v2/type/9/"
+        },
+        {
+          "name": "water",
+          "url": "https://pokeapi.co/api/v2/type/11/"
+        },
+        {
+          "name": "grass",
+          "url": "https://pokeapi.co/api/v2/type/12/"
+        }
+      ]
+    },
+    "past_damage_relations": []
+  },
+  "type/bug": {
+    "id": 7,
+    "name": "bug",
+    "generation": {
+      "name": "generation-i",
+      "url": "https://pokeapi.co/api/v2/generation/1/"
+    },
+    "damage_relations": {
+      "no_damage_to": [],
+      "half_damage_to": [
+        {
+          "name": "fighting",
+          "url": "https://pokeapi.co/api/v2/type/2/"
+        },
+        {
+          "name": "flying",
+          "url": "https://pokeapi.co/api/v2/type/3/"
+        },
+        {
+          "name": "poison",
+          "url": "https://pokeapi.co/api/v2/type/4/"
+        },
+        {
+          "name": "ghost",
+          "url": "https://pokeapi.co/api/v2/type/8/"
+        },
+        {
+          "name": "steel",
+          "url": "https://pokeapi.co/api/v2/type/9/"
+        },
+        {
+          "name": "fire",
+          "url": "https://pokeapi.co/api/v2/type/10/"
+        },
+        {
+          "name": "fairy",
+          "url": "https://pokeapi.co/api/v2/type/18/"
+        }
+      ],
+      "double_damage_to": [
+        {
+          "name": "grass",
+          "url": "https://pokeapi.co/api/v2/type/12/"
+        },
+        {
+          "name": "psychic",
+          "url": "https://pokeapi.co/api/v2/type/14/"
+        },
+        {
+          "name": "dark",
+          "url": "https://pokeapi.co/api/v2/type/17/"
+        }
+      ],
+      "no_damage_from": [],
+      "half_damage_from": [
+        {
+          "name": "fighting",
+          "url": "https://pokeapi.co/api/v2/type/2/"
+        },
+        {
+          "name": "ground",
+          "url": "https://pokeapi.co/api/v2/type/5/"
+        },
+        {
+          "name": "grass",
+          "url": "https://pokeapi.co/api/v2/type/12/"
+        }
+      ],
+      "double_damage_from": [
+        {
+          "name": "flying",
+          "url": "https://pokeapi.co/api/v2/type/3/"
+        },
+        {
+          "name": "rock",
+          "url": "https://pokeapi.co/api/v2/type/6/"
+        },
+        {
+          "name": "fire",
+          "url": "https://pokeapi.co/api/v2/type/10/"
+        }
+      ]
+    },
+    "past_damage_relations": [
+      {
+        "generation": {
+          "name": "generation-i",
+          "url": "https://pokeapi.co/api/v2/generation/1/"
+        },
+        "damage_relations": {
+          "no_damage_to": [],
+          "half_damage_to": [
+            {
+              "name": "fighting",
+              "url": "https://pokeapi.co/api/v2/type/2/"
+            },
+            {
+              "name": "flying",
+              "url": "https://pokeapi.co/api/v2/type/3/"
+            },
+            {
+              "name": "ghost",
+              "url": "https://pokeapi.co/api/v2/type/8/"
+            },
+            {
+              "name": "fire",
+              "url": "https://pokeapi.co/api/v2/type/10/"
+            }
+          ],
+          "double_damage_to": [
+            {
+              "name": "grass",
+              "url": "https://pokeapi.co/api/v2/type/12/"
+            },
+            {
+              "name": "psychic",
+              "url": "https://pokeapi.co/api/v2/type/14/"
+            },
+            {
+              "name": "poison",
+              "url": "https://pokeapi.co/api/v2/type/4/"
+            }
+          ],
+          "no_damage_from": [],
+          "half_damage_from": [
+            {
+              "name": "fighting",
+              "url": "https://pokeapi.co/api/v2/type/2/"
+            },
+            {
+              "name": "ground",
+              "url": "https://pokeapi.co/api/v2/type/5/"
+            },
+            {
+              "name": "grass",
+              "url": "https://pokeapi.co/api/v2/type/12/"
+            }
+          ],
+          "double_damage_from": [
+            {
+              "name": "flying",
+              "url": "https://pokeapi.co/api/v2/type/3/"
+            },
+            {
+              "name": "rock",
+              "url": "https://pokeapi.co/api/v2/type/6/"
+            },
+            {
+              "name": "fire",
+              "url": "https://pokeapi.co/api/v2/type/10/"
+            },
+            {
+              "name": "poison",
+              "url": "https://pokeapi.co/api/v2/type/4/"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "type/ghost": {
+    "id": 8,
+    "name": "ghost",
+    "generation": {
+      "name": "generation-i",
+      "url": "https://pokeapi.co/api/v2/generation/1/"
+    },
+    "damage_relations": {
+      "no_damage_to": [
+        {
+          "name": "normal",
+          "url": "https://pokeapi.co/api/v2/type/1/"
+        }
+      ],
+      "half_damage_to": [
+        {
+          "name": "dark",
+          "url": "https://pokeapi.co/api/v2/type/17/"
+        }
+      ],
+      "double_damage_to": [
+        {
+          "name": "ghost",
+          "url": "https://pokeapi.co/api/v2/type/8/"
+        },
+        {
+          "name": "psychic",
+          "url": "https://pokeapi.co/api/v2/type/14/"
+        }
+      ],
+      "no_damage_from": [
+        {
+          "name": "normal",
+          "url": "https://pokeapi.co/api/v2/type/1/"
+        },
+        {
+          "name": "fighting",
+          "url": "https://pokeapi.co/api/v2/type/2/"
+        }
+      ],
+      "half_damage_from": [
+        {
+          "name": "poison",
+          "url": "https://pokeapi.co/api/v2/type/4/"
+        },
+        {
+          "name": "bug",
+          "url": "https://pokeapi.co/api/v2/type/7/"
+        }
+      ],
+      "double_damage_from": [
+        {
+          "name": "ghost",
+          "url": "https://pokeapi.co/api/v2/type/8/"
+        },
+        {
+          "name": "dark",
+          "url": "https://pokeapi.co/api/v2/type/17/"
+        }
+      ]
+    },
+    "past_damage_relations": [
+      {
+        "generation": {
+          "name": "generation-i",
+          "url": "https://pokeapi.co/api/v2/generation/1/"
+        },
+        "damage_relations": {
+          "no_damage_to": [
+            {
+              "name": "normal",
+              "url": "https://pokeapi.co/api/v2/type/1/"
+            },
+            {
+              "name": "psychic",
+              "url": "https://pokeapi.co/api/v2/type/14/"
+            }
+          ],
+          "half_damage_to": [],
+          "double_damage_to": [
+            {
+              "name": "ghost",
+              "url": "https://pokeapi.co/api/v2/type/8/"
+            }
+          ],
+          "no_damage_from": [
+            {
+              "name": "normal",
+              "url": "https://pokeapi.co/api/v2/type/1/"
+            },
+            {
+              "name": "fighting",
+              "url": "https://pokeapi.co/api/v2/type/2/"
+            }
+          ],
+          "half_damage_from": [
+            {
+              "name": "poison",
+              "url": "https://pokeapi.co/api/v2/type/4/"
+            },
+            {
+              "name": "bug",
+              "url": "https://pokeapi.co/api/v2/type/7/"
+            }
+          ],
+          "double_damage_from": [
+            {
+              "name": "ghost",
+              "url": "https://pokeapi.co/api/v2/type/8/"
+            }
+          ]
+        }
+      },
+      {
+        "generation": {
+          "name": "generation-v",
+          "url": "https://pokeapi.co/api/v2/generation/5/"
+        },
+        "damage_relations": {
+          "no_damage_to": [
+            {
+              "name": "normal",
+              "url": "https://pokeapi.co/api/v2/type/1/"
+            }
+          ],
+          "half_damage_to": [
+            {
+              "name": "dark",
+              "url": "https://pokeapi.co/api/v2/type/17/"
+            },
+            {
+              "name": "steel",
+              "url": "https://pokeapi.co/api/v2/type/9/"
+            }
+          ],
+          "double_damage_to": [
+            {
+              "name": "ghost",
+              "url": "https://pokeapi.co/api/v2/type/8/"
+            },
+            {
+              "name": "psychic",
+              "url": "https://pokeapi.co/api/v2/type/14/"
+            }
+          ],
+          "no_damage_from": [
+            {
+              "name": "normal",
+              "url": "https://pokeapi.co/api/v2/type/1/"
+            },
+            {
+              "name": "fighting",
+              "url": "https://pokeapi.co/api/v2/type/2/"
+            }
+          ],
+          "half_damage_from": [
+            {
+              "name": "poison",
+              "url": "https://pokeapi.co/api/v2/type/4/"
+            },
+            {
+              "name": "bug",
+              "url": "https://pokeapi.co/api/v2/type/7/"
+            }
+          ],
+          "double_damage_from": [
+            {
+              "name": "ghost",
+              "url": "https://pokeapi.co/api/v2/type/8/"
+            },
+            {
+              "name": "dark",
+              "url": "https://pokeapi.co/api/v2/type/17/"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "type/steel": {
+    "id": 9,
+    "name": "steel",
+    "generation": {
+      "name": "generation-ii",
+      "url": "https://pokeapi.co/api/v2/generation/2/"
+    },
+    "damage_relations": {
+      "no_damage_to": [],
+      "half_damage_to": [
+        {
+          "name": "steel",
+          "url": "https://pokeapi.co/api/v2/type/9/"
+        },
+        {
+          "name": "fire",
+          "url": "https://pokeapi.co/api/v2/type/10/"
+        },
+        {
+          "name": "water",
+          "url": "https://pokeapi.co/api/v2/type/11/"
+        },
+        {
+          "name": "electric",
+          "url": "https://pokeapi.co/api/v2/type/13/"
+        }
+      ],
+      "double_damage_to": [
+        {
+          "name": "rock",
+          "url": "https://pokeapi.co/api/v2/type/6/"
+        },
+        {
+          "name": "ice",
+          "url": "https://pokeapi.co/api/v2/type/15/"
+        },
+        {
+          "name": "fairy",
+          "url": "https://pokeapi.co/api/v2/type/18/"
+        }
+      ],
+      "no_damage_from": [
+        {
+          "name": "poison",
+          "url": "https://pokeapi.co/api/v2/type/4/"
+        }
+      ],
+      "half_damage_from": [
+        {
+          "name": "normal",
+          "url": "https://pokeapi.co/api/v2/type/1/"
+        },
+        {
+          "name": "flying",
+          "url": "https://pokeapi.co/api/v2/type/3/"
+        },
+        {
+          "name": "rock",
+          "url": "https://pokeapi.co/api/v2/type/6/"
+        },
+        {
+          "name": "bug",
+          "url": "https://pokeapi.co/api/v2/type/7/"
+        },
+        {
+          "name": "steel",
+          "url": "https://pokeapi.co/api/v2/type/9/"
+        },
+        {
+          "name": "grass",
+          "url": "https://pokeapi.co/api/v2/type/12/"
+        },
+        {
+          "name": "psychic",
+          "url": "https://pokeapi.co/api/v2/type/14/"
+        },
+        {
+          "name": "ice",
+          "url": "https://pokeapi.co/api/v2/type/15/"
+        },
+        {
+          "name": "dragon",
+          "url": "https://pokeapi.co/api/v2/type/16/"
+        },
+        {
+          "name": "fairy",
+          "url": "https://pokeapi.co/api/v2/type/18/"
+        }
+      ],
+      "double_damage_from": [
+        {
+          "name": "fighting",
+          "url": "https://pokeapi.co/api/v2/type/2/"
+        },
+        {
+          "name": "ground",
+          "url": "https://pokeapi.co/api/v2/type/5/"
+        },
+        {
+          "name": "fire",
+          "url": "https://pokeapi.co/api/v2/type/10/"
+        }
+      ]
+    },
+    "past_damage_relations": [
+      {
+        "generation": {
+          "name": "generation-v",
+          "url": "https://pokeapi.co/api/v2/generation/5/"
+        },
+        "damage_relations": {
+          "no_damage_to": [],
+          "half_damage_to": [
+            {
+              "name": "steel",
+              "url": "https://pokeapi.co/api/v2/type/9/"
+            },
+            {
+              "name": "fire",
+              "url": "https://pokeapi.co/api/v2/type/10/"
+            },
+            {
+              "name": "water",
+              "url": "https://pokeapi.co/api/v2/type/11/"
+            },
+            {
+              "name": "electric",
+              "url": "https://pokeapi.co/api/v2/type/13/"
+            }
+          ],
+          "double_damage_to": [
+            {
+              "name": "rock",
+              "url": "https://pokeapi.co/api/v2/type/6/"
+            },
+            {
+              "name": "ice",
+              "url": "https://pokeapi.co/api/v2/type/15/"
+            }
+          ],
+          "no_damage_from": [
+            {
+              "name": "poison",
+              "url": "https://pokeapi.co/api/v2/type/4/"
+            }
+          ],
+          "half_damage_from": [
+            {
+              "name": "normal",
+              "url": "https://pokeapi.co/api/v2/type/1/"
+            },
+            {
+              "name": "flying",
+              "url": "https://pokeapi.co/api/v2/type/3/"
+            },
+            {
+              "name": "rock",
+              "url": "https://pokeapi.co/api/v2/type/6/"
+            },
+            {
+              "name": "bug",
+              "url": "https://pokeapi.co/api/v2/type/7/"
+            },
+            {
+              "name": "steel",
+              "url": "https://pokeapi.co/api/v2/type/9/"
+            },
+            {
+              "name": "grass",
+              "url": "https://pokeapi.co/api/v2/type/12/"
+            },
+            {
+              "name": "psychic",
+              "url": "https://pokeapi.co/api/v2/type/14/"
+            },
+            {
+              "name": "ice",
+              "url": "https://pokeapi.co/api/v2/type/15/"
+            },
+            {
+              "name": "dragon",
+              "url": "https://pokeapi.co/api/v2/type/16/"
+            },
+            {
+              "name": "ghost",
+              "url": "https://pokeapi.co/api/v2/type/8/"
+            },
+            {
+              "name": "dark",
+              "url": "https://pokeapi.co/api/v2/type/17/"
+            }
+          ],
+          "double_damage_from": [
+            {
+              "name": "fighting",
+              "url": "https://pokeapi.co/api/v2/type/2/"
+            },
+            {
+              "name": "ground",
+              "url": "https://pokeapi.co/api/v2/type/5/"
+            },
+            {
+              "name": "fire",
+              "url": "https://pokeapi.co/api/v2/type/10/"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "type/fire": {
+    "id": 10,
+    "name": "fire",
+    "generation": {
+      "name": "generation-i",
+      "url": "https://pokeapi.co/api/v2/generation/1/"
+    },
+    "damage_relations": {
+      "no_damage_to": [],
+      "half_damage_to": [
+        {
+          "name": "rock",
+          "url": "https://pokeapi.co/api/v2/type/6/"
+        },
+        {
+          "name": "fire",
+          "url": "https://pokeapi.co/api/v2/type/10/"
+        },
+        {
+          "name": "water",
+          "url": "https://pokeapi.co/api/v2/type/11/"
+        },
+        {
+          "name": "dragon",
+          "url": "https://pokeapi.co/api/v2/type/16/"
+        }
+      ],
+      "double_damage_to": [
+        {
+          "name": "bug",
+          "url": "https://pokeapi.co/api/v2/type/7/"
+        },
+        {
+          "name": "steel",
+          "url": "https://pokeapi.co/api/v2/type/9/"
+        },
+        {
+          "name": "grass",
+          "url": "https://pokeapi.co/api/v2/type/12/"
+        },
+        {
+          "name": "ice",
+          "url": "https://pokeapi.co/api/v2/type/15/"
+        }
+      ],
+      "no_damage_from": [],
+      "half_damage_from": [
+        {
+          "name": "bug",
+          "url": "https://pokeapi.co/api/v2/type/7/"
+        },
+        {
+          "name": "steel",
+          "url": "https://pokeapi.co/api/v2/type/9/"
+        },
+        {
+          "name": "fire",
+          "url": "https://pokeapi.co/api/v2/type/10/"
+        },
+        {
+          "name": "grass",
+          "url": "https://pokeapi.co/api/v2/type/12/"
+        },
+        {
+          "name": "ice",
+          "url": "https://pokeapi.co/api/v2/type/15/"
+        },
+        {
+          "name": "fairy",
+          "url": "https://pokeapi.co/api/v2/type/18/"
+        }
+      ],
+      "double_damage_from": [
+        {
+          "name": "ground",
+          "url": "https://pokeapi.co/api/v2/type/5/"
+        },
+        {
+          "name": "rock",
+          "url": "https://pokeapi.co/api/v2/type/6/"
+        },
+        {
+          "name": "water",
+          "url": "https://pokeapi.co/api/v2/type/11/"
+        }
+      ]
+    },
+    "past_damage_relations": [
+      {
+        "generation": {
+          "name": "generation-i",
+          "url": "https://pokeapi.co/api/v2/generation/1/"
+        },
+        "damage_relations": {
+          "no_damage_to": [],
+          "half_damage_to": [
+            {
+              "name": "rock",
+              "url": "https://pokeapi.co/api/v2/type/6/"
+            },
+            {
+              "name": "fire",
+              "url": "https://pokeapi.co/api/v2/type/10/"
+            },
+            {
+              "name": "water",
+              "url": "https://pokeapi.co/api/v2/type/11/"
+            },
+            {
+              "name": "dragon",
+              "url": "https://pokeapi.co/api/v2/type/16/"
+            }
+          ],
+          "double_damage_to": [
+            {
+              "name": "bug",
+              "url": "https://pokeapi.co/api/v2/type/7/"
+            },
+            {
+              "name": "grass",
+              "url": "https://pokeapi.co/api/v2/type/12/"
+            },
+            {
+              "name": "ice",
+              "url": "https://pokeapi.co/api/v2/type/15/"
+            }
+          ],
+          "no_damage_from": [],
+          "half_damage_from": [
+            {
+              "name": "bug",
+              "url": "https://pokeapi.co/api/v2/type/7/"
+            },
+            {
+              "name": "fire",
+              "url": "https://pokeapi.co/api/v2/type/10/"
+            },
+            {
+              "name": "grass",
+              "url": "https://pokeapi.co/api/v2/type/12/"
+            }
+          ],
+          "double_damage_from": [
+            {
+              "name": "ground",
+              "url": "https://pokeapi.co/api/v2/type/5/"
+            },
+            {
+              "name": "rock",
+              "url": "https://pokeapi.co/api/v2/type/6/"
+            },
+            {
+              "name": "water",
+              "url": "https://pokeapi.co/api/v2/type/11/"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "type/water": {
+    "id": 11,
+    "name": "water",
+    "generation": {
+      "name": "generation-i",
+      "url": "https://pokeapi.co/api/v2/generation/1/"
+    },
+    "damage_relations": {
+      "no_damage_to": [],
+      "half_damage_to": [
+        {
+          "name": "water",
+          "url": "https://pokeapi.co/api/v2/type/11/"
+        },
+        {
+          "name": "grass",
+          "url": "https://pokeapi.co/api/v2/type/12/"
+        },
+        {
+          "name": "dragon",
+          "url": "https://pokeapi.co/api/v2/type/16/"
+        }
+      ],
+      "double_damage_to": [
+        {
+          "name": "ground",
+          "url": "https://pokeapi.co/api/v2/type/5/"
+        },
+        {
+          "name": "rock",
+          "url": "https://pokeapi.co/api/v2/type/6/"
+        },
+        {
+          "name": "fire",
+          "url": "https://pokeapi.co/api/v2/type/10/"
+        }
+      ],
+      "no_damage_from": [],
+      "half_damage_from": [
+        {
+          "name": "steel",
+          "url": "https://pokeapi.co/api/v2/type/9/"
+        },
+        {
+          "name": "fire",
+          "url": "https://pokeapi.co/api/v2/type/10/"
+        },
+        {
+          "name": "water",
+          "url": "https://pokeapi.co/api/v2/type/11/"
+        },
+        {
+          "name": "ice",
+          "url": "https://pokeapi.co/api/v2/type/15/"
+        }
+      ],
+      "double_damage_from": [
+        {
+          "name": "grass",
+          "url": "https://pokeapi.co/api/v2/type/12/"
+        },
+        {
+          "name": "electric",
+          "url": "https://pokeapi.co/api/v2/type/13/"
+        }
+      ]
+    },
+    "past_damage_relations": []
+  },
+  "type/grass": {
+    "id": 12,
+    "name": "grass",
+    "generation": {
+      "name": "generation-i",
+      "url": "https://pokeapi.co/api/v2/generation/1/"
+    },
+    "damage_relations": {
+      "no_damage_to": [],
+      "half_damage_to": [
+        {
+          "name": "flying",
+          "url": "https://pokeapi.co/api/v2/type/3/"
+        },
+        {
+          "name": "poison",
+          "url": "https://pokeapi.co/api/v2/type/4/"
+        },
+        {
+          "name": "bug",
+          "url": "https://pokeapi.co/api/v2/type/7/"
+        },
+        {
+          "name": "steel",
+          "url": "https://pokeapi.co/api/v2/type/9/"
+        },
+        {
+          "name": "fire",
+          "url": "https://pokeapi.co/api/v2/type/10/"
+        },
+        {
+          "name": "grass",
+          "url": "https://pokeapi.co/api/v2/type/12/"
+        },
+        {
+          "name": "dragon",
+          "url": "https://pokeapi.co/api/v2/type/16/"
+        }
+      ],
+      "double_damage_to": [
+        {
+          "name": "ground",
+          "url": "https://pokeapi.co/api/v2/type/5/"
+        },
+        {
+          "name": "rock",
+          "url": "https://pokeapi.co/api/v2/type/6/"
+        },
+        {
+          "name": "water",
+          "url": "https://pokeapi.co/api/v2/type/11/"
+        }
+      ],
+      "no_damage_from": [],
+      "half_damage_from": [
+        {
+          "name": "ground",
+          "url": "https://pokeapi.co/api/v2/type/5/"
+        },
+        {
+          "name": "water",
+          "url": "https://pokeapi.co/api/v2/type/11/"
+        },
+        {
+          "name": "grass",
+          "url": "https://pokeapi.co/api/v2/type/12/"
+        },
+        {
+          "name": "electric",
+          "url": "https://pokeapi.co/api/v2/type/13/"
+        }
+      ],
+      "double_damage_from": [
+        {
+          "name": "flying",
+          "url": "https://pokeapi.co/api/v2/type/3/"
+        },
+        {
+          "name": "poison",
+          "url": "https://pokeapi.co/api/v2/type/4/"
+        },
+        {
+          "name": "bug",
+          "url": "https://pokeapi.co/api/v2/type/7/"
+        },
+        {
+          "name": "fire",
+          "url": "https://pokeapi.co/api/v2/type/10/"
+        },
+        {
+          "name": "ice",
+          "url": "https://pokeapi.co/api/v2/type/15/"
+        }
+      ]
+    },
+    "past_damage_relations": []
+  },
+  "type/electric": {
+    "id": 13,
+    "name": "electric",
+    "generation": {
+      "name": "generation-i",
+      "url": "https://pokeapi.co/api/v2/generation/1/"
+    },
+    "damage_relations": {
+      "no_damage_to": [
+        {
+          "name": "ground",
+          "url": "https://pokeapi.co/api/v2/type/5/"
+        }
+      ],
+      "half_damage_to": [
+        {
+          "name": "grass",
+          "url": "https://pokeapi.co/api/v2/type/12/"
+        },
+        {
+          "name": "electric",
+          "url": "https://pokeapi.co/api/v2/type/13/"
+        },
+        {
+          "name": "dragon",
+          "url": "https://pokeapi.co/api/v2/type/16/"
+        }
+      ],
+      "double_damage_to": [
+        {
+          "name": "flying",
+          "url": "https://pokeapi.co/api/v2/type/3/"
+        },
+        {
+          "name": "water",
+          "url": "https://pokeapi.co/api/v2/type/11/"
+        }
+      ],
+      "no_damage_from": [],
+      "half_damage_from": [
+        {
+          "name": "flying",
+          "url": "https://pokeapi.co/api/v2/type/3/"
+        },
+        {
+          "name": "steel",
+          "url": "https://pokeapi.co/api/v2/type/9/"
+        },
+        {
+          "name": "electric",
+          "url": "https://pokeapi.co/api/v2/type/13/"
+        }
+      ],
+      "double_damage_from": [
+        {
+          "name": "ground",
+          "url": "https://pokeapi.co/api/v2/type/5/"
+        }
+      ]
+    },
+    "past_damage_relations": []
+  },
+  "type/psychic": {
+    "id": 14,
+    "name": "psychic",
+    "generation": {
+      "name": "generation-i",
+      "url": "https://pokeapi.co/api/v2/generation/1/"
+    },
+    "damage_relations": {
+      "no_damage_to": [
+        {
+          "name": "dark",
+          "url": "https://pokeapi.co/api/v2/type/17/"
+        }
+      ],
+      "half_damage_to": [
+        {
+          "name": "steel",
+          "url": "https://pokeapi.co/api/v2/type/9/"
+        },
+        {
+          "name": "psychic",
+          "url": "https://pokeapi.co/api/v2/type/14/"
+        }
+      ],
+      "double_damage_to": [
+        {
+          "name": "fighting",
+          "url": "https://pokeapi.co/api/v2/type/2/"
+        },
+        {
+          "name": "poison",
+          "url": "https://pokeapi.co/api/v2/type/4/"
+        }
+      ],
+      "no_damage_from": [],
+      "half_damage_from": [
+        {
+          "name": "fighting",
+          "url": "https://pokeapi.co/api/v2/type/2/"
+        },
+        {
+          "name": "psychic",
+          "url": "https://pokeapi.co/api/v2/type/14/"
+        }
+      ],
+      "double_damage_from": [
+        {
+          "name": "bug",
+          "url": "https://pokeapi.co/api/v2/type/7/"
+        },
+        {
+          "name": "ghost",
+          "url": "https://pokeapi.co/api/v2/type/8/"
+        },
+        {
+          "name": "dark",
+          "url": "https://pokeapi.co/api/v2/type/17/"
+        }
+      ]
+    },
+    "past_damage_relations": [
+      {
+        "generation": {
+          "name": "generation-i",
+          "url": "https://pokeapi.co/api/v2/generation/1/"
+        },
+        "damage_relations": {
+          "no_damage_to": [],
+          "half_damage_to": [
+            {
+              "name": "psychic",
+              "url": "https://pokeapi.co/api/v2/type/14/"
+            }
+          ],
+          "double_damage_to": [
+            {
+              "name": "fighting",
+              "url": "https://pokeapi.co/api/v2/type/2/"
+            },
+            {
+              "name": "poison",
+              "url": "https://pokeapi.co/api/v2/type/4/"
+            }
+          ],
+          "no_damage_from": [
+            {
+              "name": "ghost",
+              "url": "https://pokeapi.co/api/v2/type/8/"
+            }
+          ],
+          "half_damage_from": [
+            {
+              "name": "fighting",
+              "url": "https://pokeapi.co/api/v2/type/2/"
+            },
+            {
+              "name": "psychic",
+              "url": "https://pokeapi.co/api/v2/type/14/"
+            }
+          ],
+          "double_damage_from": [
+            {
+              "name": "bug",
+              "url": "https://pokeapi.co/api/v2/type/7/"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "type/ice": {
+    "id": 15,
+    "name": "ice",
+    "generation": {
+      "name": "generation-i",
+      "url": "https://pokeapi.co/api/v2/generation/1/"
+    },
+    "damage_relations": {
+      "no_damage_to": [],
+      "half_damage_to": [
+        {
+          "name": "steel",
+          "url": "https://pokeapi.co/api/v2/type/9/"
+        },
+        {
+          "name": "fire",
+          "url": "https://pokeapi.co/api/v2/type/10/"
+        },
+        {
+          "name": "water",
+          "url": "https://pokeapi.co/api/v2/type/11/"
+        },
+        {
+          "name": "ice",
+          "url": "https://pokeapi.co/api/v2/type/15/"
+        }
+      ],
+      "double_damage_to": [
+        {
+          "name": "flying",
+          "url": "https://pokeapi.co/api/v2/type/3/"
+        },
+        {
+          "name": "ground",
+          "url": "https://pokeapi.co/api/v2/type/5/"
+        },
+        {
+          "name": "grass",
+          "url": "https://pokeapi.co/api/v2/type/12/"
+        },
+        {
+          "name": "dragon",
+          "url": "https://pokeapi.co/api/v2/type/16/"
+        }
+      ],
+      "no_damage_from": [],
+      "half_damage_from": [
+        {
+          "name": "ice",
+          "url": "https://pokeapi.co/api/v2/type/15/"
+        }
+      ],
+      "double_damage_from": [
+        {
+          "name": "fighting",
+          "url": "https://pokeapi.co/api/v2/type/2/"
+        },
+        {
+          "name": "rock",
+          "url": "https://pokeapi.co/api/v2/type/6/"
+        },
+        {
+          "name": "steel",
+          "url": "https://pokeapi.co/api/v2/type/9/"
+        },
+        {
+          "name": "fire",
+          "url": "https://pokeapi.co/api/v2/type/10/"
+        }
+      ]
+    },
+    "past_damage_relations": [
+      {
+        "generation": {
+          "name": "generation-i",
+          "url": "https://pokeapi.co/api/v2/generation/1/"
+        },
+        "damage_relations": {
+          "no_damage_to": [],
+          "half_damage_to": [
+            {
+              "name": "water",
+              "url": "https://pokeapi.co/api/v2/type/11/"
+            },
+            {
+              "name": "ice",
+              "url": "https://pokeapi.co/api/v2/type/15/"
+            }
+          ],
+          "double_damage_to": [
+            {
+              "name": "flying",
+              "url": "https://pokeapi.co/api/v2/type/3/"
+            },
+            {
+              "name": "ground",
+              "url": "https://pokeapi.co/api/v2/type/5/"
+            },
+            {
+              "name": "grass",
+              "url": "https://pokeapi.co/api/v2/type/12/"
+            },
+            {
+              "name": "dragon",
+              "url": "https://pokeapi.co/api/v2/type/16/"
+            }
+          ],
+          "no_damage_from": [],
+          "half_damage_from": [
+            {
+              "name": "ice",
+              "url": "https://pokeapi.co/api/v2/type/15/"
+            }
+          ],
+          "double_damage_from": [
+            {
+              "name": "fighting",
+              "url": "https://pokeapi.co/api/v2/type/2/"
+            },
+            {
+              "name": "rock",
+              "url": "https://pokeapi.co/api/v2/type/6/"
+            },
+            {
+              "name": "fire",
+              "url": "https://pokeapi.co/api/v2/type/10/"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "type/dragon": {
+    "id": 16,
+    "name": "dragon",
+    "generation": {
+      "name": "generation-i",
+      "url": "https://pokeapi.co/api/v2/generation/1/"
+    },
+    "damage_relations": {
+      "no_damage_to": [
+        {
+          "name": "fairy",
+          "url": "https://pokeapi.co/api/v2/type/18/"
+        }
+      ],
+      "half_damage_to": [
+        {
+          "name": "steel",
+          "url": "https://pokeapi.co/api/v2/type/9/"
+        }
+      ],
+      "double_damage_to": [
+        {
+          "name": "dragon",
+          "url": "https://pokeapi.co/api/v2/type/16/"
+        }
+      ],
+      "no_damage_from": [],
+      "half_damage_from": [
+        {
+          "name": "fire",
+          "url": "https://pokeapi.co/api/v2/type/10/"
+        },
+        {
+          "name": "water",
+          "url": "https://pokeapi.co/api/v2/type/11/"
+        },
+        {
+          "name": "grass",
+          "url": "https://pokeapi.co/api/v2/type/12/"
+        },
+        {
+          "name": "electric",
+          "url": "https://pokeapi.co/api/v2/type/13/"
+        }
+      ],
+      "double_damage_from": [
+        {
+          "name": "ice",
+          "url": "https://pokeapi.co/api/v2/type/15/"
+        },
+        {
+          "name": "dragon",
+          "url": "https://pokeapi.co/api/v2/type/16/"
+        },
+        {
+          "name": "fairy",
+          "url": "https://pokeapi.co/api/v2/type/18/"
+        }
+      ]
+    },
+    "past_damage_relations": []
+  },
+  "type/dark": {
+    "id": 17,
+    "name": "dark",
+    "generation": {
+      "name": "generation-ii",
+      "url": "https://pokeapi.co/api/v2/generation/2/"
+    },
+    "damage_relations": {
+      "no_damage_to": [],
+      "half_damage_to": [
+        {
+          "name": "fighting",
+          "url": "https://pokeapi.co/api/v2/type/2/"
+        },
+        {
+          "name": "dark",
+          "url": "https://pokeapi.co/api/v2/type/17/"
+        },
+        {
+          "name": "fairy",
+          "url": "https://pokeapi.co/api/v2/type/18/"
+        }
+      ],
+      "double_damage_to": [
+        {
+          "name": "ghost",
+          "url": "https://pokeapi.co/api/v2/type/8/"
+        },
+        {
+          "name": "psychic",
+          "url": "https://pokeapi.co/api/v2/type/14/"
+        }
+      ],
+      "no_damage_from": [
+        {
+          "name": "psychic",
+          "url": "https://pokeapi.co/api/v2/type/14/"
+        }
+      ],
+      "half_damage_from": [
+        {
+          "name": "ghost",
+          "url": "https://pokeapi.co/api/v2/type/8/"
+        },
+        {
+          "name": "dark",
+          "url": "https://pokeapi.co/api/v2/type/17/"
+        }
+      ],
+      "double_damage_from": [
+        {
+          "name": "fighting",
+          "url": "https://pokeapi.co/api/v2/type/2/"
+        },
+        {
+          "name": "bug",
+          "url": "https://pokeapi.co/api/v2/type/7/"
+        },
+        {
+          "name": "fairy",
+          "url": "https://pokeapi.co/api/v2/type/18/"
+        }
+      ]
+    },
+    "past_damage_relations": [
+      {
+        "generation": {
+          "name": "generation-v",
+          "url": "https://pokeapi.co/api/v2/generation/5/"
+        },
+        "damage_relations": {
+          "no_damage_to": [],
+          "half_damage_to": [
+            {
+              "name": "fighting",
+              "url": "https://pokeapi.co/api/v2/type/2/"
+            },
+            {
+              "name": "dark",
+              "url": "https://pokeapi.co/api/v2/type/17/"
+            },
+            {
+              "name": "steel",
+              "url": "https://pokeapi.co/api/v2/type/9/"
+            }
+          ],
+          "double_damage_to": [
+            {
+              "name": "ghost",
+              "url": "https://pokeapi.co/api/v2/type/8/"
+            },
+            {
+              "name": "psychic",
+              "url": "https://pokeapi.co/api/v2/type/14/"
+            }
+          ],
+          "no_damage_from": [
+            {
+              "name": "psychic",
+              "url": "https://pokeapi.co/api/v2/type/14/"
+            }
+          ],
+          "half_damage_from": [
+            {
+              "name": "ghost",
+              "url": "https://pokeapi.co/api/v2/type/8/"
+            },
+            {
+              "name": "dark",
+              "url": "https://pokeapi.co/api/v2/type/17/"
+            }
+          ],
+          "double_damage_from": [
+            {
+              "name": "fighting",
+              "url": "https://pokeapi.co/api/v2/type/2/"
+            },
+            {
+              "name": "bug",
+              "url": "https://pokeapi.co/api/v2/type/7/"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "type/fairy": {
+    "id": 18,
+    "name": "fairy",
+    "generation": {
+      "name": "generation-vi",
+      "url": "https://pokeapi.co/api/v2/generation/6/"
+    },
+    "damage_relations": {
+      "no_damage_to": [],
+      "half_damage_to": [
+        {
+          "name": "poison",
+          "url": "https://pokeapi.co/api/v2/type/4/"
+        },
+        {
+          "name": "steel",
+          "url": "https://pokeapi.co/api/v2/type/9/"
+        },
+        {
+          "name": "fire",
+          "url": "https://pokeapi.co/api/v2/type/10/"
+        }
+      ],
+      "double_damage_to": [
+        {
+          "name": "fighting",
+          "url": "https://pokeapi.co/api/v2/type/2/"
+        },
+        {
+          "name": "dragon",
+          "url": "https://pokeapi.co/api/v2/type/16/"
+        },
+        {
+          "name": "dark",
+          "url": "https://pokeapi.co/api/v2/type/17/"
+        }
+      ],
+      "no_damage_from": [
+        {
+          "name": "dragon",
+          "url": "https://pokeapi.co/api/v2/type/16/"
+        }
+      ],
+      "half_damage_from": [
+        {
+          "name": "fighting",
+          "url": "https://pokeapi.co/api/v2/type/2/"
+        },
+        {
+          "name": "bug",
+          "url": "https://pokeapi.co/api/v2/type/7/"
+        },
+        {
+          "name": "dark",
+          "url": "https://pokeapi.co/api/v2/type/17/"
+        }
+      ],
+      "double_damage_from": [
+        {
+          "name": "poison",
+          "url": "https://pokeapi.co/api/v2/type/4/"
+        },
+        {
+          "name": "steel",
+          "url": "https://pokeapi.co/api/v2/type/9/"
+        }
+      ]
+    },
+    "past_damage_relations": []
+  },
+  "type/stellar": {
+    "id": 19,
+    "name": "stellar",
+    "generation": {
+      "name": "generation-ix",
+      "url": "https://pokeapi.co/api/v2/generation/9/"
+    },
+    "damage_relations": {
+      "no_damage_to": [],
+      "half_damage_to": [],
+      "double_damage_to": [],
+      "no_damage_from": [],
+      "half_damage_from": [],
+      "double_damage_from": []
+    },
+    "past_damage_relations": []
+  },
+  "type/unknown": {
+    "id": 10001,
+    "name": "unknown",
+    "generation": {
+      "name": "generation-ii",
+      "url": "https://pokeapi.co/api/v2/generation/2/"
+    },
+    "damage_relations": {
+      "no_damage_to": [],
+      "half_damage_to": [],
+      "double_damage_to": [],
+      "no_damage_from": [],
+      "half_damage_from": [],
+      "double_damage_from": []
+    },
+    "past_damage_relations": []
+  },
+  "type/shadow": {
+    "id": 10002,
+    "name": "shadow",
+    "generation": {
+      "name": "generation-iii",
+      "url": "https://pokeapi.co/api/v2/generation/3/"
+    },
+    "damage_relations": {
+      "no_damage_to": [],
+      "half_damage_to": [],
+      "double_damage_to": [],
+      "no_damage_from": [],
+      "half_damage_from": [],
+      "double_damage_from": []
+    },
+    "past_damage_relations": []
+  },
+  "pokemon/clefairy": {
+    "id": 35,
+    "name": "clefairy",
+    "species": {
+      "name": "clefairy",
+      "url": "https://pokeapi.co/api/v2/pokemon-species/35/"
+    },
+    "forms": [
+      {
+        "name": "clefairy",
+        "url": "https://pokeapi.co/api/v2/pokemon-form/35/"
+      }
+    ],
+    "types": [
+      {
+        "slot": 1,
+        "type": {
+          "name": "fairy",
+          "url": "https://pokeapi.co/api/v2/type/18/"
+        }
+      }
+    ],
+    "past_types": [
+      {
+        "generation": {
+          "name": "generation-v",
+          "url": "https://pokeapi.co/api/v2/generation/5/"
+        },
+        "types": [
+          {
+            "slot": 1,
+            "type": {
+              "name": "normal",
+              "url": "https://pokeapi.co/api/v2/type/1/"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "pokemon-form/clefairy": {
+    "id": 35,
+    "name": "clefairy",
+    "version_group": {
+      "name": "red-green-japan",
+      "url": "https://pokeapi.co/api/v2/version-group/28/"
+    }
+  },
+  "pokemon/magnemite": {
+    "id": 81,
+    "name": "magnemite",
+    "species": {
+      "name": "magnemite",
+      "url": "https://pokeapi.co/api/v2/pokemon-species/81/"
+    },
+    "forms": [
+      {
+        "name": "magnemite",
+        "url": "https://pokeapi.co/api/v2/pokemon-form/81/"
+      }
+    ],
+    "types": [
+      {
+        "slot": 1,
+        "type": {
+          "name": "electric",
+          "url": "https://pokeapi.co/api/v2/type/13/"
+        }
+      },
+      {
+        "slot": 2,
+        "type": {
+          "name": "steel",
+          "url": "https://pokeapi.co/api/v2/type/9/"
+        }
+      }
+    ],
+    "past_types": [
+      {
+        "generation": {
+          "name": "generation-i",
+          "url": "https://pokeapi.co/api/v2/generation/1/"
+        },
+        "types": [
+          {
+            "slot": 1,
+            "type": {
+              "name": "electric",
+              "url": "https://pokeapi.co/api/v2/type/13/"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "pokemon-form/magnemite": {
+    "id": 81,
+    "name": "magnemite",
+    "version_group": {
+      "name": "red-green-japan",
+      "url": "https://pokeapi.co/api/v2/version-group/28/"
+    }
+  },
+  "pokemon/rotom-heat": {
+    "id": 10008,
+    "name": "rotom-heat",
+    "species": {
+      "name": "rotom",
+      "url": "https://pokeapi.co/api/v2/pokemon-species/479/"
+    },
+    "forms": [
+      {
+        "name": "rotom-heat",
+        "url": "https://pokeapi.co/api/v2/pokemon-form/10058/"
+      }
+    ],
+    "types": [
+      {
+        "slot": 1,
+        "type": {
+          "name": "electric",
+          "url": "https://pokeapi.co/api/v2/type/13/"
+        }
+      },
+      {
+        "slot": 2,
+        "type": {
+          "name": "fire",
+          "url": "https://pokeapi.co/api/v2/type/10/"
+        }
+      }
+    ],
+    "past_types": [
+      {
+        "generation": {
+          "name": "generation-iv",
+          "url": "https://pokeapi.co/api/v2/generation/4/"
+        },
+        "types": [
+          {
+            "slot": 1,
+            "type": {
+              "name": "electric",
+              "url": "https://pokeapi.co/api/v2/type/13/"
+            }
+          },
+          {
+            "slot": 2,
+            "type": {
+              "name": "ghost",
+              "url": "https://pokeapi.co/api/v2/type/8/"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "pokemon-form/rotom-heat": {
+    "id": 10058,
+    "name": "rotom-heat",
+    "version_group": {
+      "name": "platinum",
+      "url": "https://pokeapi.co/api/v2/version-group/9/"
+    }
+  },
+  "pokemon/garchomp": {
+    "id": 445,
+    "name": "garchomp",
+    "species": {
+      "name": "garchomp",
+      "url": "https://pokeapi.co/api/v2/pokemon-species/445/"
+    },
+    "forms": [
+      {
+        "name": "garchomp",
+        "url": "https://pokeapi.co/api/v2/pokemon-form/445/"
+      }
+    ],
+    "types": [
+      {
+        "slot": 1,
+        "type": {
+          "name": "dragon",
+          "url": "https://pokeapi.co/api/v2/type/16/"
+        }
+      },
+      {
+        "slot": 2,
+        "type": {
+          "name": "ground",
+          "url": "https://pokeapi.co/api/v2/type/5/"
+        }
+      }
+    ],
+    "past_types": []
+  },
+  "pokemon-form/garchomp": {
+    "id": 445,
+    "name": "garchomp",
+    "version_group": {
+      "name": "diamond-pearl",
+      "url": "https://pokeapi.co/api/v2/version-group/8/"
+    }
+  },
+  "pokemon/raichu-alola": {
+    "id": 10100,
+    "name": "raichu-alola",
+    "species": {
+      "name": "raichu",
+      "url": "https://pokeapi.co/api/v2/pokemon-species/26/"
+    },
+    "forms": [
+      {
+        "name": "raichu-alola",
+        "url": "https://pokeapi.co/api/v2/pokemon-form/10202/"
+      }
+    ],
+    "types": [
+      {
+        "slot": 1,
+        "type": {
+          "name": "electric",
+          "url": "https://pokeapi.co/api/v2/type/13/"
+        }
+      },
+      {
+        "slot": 2,
+        "type": {
+          "name": "psychic",
+          "url": "https://pokeapi.co/api/v2/type/14/"
+        }
+      }
+    ],
+    "past_types": []
+  },
+  "pokemon-form/raichu-alola": {
+    "id": 10202,
+    "name": "raichu-alola",
+    "version_group": {
+      "name": "sun-moon",
+      "url": "https://pokeapi.co/api/v2/version-group/17/"
+    }
+  }
+}

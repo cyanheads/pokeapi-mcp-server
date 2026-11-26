@@ -1,11 +1,21 @@
 /**
- * @fileoverview pokeapi_get_type_matchups tool — computed offensive and defensive type effectiveness.
+ * @fileoverview pokeapi_get_type_matchups tool — offensive and defensive type effectiveness for
+ * one or two types or a Pokémon, currently or as of an earlier generation.
  * @module mcp-server/tools/definitions/get-type-matchups.tool
  */
 
 import { tool, z } from '@cyanheads/mcp-ts-core';
-import { JsonRpcErrorCode, McpError } from '@cyanheads/mcp-ts-core/errors';
-import { getPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
+import { JsonRpcErrorCode, McpError, serviceUnavailable } from '@cyanheads/mcp-ts-core/errors';
+import { getPokeApiService, UnknownGenerationError } from '@/services/pokeapi/pokeapi-service.js';
+import {
+  type GenerationScope,
+  NotInGenerationError,
+  UnknownTypeError,
+} from '@/services/pokeapi/type-matchups.js';
+import type { TypeRelations, TypeSetMatchups } from '@/services/pokeapi/types.js';
+
+/** No PokéAPI type name contains these, so they separate the types of a two-type query. */
+const TYPE_SEPARATORS = /[\s/,+]+/;
 
 const TypeRelationsSchema = z.object({
   superEffectiveTo: z.array(z.string()).describe('Types this type deals 2× damage to.'),
@@ -21,27 +31,35 @@ const DefensiveMatchupsSchema = z.object({
   immuneTo: z.array(z.string()).describe('Attacking types that deal 0× damage.'),
 });
 
+const relationLines = (relations: TypeRelations) => [
+  `**Super Effective (2×):** ${relations.superEffectiveTo.join(', ') || 'None'}`,
+  `**Not Very Effective (0.5×):** ${relations.notVeryEffectiveTo.join(', ') || 'None'}`,
+  `**No Effect (0×):** ${relations.noEffectTo.join(', ') || 'None'}`,
+];
+
 export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
   title: 'Get Type Matchups',
   description:
-    'Get the full offensive and defensive type effectiveness breakdown. ' +
-    'Provide either a type name (e.g. "fire", "psychic") or a Pokémon identifier ' +
-    '(name or PokéAPI Pokémon-record ID; a species name resolves to its default variety). For dual-type Pokémon, the defensive multipliers are ' +
-    'correctly composed (e.g. Fire/Flying vs Rock = 4× because both types are ' +
-    'weak to Rock). Exactly one of type or pokemon must be provided.',
+    'Offensive and defensive type effectiveness for one type, two types, or a Pokémon\'s typing. Provide type (one type, or two separated by "/", ",", "+", or a space, e.g. "water/ground") or pokemon (name or PokéAPI Pokémon-record ID; a species name resolves to its default variety), not both. Two types compose defense as a dual-type Pokémon does (Fire/Flying vs Rock = 4×), and offensiveByType lists each type\'s attacking relations. Pass generation for an older game: relations and Pokémon typings are then as they stood in that generation. PokéAPI records no damage relations for stellar, shadow, and unknown, so theirs come back empty.',
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
   input: z.object({
     type: z
       .string()
       .optional()
       .describe(
-        'Type name in lowercase (e.g. "fire", "water", "psychic"). Provide this or pokemon, not both.',
+        'One type, or two separated by "/", ",", "+", or a space (e.g. "fire", "Water / Ground"); case-insensitive. Provide this or pokemon, not both.',
       ),
     pokemon: z
       .string()
       .optional()
       .describe(
         'Pokémon name or PokéAPI Pokémon-record ID; a species name resolves to its default variety. The server resolves the types automatically. Provide this or type, not both.',
+      ),
+    generation: z
+      .string()
+      .optional()
+      .describe(
+        'Answer as of this generation: a PokéAPI name ("generation-v"), in-game name ("Generation V"), or number ("5"). Type relations and Pokémon typings are then as they stood in that generation. Omit for current data.',
       ),
   }),
   output: z.object({
@@ -64,11 +82,22 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
       .describe(
         'Species name when it resolved to its default variety; null for direct record or type queries.',
       ),
+    generation: z
+      .string()
+      .nullable()
+      .describe(
+        'Canonical generation the answer is scoped to (e.g. "generation-v"); null for current data.',
+      ),
     offensiveRelations: TypeRelationsSchema.nullable().describe(
-      'Offensive effectiveness (populated for single-type queries; null for dual-type Pokémon where per-type breakdown does not compose cleanly).',
+      'Offensive effectiveness when one type resolved; null when two did, since each type attacks on its own (see offensiveByType).',
     ),
+    offensiveByType: z
+      .record(z.string(), TypeRelationsSchema)
+      .describe(
+        'Offensive effectiveness of each resolved type, keyed by type name, for single types too.',
+      ),
     defensiveMatchups: DefensiveMatchupsSchema.describe(
-      'Defensive matchups — composed correctly for dual-type Pokémon.',
+      'Defensive matchups — composed correctly for two types.',
     ),
     composedMultipliers: z
       .record(z.string(), z.number())
@@ -81,15 +110,30 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
     {
       reason: 'not_found',
       code: JsonRpcErrorCode.NotFound,
-      when: 'The type name or Pokémon identifier was not found in PokéAPI.',
+      when: 'A type name or the Pokémon identifier was not found in PokéAPI.',
       recovery:
         'Verify the type name is a valid Pokémon type (fire, water, etc.) or use a Pokémon name or PokéAPI Pokémon-record ID.',
     },
     {
       reason: 'invalid_input',
       code: JsonRpcErrorCode.ValidationError,
-      when: 'Neither type nor pokemon was provided, or both were provided simultaneously.',
-      recovery: 'Provide either a type name or a Pokémon identifier — exactly one is required.',
+      when: 'Neither or both of type and pokemon were provided, or type named more than two types.',
+      recovery:
+        'Provide exactly one of type or pokemon, with type naming one type or two (e.g. "water/ground").',
+    },
+    {
+      reason: 'invalid_generation',
+      code: JsonRpcErrorCode.InvalidParams,
+      when: 'The generation matches no PokéAPI generation.',
+      recovery:
+        'Use a PokéAPI generation name such as "generation-v", its in-game name ("Generation V"), or its number ("5").',
+    },
+    {
+      reason: 'not_in_generation',
+      code: JsonRpcErrorCode.InvalidParams,
+      when: "A requested type, or the Pokémon's form, was introduced after the requested generation.",
+      recovery:
+        'Use the generation named in the error or a later one, or omit generation for current data.',
     },
   ],
 
@@ -100,26 +144,63 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
       throw ctx.fail('invalid_input', 'Provide either type or pokemon — not both.');
     }
 
+    /** The requested generation's scope, read only after the query itself validates. */
+    const scopeOf = async (): Promise<GenerationScope | undefined> => {
+      if (!input.generation?.trim()) return;
+      try {
+        return await svc.getGenerationScope(input.generation, ctx);
+      } catch (err) {
+        if (!(err instanceof UnknownGenerationError)) throw err;
+        const guidance = err.validNames?.length
+          ? `Valid names: ${err.validNames.join(', ')}.`
+          : 'The list of valid names could not be retrieved.';
+        throw ctx.fail(
+          'invalid_generation',
+          `Unrecognized generation "${input.generation}". ${guidance}`,
+          undefined,
+          { cause: err },
+        );
+      }
+    };
+
     try {
       if (input.type) {
-        // Single-type query
-        const typeName = svc.normalizeIdentifier(input.type);
-        ctx.log.info('Getting type matchups', { type: typeName });
-        const matchups = await svc.getTypeMatchups(typeName, ctx);
-
-        const multipliers: Record<string, number> = {};
-        for (const t of matchups.defensiveRelations.immuneTo) multipliers[t] = 0;
-        for (const t of matchups.defensiveRelations.resists) multipliers[t] = 0.5;
-        for (const t of matchups.defensiveRelations.weakTo) multipliers[t] = 2;
-
+        /**
+         * Normalized type name → the part as supplied. Splitting precedes the identifier fold;
+         * a blank or separator-only value stays one part, which then misses as not_found.
+         */
+        const parts = new Map<string, string>();
+        const split = input.type.split(TYPE_SEPARATORS).filter(Boolean);
+        for (const supplied of split.length > 0 ? split : [input.type]) {
+          const name = svc.normalizeIdentifier(supplied);
+          if (!parts.has(name)) parts.set(name, supplied);
+        }
+        if (parts.size > 2) {
+          throw ctx.fail(
+            'invalid_input',
+            `type takes one type or two types separated by "/", ",", "+", or a space; "${input.type}" names ${parts.size}.`,
+          );
+        }
+        const scope = await scopeOf();
+        ctx.log.info('Getting type matchups', { types: [...parts.keys()], scope: scope?.name });
+        const matchups = await svc
+          .getTypeSetMatchups([...parts.keys()], ctx, scope)
+          .catch((err: unknown) => {
+            if (!(err instanceof UnknownTypeError)) throw err;
+            const missing = err.types.map((name) => `"${parts.get(name) ?? name}"`);
+            throw ctx.fail(
+              'not_found',
+              `${missing.length > 1 ? 'Types' : 'Type'} ${missing.join(', ')} not found — use a valid type name (e.g. "fire").`,
+              undefined,
+              { cause: err },
+            );
+          });
         return {
           queryType: 'type',
-          resolvedTypes: [matchups.typeName],
+          ...summarize(matchups),
           resolvedPokemon: null,
           resolvedFromSpecies: null,
-          offensiveRelations: matchups.offensiveRelations,
-          defensiveMatchups: matchups.defensiveRelations,
-          composedMultipliers: multipliers,
+          generation: scope?.name ?? null,
         };
       }
 
@@ -129,48 +210,45 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
           'Provide either type or pokemon — exactly one is required.',
         );
       }
+      const scope = await scopeOf();
       const pokemonId = svc.normalizeIdentifier(input.pokemon);
-      ctx.log.info('Getting type matchups for Pokémon', { pokemon: pokemonId });
-      const { pokemon: rawPokemon, resolvedFromSpecies } = await svc.resolvePokemon(pokemonId, ctx);
-      const types = rawPokemon.types.toSorted((a, b) => a.slot - b.slot).map((t) => t.type.name);
-
-      const composedMultipliers = await svc.getDualTypeDefensive(types, ctx);
-
-      const weakTo = Object.entries(composedMultipliers)
-        .filter(([, m]) => m >= 2)
-        .map(([t]) => t);
-      const resists = Object.entries(composedMultipliers)
-        .filter(([, m]) => m > 0 && m < 1)
-        .map(([t]) => t);
-      const immuneTo = Object.entries(composedMultipliers)
-        .filter(([, m]) => m === 0)
-        .map(([t]) => t);
-
-      // Single-type Pokémon expose a clean offensive breakdown; dual-type does not compose.
-      const [firstType] = types;
-      const offensiveRelations =
-        types.length === 1 && firstType
-          ? (await svc.getTypeMatchups(firstType, ctx)).offensiveRelations
-          : null;
-
+      ctx.log.info('Getting type matchups for Pokémon', { pokemon: pokemonId, scope: scope?.name });
+      const { pokemon, resolvedFromSpecies } = await svc
+        .resolvePokemon(pokemonId, ctx)
+        .catch((err: unknown) => {
+          if (!(err instanceof McpError) || err.code !== JsonRpcErrorCode.NotFound) throw err;
+          throw ctx.fail(
+            'not_found',
+            `"${input.pokemon}" not found — use a valid type name (e.g. "fire"), Pokémon name, or PokéAPI Pokémon-record ID.`,
+            undefined,
+            { cause: err },
+          );
+        });
+      const types = await svc.getPokemonTypes(pokemon, ctx, scope);
+      // A type the Pokémon's own record names but PokéAPI cannot serve is an upstream gap.
+      const matchups = await svc.getTypeSetMatchups(types, ctx, scope).catch((err: unknown) => {
+        if (!(err instanceof UnknownTypeError)) throw err;
+        throw serviceUnavailable(
+          `PokéAPI lists type ${err.types.join(', ')} for ${pokemon.name} but serves no record for it.`,
+          undefined,
+          { cause: err },
+        );
+      });
       return {
         queryType: 'pokemon',
-        resolvedTypes: types,
-        resolvedPokemon: { id: rawPokemon.id, name: rawPokemon.name },
+        ...summarize(matchups),
+        resolvedPokemon: { id: pokemon.id, name: pokemon.name },
         resolvedFromSpecies,
-        offensiveRelations,
-        defensiveMatchups: { weakTo, resists, immuneTo },
-        composedMultipliers,
+        generation: scope?.name ?? null,
       };
     } catch (err) {
-      if (err instanceof McpError && err.code === JsonRpcErrorCode.NotFound) {
-        const subject = input.type ?? input.pokemon ?? 'identifier';
-        throw ctx.fail(
-          'not_found',
-          `"${subject}" not found — use a valid type name (e.g. "fire"), Pokémon name, or PokéAPI Pokémon-record ID.`,
-        );
-      }
-      throw err;
+      if (!(err instanceof NotInGenerationError)) throw err;
+      throw ctx.fail(
+        'not_in_generation',
+        `${err.kind === 'type' ? 'Type' : 'Pokémon'} "${err.subject}" was introduced in ${err.introducedIn}, after ${err.generation}.`,
+        undefined,
+        { cause: err },
+      );
     }
   },
 
@@ -179,6 +257,7 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
 
     lines.push(`# Type Matchups: ${result.resolvedTypes.join(' / ')}`);
     lines.push(`**Query type:** ${result.queryType}`);
+    if (result.generation) lines.push(`**Generation:** ${result.generation}`);
     if (result.resolvedPokemon) {
       lines.push(
         `**Resolved Pokémon:** ${result.resolvedPokemon.name} (PokéAPI ID: ${result.resolvedPokemon.id})`,
@@ -191,19 +270,13 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
     }
 
     if (result.offensiveRelations) {
-      lines.push('\n## Offensive Relations');
-      lines.push(
-        `**Super Effective (2×):** ${result.offensiveRelations.superEffectiveTo.join(', ') || 'None'}`,
-      );
-      lines.push(
-        `**Not Very Effective (0.5×):** ${result.offensiveRelations.notVeryEffectiveTo.join(', ') || 'None'}`,
-      );
-      lines.push(
-        `**No Effect (0×):** ${result.offensiveRelations.noEffectTo.join(', ') || 'None'}`,
-      );
-    } else {
-      lines.push('\n## Offensive Relations');
-      lines.push('*(Offensive breakdown unavailable for dual-type Pokémon queries.)*');
+      lines.push('\n## Offensive Relations', ...relationLines(result.offensiveRelations));
+    }
+    const shown = JSON.stringify(result.offensiveRelations);
+    for (const [type, relations] of Object.entries(result.offensiveByType)) {
+      // A single type's entry is offensiveRelations, already shown above.
+      if (JSON.stringify(relations) === shown) continue;
+      lines.push(`\n## Offensive Relations: ${type}`, ...relationLines(relations));
     }
 
     lines.push('\n## Defensive Matchups');
@@ -221,3 +294,24 @@ export const getTypeMatchups = tool('pokeapi_get_type_matchups', {
     return [{ type: 'text', text: lines.join('\n') }];
   },
 });
+
+/** Response fields shared by type and Pokémon queries. */
+function summarize({ offensiveByType, composedMultipliers }: TypeSetMatchups) {
+  const [first, second] = Object.values(offensiveByType);
+  const multiplied = (keep: (multiplier: number) => boolean) =>
+    Object.entries(composedMultipliers)
+      .filter(([, multiplier]) => keep(multiplier))
+      .map(([type]) => type);
+  return {
+    resolvedTypes: Object.keys(offensiveByType),
+    // Two types each attack on their own, so only a single type has one offensive table.
+    offensiveRelations: second ? null : (first ?? null),
+    offensiveByType,
+    defensiveMatchups: {
+      weakTo: multiplied((m) => m >= 2),
+      resists: multiplied((m) => m > 0 && m < 1),
+      immuneTo: multiplied((m) => m === 0),
+    },
+    composedMultipliers,
+  };
+}

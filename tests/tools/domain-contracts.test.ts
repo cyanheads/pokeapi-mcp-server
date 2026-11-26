@@ -224,6 +224,82 @@ describe('complete evolution and price data', () => {
     },
   );
 
+  it.each([
+    [
+      '67',
+      {
+        vaporeon: ['use-item', null, 'water-stone', 'use water-stone'],
+        jolteon: ['use-item', null, 'thunder-stone', 'use thunder-stone'],
+        flareon: ['use-item', null, 'fire-stone', 'use fire-stone'],
+        espeon: ['level-up', null, null, 'happiness 160+, day time'],
+        umbreon: ['level-up', null, null, 'happiness 160+, night time'],
+        leafeon: ['use-item', null, 'leaf-stone', 'use leaf-stone'],
+        glaceon: ['use-item', null, 'ice-stone', 'use ice-stone'],
+        sylveon: ['level-up', null, null, 'happiness 160+, know a fairy-type move'],
+      },
+    ],
+    [
+      '47',
+      {
+        hitmonlee: ['level-up', 20, null, 'level 20+, attack > defense'],
+        hitmonchan: ['level-up', 20, null, 'level 20+, attack < defense'],
+        hitmontop: ['level-up', 20, null, 'level 20+, attack = defense'],
+      },
+    ],
+    ['352', { malamar: ['level-up', 30, null, 'level 30+, turn upside down'] }],
+    ['280', { basculegion: ['recoil-damage', null, null, 'male, 294+ damage taken'] }],
+    [
+      '287',
+      {
+        cofagrigus: ['level-up', 34, null, 'level 34+'],
+        runerigus: ['take-damage', null, null, 'at dusty-bowl, 49+ damage taken'],
+      },
+    ],
+    [
+      '362',
+      {
+        sliggoo: ['level-up', 40, null, 'level 40+'],
+        goodra: ['level-up', 50, null, 'level 50+, overworld rain'],
+      },
+    ],
+  ] as const)(
+    'summarizes the first default alternative of chain %s with every populated requirement',
+    async (id, expected) => {
+      const http = capturedHttp({
+        'pokemon-species/bulbasaur': {
+          ...captures.species.bulbasaur,
+          evolution_chain: { url: `https://pokeapi.co/api/v2/evolution-chain/${id}/` },
+        },
+      });
+      http.install();
+      try {
+        const result = await runToolContract(getPokemon, { identifier: 'bulbasaur' });
+        expect(result.isError).not.toBe(true);
+        const output = getPokemon.output.parse(result.structuredContent);
+        const summaries: Record<string, unknown[]> = {};
+        const collect = (step: NonNullable<typeof output.evolutionChain>) => {
+          if (step.evolutionDetails.length > 0) {
+            summaries[step.species] = [step.trigger, step.minLevel, step.item, step.condition];
+          }
+          step.evolvesTo.forEach(collect);
+        };
+        collect(output.evolutionChain!);
+        expect(summaries).toEqual(expected);
+        const text = textOf(result);
+        for (const [species, [trigger, , , condition]] of Object.entries(expected)) {
+          expect(text).toContain(`→ **${species}** *(trigger: ${trigger}, ${condition})*\n`);
+        }
+        const resource = await pokemonResource.handler(
+          { identifier: 'bulbasaur' },
+          createMockContext({ errors: pokemonResource.errors }),
+        );
+        expect(getPokemon.output.parse(resource).evolutionChain).toEqual(output.evolutionChain);
+      } finally {
+        http.restore();
+      }
+    },
+  );
+
   it('retains all documented fields, false metadata, zero and expression data', async () => {
     const chain = structuredClone(captures.chains['1']!);
     chain.chain.evolves_to[0]!.evolves_to[0]!.evolution_details = [captures.syntheticDetail];
@@ -376,6 +452,64 @@ describe('complete evolution and price data', () => {
       ])
         expect(text).toContain(token);
       expect(globalThis).not.toHaveProperty('shouldNeverRun');
+      const resource = await pokemonResource.handler(
+        { identifier: 'bulbasaur' },
+        createMockContext({ errors: pokemonResource.errors }),
+      );
+      expect(getPokemon.output.parse(resource).evolutionChain).toEqual(output.evolutionChain);
+    } finally {
+      http.restore();
+    }
+  });
+
+  it('reads the evolution chain from the configured base, whatever host the species names', async () => {
+    const species = structuredClone(captures.species.bulbasaur!);
+    species.evolution_chain = { url: 'https://mirror.invalid/api/v2/evolution-chain/1/' };
+    const http = capturedHttp({ 'pokemon-species/bulbasaur': species });
+    http.install();
+    try {
+      const result = await runToolContract(getPokemon, { identifier: 'bulbasaur' });
+      expect(result.isError).not.toBe(true);
+      const output = getPokemon.output.parse(result.structuredContent);
+      expect(output.evolutionChain!.evolvesTo[0]!.species).toBe('ivysaur');
+    } finally {
+      http.restore();
+    }
+  });
+
+  it('returns a condition expression whose upstream chance is null', async () => {
+    // PokéAPI records no chance on the Milcery → Alcremie spin conditions (chain 452).
+    const chain = structuredClone(captures.chains['1']!);
+    chain.chain.evolves_to[0]!.evolution_details = [
+      {
+        trigger: { name: 'spin', url: 'https://pokeapi.co/api/v2/evolution-trigger/13/' },
+        is_default: true,
+        condition_expression: {
+          expression: 'SPIN_DIR 0 == SPIN_SEC 5 < &&',
+          percentage_chance: null,
+          variables: [
+            { name: 'spin-direction', url: 'https://pokeapi.co/api/v2/evolution-variable/3/' },
+            { name: 'spin-duration', url: 'https://pokeapi.co/api/v2/evolution-variable/4/' },
+          ],
+        },
+      },
+    ];
+    const http = capturedHttp({ 'evolution-chain/1': chain });
+    http.install();
+    try {
+      const result = await runToolContract(getPokemon, { identifier: 'bulbasaur' });
+      expect(result.isError).not.toBe(true);
+      const output = getPokemon.output.parse(result.structuredContent);
+      const step = output.evolutionChain!.evolvesTo[0]!;
+      expect(step.evolutionDetails[0]!.conditionExpression).toEqual({
+        expression: 'SPIN_DIR 0 == SPIN_SEC 5 < &&',
+        percentageChance: null,
+        variables: ['spin-direction', 'spin-duration'],
+      });
+      expect(step.condition).toBe('expression SPIN_DIR 0 == SPIN_SEC 5 < &&');
+      const text = textOf(result);
+      expect(text).toContain('Chance: unspecified');
+      expect(text).not.toContain('null%');
       const resource = await pokemonResource.handler(
         { identifier: 'bulbasaur' },
         createMockContext({ errors: pokemonResource.errors }),

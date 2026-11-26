@@ -3,18 +3,23 @@
  * @module tests/services/pokeapi-service.test
  */
 
-import { JsonRpcErrorCode } from '@cyanheads/mcp-ts-core/errors';
+import { databaseError, JsonRpcErrorCode, validationError } from '@cyanheads/mcp-ts-core/errors';
+import { StorageService } from '@cyanheads/mcp-ts-core/storage';
 import {
   createFetchMock,
   createInMemoryStorage,
   createMockContext,
+  runToolContract,
 } from '@cyanheads/mcp-ts-core/testing';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { getMove } from '@/mcp-server/tools/definitions/get-move.tool.js';
 import {
   getPokeApiService,
   initPokeApiService,
   MAX_IDENTIFIER_LENGTH,
 } from '@/services/pokeapi/pokeapi-service.js';
+import { handlerHttp } from '../fixtures/handler-fixtures.js';
+import { capacityError } from '../fixtures/storage-failures.js';
 
 const BASE = 'https://pokeapi.co/api/v2';
 const FETCHERS = [
@@ -220,4 +225,129 @@ describe('upstream path and cache key', () => {
       }
     },
   );
+});
+
+/** A handler context whose `ctx.state` reads and writes `storage`. */
+function contextOver(storage: StorageService) {
+  const ctx = createMockContext({ errors: getMove.errors });
+  const state: typeof ctx.state = {
+    ...ctx.state,
+    get: <T>(key: string) => storage.get<T>(key, ctx),
+    set: (key, value, options) => storage.set(key, value, ctx, options),
+  };
+  return { ...ctx, state };
+}
+
+/** Machine records the captured Earthquake move references, one per version group. */
+const EARTHQUAKE_MACHINES = 26;
+
+describe('response cache over a failing store', () => {
+  let http: ReturnType<typeof handlerHttp>;
+  beforeEach(() => {
+    http = handlerHttp();
+    http.install();
+  });
+  afterEach(() => {
+    http.restore();
+    vi.restoreAllMocks();
+  });
+
+  it('propagates a programmer error or a rejected key from the store without a request', async () => {
+    for (const bug of [
+      new TypeError('cache bug'),
+      validationError('Key contains invalid characters.'),
+    ]) {
+      const ctx = createMockContext();
+      vi.spyOn(ctx.state, 'get').mockRejectedValue(bug);
+      await expect(getPokeApiService().fetchNature('hardy', ctx)).rejects.toBe(bug);
+    }
+    expect(http.calls).toHaveLength(0);
+  });
+
+  it('surfaces caller cancellation from a cache write the store also fails', async () => {
+    const capacity = await capacityError();
+    const controller = new AbortController();
+    const reason = new DOMException('Caller cancelled', 'AbortError');
+    const ctx = createMockContext({ signal: controller.signal });
+    vi.spyOn(ctx.state, 'set').mockImplementation(() => {
+      controller.abort(reason);
+      return Promise.reject(capacity);
+    });
+    await expect(getPokeApiService().fetchNature('hardy', ctx)).rejects.toBe(reason);
+  });
+
+  it.each([
+    ['rejects every write with its capacity error', 'set', capacityError],
+    ['fails every read', 'get', () => Promise.resolve(databaseError('Store offline'))],
+  ] as const)('answers pokeapi_get_move when the store %s', async (_label, operation, failure) => {
+    vi.spyOn(StorageService.prototype, operation).mockRejectedValue(await failure());
+    const result = await runToolContract(getMove, { identifier: 'earthquake' });
+    expect(result.isError).toBeFalsy();
+    const output = getMove.output.parse(result.structuredContent);
+    expect(output).toMatchObject({ name: 'earthquake', notices: [] });
+    expect(output.machines).toHaveLength(EARTHQUAKE_MACHINES);
+    expect(output.machines.every((row) => row.item !== null)).toBe(true);
+    const text = result.content.map((block) => (block.type === 'text' ? block.text : '')).join('');
+    for (const row of output.machines)
+      expect(text).toContain(`| ${row.versionGroup} | ${row.item} |`);
+    expect(http.calls).toHaveLength(1 + EARTHQUAKE_MACHINES);
+  });
+
+  it('keeps answering through a real in-memory store that fills mid-call', async () => {
+    const maxEntries = 4;
+    const ctx = contextOver(createInMemoryStorage({ maxEntries }));
+    const input = getMove.input.parse({ identifier: 'earthquake' });
+    // The second call reads the move and the three machine records that fit from the store.
+    for (const requests of [1 + EARTHQUAKE_MACHINES, EARTHQUAKE_MACHINES - (maxEntries - 1)]) {
+      const before = http.calls.length;
+      const result = getMove.output.parse(await getMove.handler(input, ctx));
+      expect(result.notices).toEqual([]);
+      expect(result.machines.every((row) => row.item !== null)).toBe(true);
+      expect(http.calls.length - before).toBe(requests);
+    }
+  });
+
+  it('establishes move chronology when the store cannot hold version-group order', async () => {
+    const capacity = await capacityError();
+    const ctx = createMockContext();
+    const original = ctx.state.set.bind(ctx.state);
+    const writes = vi
+      .spyOn(ctx.state, 'set')
+      .mockImplementation((key, value, options) =>
+        key.startsWith('pokeapi/version-group-order/')
+          ? Promise.reject(capacity)
+          : original(key, value, options),
+      );
+    const dossier = await getPokeApiService().getPokemonDossier('charmander', true, undefined, ctx);
+    expect(dossier.moves[0]).toEqual({
+      name: 'dragon-claw',
+      learnMethod: 'level-up',
+      levelLearnedAt: 42,
+      versionGroup: 'scarlet-violet',
+    });
+    expect(dossier.notices).toEqual([]);
+    expect(
+      writes.mock.calls.filter(([key]) => key.startsWith('pokeapi/version-group-order/')),
+    ).toHaveLength(2);
+  });
+
+  it('confirms an unlisted version_group when the store cannot hold its order', async () => {
+    const capacity = await capacityError();
+    const ctx = createMockContext();
+    const original = ctx.state.set.bind(ctx.state);
+    vi.spyOn(ctx.state, 'set').mockImplementation((key, value, options) =>
+      key.startsWith('pokeapi/version-group-order/')
+        ? Promise.reject(capacity)
+        : original(key, value, options),
+    );
+    const dossier = await getPokeApiService().getPokemonDossier(
+      'charmander',
+      false,
+      undefined,
+      ctx,
+      'red-blue',
+    );
+    expect(dossier.moves).toEqual([]);
+    expect(dossier.notices).toEqual(['No learnable moves are listed for red-blue.']);
+  });
 });

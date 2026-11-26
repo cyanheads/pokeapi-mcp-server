@@ -5,7 +5,7 @@
 
 import { tool, z } from '@cyanheads/mcp-ts-core';
 import { JsonRpcErrorCode, McpError } from '@cyanheads/mcp-ts-core/errors';
-import { getPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
+import { getPokeApiService, UnknownGenerationError } from '@/services/pokeapi/pokeapi-service.js';
 import type { PokemonListEntry } from '@/services/pokeapi/types.js';
 
 // Species lists lead mixed searches, so their row identity survives the intersection.
@@ -37,7 +37,7 @@ export const findPokemon = tool('pokeapi_find_pokemon', {
       .string()
       .optional()
       .describe(
-        'Generation name (e.g. "generation-i", "generation-iii"). Filters to Pokémon introduced in this generation.',
+        'Generation as a name ("generation-iii"), title ("Generation III"), or number ("3"). Filters to Pokémon introduced in this generation.',
       ),
     type: z
       .string()
@@ -191,8 +191,11 @@ export const findPokemon = tool('pokeapi_find_pokemon', {
           candidateSets.push(await svc[method](value, ctx));
         }
       } catch (err) {
-        if (!(err instanceof McpError) || err.code !== JsonRpcErrorCode.NotFound) throw err;
-        const names = await svc.getFilterNames(resource, ctx);
+        // The generation filter resolves through the service's shared generation lookup.
+        const generationMiss = err instanceof UnknownGenerationError;
+        const miss = err instanceof McpError && err.code === JsonRpcErrorCode.NotFound;
+        if (!generationMiss && !miss) throw err;
+        const names = generationMiss ? err.validNames : await svc.getFilterNames(resource, ctx);
         const guidance = names?.length
           ? `Valid names: ${names.join(', ')}.`
           : 'The list of valid names could not be retrieved.';

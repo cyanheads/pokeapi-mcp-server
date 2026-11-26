@@ -46,6 +46,7 @@ for (const [name, id, species, types] of [
   ['charizard', 6, 'charizard', ['fire', 'flying']],
   ['mewtwo', 150, 'mewtwo', ['psychic']],
   ['mr-mime', 122, 'mr-mime', ['psychic', 'fairy']],
+  ['clefairy', 35, 'clefairy', ['fairy']],
 ] as const) {
   records[`pokemon/${name}`] = {
     ...domain.pokemon.bulbasaur,
@@ -67,6 +68,41 @@ for (const [name, id, species, types] of [
     ],
   };
 }
+const generation = (number: number, roman: string) =>
+  ref(`generation-${roman}`, 'generation', number);
+const pastHiddenSlot = {
+  generation: generation(4, 'iv'),
+  abilities: [{ ability: null, is_hidden: true, slot: 3 }],
+};
+const pastStat = (name: string, id: number, base_stat: number) => ({
+  base_stat,
+  effort: 0,
+  stat: ref(name, 'stat', id),
+});
+/** Past typing, abilities, and stats as PokéAPI served them on 2026-11-25. */
+records['pokemon/pikachu'] = {
+  ...(records['pokemon/pikachu'] as object),
+  past_types: [],
+  past_abilities: [pastHiddenSlot],
+  past_stats: [
+    { generation: generation(1, 'i'), stats: [pastStat('special', 9, 50)] },
+    {
+      generation: generation(5, 'v'),
+      stats: [pastStat('defense', 3, 30), pastStat('special-defense', 5, 40)],
+    },
+  ],
+};
+records['pokemon/clefairy'] = {
+  ...(records['pokemon/clefairy'] as object),
+  past_types: [
+    { generation: generation(5, 'v'), types: [{ slot: 1, type: ref('normal', 'type') }] },
+  ],
+  past_abilities: [
+    { generation: generation(3, 'iii'), abilities: [{ ability: null, is_hidden: false, slot: 2 }] },
+    pastHiddenSlot,
+  ],
+  past_stats: [{ generation: generation(1, 'i'), stats: [pastStat('special', 9, 60)] }],
+};
 for (const [path, id, name] of [
   ['pokemon/1', 1, 'bulbasaur'],
   ['pokemon/25', 25, 'pikachu'],
@@ -137,6 +173,7 @@ const move = {
   ],
   stat_changes: [],
   learned_by_pokemon: [ref('charizard')],
+  machines: [],
 };
 records['move/flamethrower'] = move;
 records['move/53'] = move;
@@ -149,6 +186,19 @@ records['move/thunder-wave'] = {
   power: null,
   accuracy: 90,
 };
+
+/** TM25 and Earthquake with every machine record they reference, captured 2026-11-25. */
+const machineCaptures = JSON.parse(
+  readFileSync(new URL('./machine-captures.json', import.meta.url), 'utf8'),
+) as Record<'items' | 'moves' | 'machines' | 'versionGroups', Record<string, unknown>>;
+for (const [kind, values] of Object.entries({
+  item: machineCaptures.items,
+  move: machineCaptures.moves,
+  machine: machineCaptures.machines,
+  'version-group': machineCaptures.versionGroups,
+})) {
+  for (const [name, value] of Object.entries(values)) records[`${kind}/${name}`] = value;
+}
 
 const natureNames = [
   'hardy',
@@ -239,6 +289,7 @@ const missingPaths = [
   'item/fake-item-xyz-9999',
   'move/fake-move-xyz-9999',
   'nature/fake-nature-xyz',
+  'nature/list',
   'type/faketype-xyz-999',
   'generation/fake-generation-xyz',
   'generation?limit=100',

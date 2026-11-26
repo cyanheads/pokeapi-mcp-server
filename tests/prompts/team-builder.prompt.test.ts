@@ -80,6 +80,21 @@ describe('pokeapi_team_builder', () => {
     ])
       expect(content.text).toContain(required);
   });
+
+  it('points attacking coverage at offensiveByType and older games at generation', async () => {
+    for (const opponent_kind of ['pokemon', 'type'] as const) {
+      const messages = await teamBuilder.generate({ ...baseArgs, opponent_kind });
+      const content = messages[0]!.content;
+      if (content.type !== 'text') throw new Error('Expected text message');
+      expect(content.text).toContain('offensiveByType for each type');
+      expect(content.text).not.toContain('combining offensiveRelations');
+      expect(content.text).toContain(
+        'pass that game\'s generation (e.g. "generation-iv") as generation on every pokeapi_get_type_matchups call',
+      );
+      expect(content.text).toContain('not_in_generation');
+      expect(content.text).toContain('pastTypes, pastAbilities and pastStats');
+    }
+  });
 });
 
 const rpcSchema = z.object({

@@ -5,17 +5,23 @@
 
 import { tool, z } from '@cyanheads/mcp-ts-core';
 import { JsonRpcErrorCode, McpError } from '@cyanheads/mcp-ts-core/errors';
-import { getPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
+import { getPokeApiService, UnknownVersionGroupError } from '@/services/pokeapi/pokeapi-service.js';
 
 export const getItem = tool('pokeapi_get_item', {
   title: 'Get Item',
   description:
-    'Get item details by name or numeric ID — effect text, category, versioned purchase and sell prices, fling power, item attributes (holdable, consumable, etc.), sprite URL, and Pokémon that commonly hold it.',
+    'Get item details by name or numeric ID — English effect text (the latest in-game description when PokéAPI has no effect text), category, versioned purchase and sell prices, fling power, item attributes (holdable, consumable, etc.), sprite URL, Pokémon that commonly hold it, and, for a TM, TR, or HM, the move it teaches in each version group.',
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
   input: z.object({
     identifier: z
       .string()
-      .describe('Item name (e.g. "Poké Ball", "choice-specs") or numeric ID as a string.'),
+      .describe('Item name (e.g. "Poké Ball", "choice-specs", "tm25") or numeric ID as a string.'),
+    version_group: z
+      .string()
+      .optional()
+      .describe(
+        'PokéAPI version-group name (e.g. "scarlet-violet"). Limits machine rows to this group.',
+      ),
   }),
   output: z.object({
     id: z.number().describe('Item ID.'),
@@ -58,11 +64,21 @@ export const getItem = tool('pokeapi_get_item', {
     effectText: z
       .string()
       .nullable()
-      .describe('Full English effect description. Null when unavailable.'),
+      .describe(
+        "PokéAPI's full English effect description. When it has none, the latest English in-game flavor text, folded to one line and named by effectTextVersionGroup. Null when neither exists.",
+      ),
     shortEffectText: z
       .string()
       .nullable()
-      .describe('Short English effect summary. Null when unavailable.'),
+      .describe(
+        "PokéAPI's short English effect summary. Null when unavailable, including whenever effectText is flavor text.",
+      ),
+    effectTextVersionGroup: z
+      .string()
+      .nullable()
+      .describe(
+        "Version group whose in-game flavor text effectText carries. Null when effectText is PokéAPI's effect description or absent.",
+      ),
     attributes: z
       .array(z.string())
       .describe('Item attributes (e.g. "holdable", "consumable", "usable-in-battle").'),
@@ -70,6 +86,26 @@ export const getItem = tool('pokeapi_get_item', {
       .array(z.string())
       .describe('Pokémon that commonly hold this item in the wild.'),
     spriteUrl: z.string().nullable().describe('Item sprite URL. Null when no sprite is available.'),
+    machines: z
+      .array(
+        z
+          .object({
+            versionGroup: z.string().describe('Version group this machine row applies to.'),
+            move: z
+              .string()
+              .nullable()
+              .describe(
+                'Move this item teaches in the version group. Null when its machine record could not be read; notices name the group.',
+              ),
+          })
+          .describe('The move a TM, TR, or HM teaches in one version group.'),
+      )
+      .describe(
+        'One row per version group in upstream order. Empty for items that are not machines, or when version_group names a group without a row. Unless effectTextVersionGroup names a group, effectText is one description for every group and can name another move.',
+      ),
+    notices: z
+      .array(z.string())
+      .describe('Notices about version-group selection and machine records that were not read.'),
   }),
 
   errors: [
@@ -79,14 +115,24 @@ export const getItem = tool('pokeapi_get_item', {
       when: 'The identifier resolves to no item in PokéAPI.',
       recovery: 'Check the item name in PokéAPI (e.g. "choice-specs") or use the numeric ID.',
     },
+    {
+      reason: 'invalid_version_group',
+      code: JsonRpcErrorCode.InvalidParams,
+      when: 'The supplied version_group is not a known PokéAPI version-group name.',
+      recovery:
+        'Use a version-group name such as scarlet-violet or sword-shield, or omit version_group.',
+    },
   ],
 
   async handler(input, ctx) {
     ctx.log.info('Getting item details', { identifier: input.identifier });
     const svc = getPokeApiService();
     try {
-      return await svc.getItemDetails(input.identifier, ctx);
+      return await svc.getItemDetails(input.identifier, ctx, input.version_group);
     } catch (err) {
+      if (err instanceof UnknownVersionGroupError) {
+        throw ctx.fail('invalid_version_group', 'Use a known PokéAPI version-group name.');
+      }
       if (err instanceof McpError && err.code === JsonRpcErrorCode.NotFound) {
         throw ctx.fail(
           'not_found',
@@ -120,7 +166,15 @@ export const getItem = tool('pokeapi_get_item', {
       }
     }
 
-    lines.push('\n## Effect');
+    // A machine's effect prose is one description for every version group; its rows are per group.
+    const isMachine = result.machines.length > 0 || result.category === 'all-machines';
+    if (result.effectTextVersionGroup) {
+      lines.push(`\n## Effect (${result.effectTextVersionGroup} flavor text)`);
+    } else if (isMachine && (result.effectText || result.shortEffectText)) {
+      lines.push("\n## Effect (PokéAPI's unversioned description)");
+    } else {
+      lines.push('\n## Effect');
+    }
     if (result.effectText) {
       lines.push(result.effectText);
     } else if (result.shortEffectText) {
@@ -131,6 +185,16 @@ export const getItem = tool('pokeapi_get_item', {
     // Always surface shortEffectText when distinct from effectText
     if (result.shortEffectText && result.shortEffectText !== result.effectText) {
       lines.push(`\n**Summary:** ${result.shortEffectText}`);
+    }
+
+    if (result.machines.length > 0) {
+      lines.push('\n## Machines', '| Version group | Move |', '| --- | --- |');
+      for (const row of result.machines) {
+        lines.push(`| ${row.versionGroup} | ${row.move ?? 'Unavailable'} |`);
+      }
+    }
+    if (result.notices.length > 0) {
+      lines.push('\n## Notices', ...result.notices.map((notice) => `- ${notice}`));
     }
 
     lines.push('\n## Commonly Held By');

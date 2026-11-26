@@ -7,6 +7,7 @@ import { McpError } from '@cyanheads/mcp-ts-core/errors';
 import { createInMemoryStorage, createMockContext } from '@cyanheads/mcp-ts-core/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { pokemonResource } from '@/mcp-server/resources/definitions/pokemon.resource.js';
+import { getPokemon } from '@/mcp-server/tools/definitions/get-pokemon.tool.js';
 import { initPokeApiService } from '@/services/pokeapi/pokeapi-service.js';
 import { handlerHttp } from '../fixtures/handler-fixtures.js';
 
@@ -33,6 +34,29 @@ describe('pokemonResource', () => {
     expect((result as Record<string, unknown>).types).toBeInstanceOf(Array);
     expect((result as Record<string, unknown>).stats).toBeInstanceOf(Array);
   }, 15000);
+
+  it('carries the same past typing, abilities, and stats as pokeapi_get_pokemon', async () => {
+    const ctx = createMockContext({ errors: pokemonResource.errors });
+    const resource = getPokemon.output.parse(
+      await pokemonResource.handler({ identifier: 'clefairy' }, ctx),
+    );
+    const tool = await getPokemon.handler(
+      getPokemon.input.parse({ identifier: 'clefairy' }),
+      createMockContext({ errors: getPokemon.errors }),
+    );
+    expect(resource).toMatchObject({
+      pastTypes: [{ throughGeneration: 'generation-v', types: ['normal'] }],
+      pastStats: [
+        {
+          throughGeneration: 'generation-i',
+          stats: [{ name: 'special', baseStat: 60, effort: 0 }],
+        },
+      ],
+    });
+    for (const field of ['pastTypes', 'pastAbilities', 'pastStats'] as const) {
+      expect(resource[field]).toEqual(tool[field]);
+    }
+  });
 
   it('returns Pokémon dossier by PokéAPI Pokémon-record ID', async () => {
     const ctx = createMockContext({ errors: pokemonResource.errors, tenantId: 'test-tenant' });

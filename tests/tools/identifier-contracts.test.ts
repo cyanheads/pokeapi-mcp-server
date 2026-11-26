@@ -10,7 +10,7 @@ import {
   createMockContext,
   runToolContract,
 } from '@cyanheads/mcp-ts-core/testing';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { pokemonResource } from '@/mcp-server/resources/definitions/pokemon.resource.js';
 import { typeResource } from '@/mcp-server/resources/definitions/type.resource.js';
 import { findPokemon } from '@/mcp-server/tools/definitions/find-pokemon.tool.js';
@@ -21,6 +21,7 @@ import { getNature } from '@/mcp-server/tools/definitions/get-nature.tool.js';
 import { getPokemon } from '@/mcp-server/tools/definitions/get-pokemon.tool.js';
 import { getTypeMatchups } from '@/mcp-server/tools/definitions/get-type-matchups.tool.js';
 import { initPokeApiService, MAX_IDENTIFIER_LENGTH } from '@/services/pokeapi/pokeapi-service.js';
+import { handlerHttp } from '../fixtures/handler-fixtures.js';
 
 const BASE = 'https://pokeapi.co/api/v2';
 const OVERLONG = 'a'.repeat(MAX_IDENTIFIER_LENGTH + 1);
@@ -76,6 +77,9 @@ const LOOKUPS = [
     run: (identifier: string) => runToolContract(getTypeMatchups, { type: identifier }),
     paths: ['type'],
     recovery: recoveryOf(getTypeMatchups.errors, 'not_found'),
+    // Whitespace, "/", ",", and "+" separate two types, so one-name cases avoid them.
+    invented: ' Missing-Type-Value ',
+    noncanonical: 'a?b',
   },
   {
     name: 'pokeapi_get_type_matchups (pokemon)',
@@ -137,7 +141,7 @@ describe('lookup tools', () => {
     const http = notFoundHttp();
     http.install();
     try {
-      const result = await lookup.run(' Missing Type Value ');
+      const result = await lookup.run(lookup.invented ?? ' Missing Type Value ');
       expect(http.calls.map((call) => call.request.url)).toEqual(
         lookup.paths.map((path) => `${BASE}/${path}/missing-type-value`),
       );
@@ -271,7 +275,7 @@ describe('noncanonical identifiers and upstream error classification', () => {
     const http = notFoundHttp();
     http.install();
     try {
-      const result = await lookup.run('a/b');
+      const result = await lookup.run(lookup.noncanonical ?? 'a/b');
       expectDeclared(result, JsonRpcErrorCode.NotFound, 'not_found', lookup.recovery);
       expect(JSON.stringify(result)).not.toContain('Fetch failed');
       expect(http.calls).toHaveLength(0);
@@ -344,6 +348,55 @@ describe('noncanonical identifiers and upstream error classification', () => {
       http.restore();
     }
   });
+
+  it('reports a 2xx body that is not JSON as an upstream failure, not caller input', async () => {
+    vi.useFakeTimers();
+    const http = createFetchMock([
+      {
+        match: `${BASE}/ability/levitate`,
+        respond: () =>
+          new Response('error code: 1015', { headers: { 'Content-Type': 'text/plain' } }),
+      },
+    ]);
+    http.install();
+    try {
+      const pending = runToolContract(getAbility, { identifier: 'levitate' });
+      await vi.runAllTimersAsync();
+      const result = await pending;
+      expect(result.isError).toBe(true);
+      expect(result.structuredContent).toMatchObject({
+        error: { code: JsonRpcErrorCode.ServiceUnavailable },
+      });
+    } finally {
+      http.restore();
+      vi.useRealTimers();
+    }
+  });
+  it('answers once a body that is not JSON clears on retry', async () => {
+    vi.useFakeTimers();
+    let served = false;
+    const http = handlerHttp({}, [
+      {
+        match: (request) => !served && request.url === `${BASE}/ability/overgrow`,
+        respond: () => {
+          served = true;
+          return new Response('error code: 1015', { headers: { 'Content-Type': 'text/plain' } });
+        },
+      },
+    ]);
+    http.install();
+    try {
+      const pending = runToolContract(getAbility, { identifier: 'overgrow' });
+      await vi.runAllTimersAsync();
+      const result = await pending;
+      expect(result.isError).toBeFalsy();
+      expect(result.structuredContent).toMatchObject({ name: 'overgrow' });
+      expect(http.calls).toHaveLength(2);
+    } finally {
+      http.restore();
+      vi.useRealTimers();
+    }
+  });
 });
 
 describe('pokeapi_find_pokemon category filters', () => {
@@ -392,4 +445,106 @@ describe('pokeapi_find_pokemon category filters', () => {
       http.restore();
     }
   });
+});
+
+/** Every tool that takes version_group, with its record and the rows that group selects. */
+const SCOPED = [
+  {
+    name: 'pokeapi_get_pokemon',
+    run: (version_group: string) =>
+      runToolContract(getPokemon, { identifier: 'charmander', version_group }),
+    selected: { moves: Array(3).fill({ versionGroup: 'scarlet-violet' }) },
+    recovery: recoveryOf(getPokemon.errors, 'invalid_version_group'),
+  },
+  {
+    name: 'pokeapi_get_item',
+    run: (version_group: string) => runToolContract(getItem, { identifier: 'tm25', version_group }),
+    selected: { machines: [{ versionGroup: 'scarlet-violet', move: 'facade' }] },
+    recovery: recoveryOf(getItem.errors, 'invalid_version_group'),
+  },
+  {
+    name: 'pokeapi_get_move',
+    run: (version_group: string) =>
+      runToolContract(getMove, { identifier: 'earthquake', version_group }),
+    selected: { machines: [{ versionGroup: 'scarlet-violet', item: 'tm149' }] },
+    recovery: recoveryOf(getMove.errors, 'invalid_version_group'),
+  },
+];
+
+describe('version_group', () => {
+  const groupReads = (http: ReturnType<typeof handlerHttp>) =>
+    http.calls.filter(({ request }) => new URL(request.url).pathname.includes('/version-group/'));
+
+  it.each(SCOPED)('$name reads a display spelling as its canonical group', async (scoped) => {
+    const http = handlerHttp();
+    http.install();
+    try {
+      const result = await scoped.run(' Scarlet Violet ');
+      expect(result.isError).not.toBe(true);
+      expect(result.structuredContent).toMatchObject(scoped.selected);
+      expect(groupReads(http)).toHaveLength(0);
+    } finally {
+      http.restore();
+    }
+  });
+
+  it.each(SCOPED)(
+    '$name rejects an ID, noncanonical, overlong, or unencodable group without reading it',
+    async (scoped) => {
+      const http = handlerHttp();
+      http.install();
+      try {
+        for (const group of ['25', 'a/b', '..', '   ', OVERLONG, UNENCODABLE]) {
+          expectDeclared(
+            await scoped.run(group),
+            JsonRpcErrorCode.InvalidParams,
+            'invalid_version_group',
+            scoped.recovery,
+          );
+        }
+        expect(groupReads(http)).toHaveLength(0);
+      } finally {
+        http.restore();
+      }
+    },
+  );
+
+  it.each(SCOPED)('$name reports a group PokéAPI does not list', async (scoped) => {
+    const http = handlerHttp();
+    http.install();
+    try {
+      expectDeclared(
+        await scoped.run('unknown-group'),
+        JsonRpcErrorCode.InvalidParams,
+        'invalid_version_group',
+        scoped.recovery,
+      );
+      expect(groupReads(http).map(({ request }) => request.url)).toEqual([
+        `${BASE}/version-group/unknown-group`,
+      ]);
+    } finally {
+      http.restore();
+    }
+  });
+
+  it.each(SCOPED)(
+    '$name reports a version-group body that is not JSON as an upstream failure',
+    async (scoped) => {
+      const http = handlerHttp({
+        'version-group/unknown-group': new Response('<!DOCTYPE html><html>Bad gateway</html>', {
+          headers: { 'Content-Type': 'text/html' },
+        }),
+      });
+      http.install();
+      try {
+        const result = await scoped.run('unknown-group');
+        expect(result.isError).toBe(true);
+        expect(result.structuredContent).toMatchObject({
+          error: { code: JsonRpcErrorCode.ServiceUnavailable },
+        });
+      } finally {
+        http.restore();
+      }
+    },
+  );
 });

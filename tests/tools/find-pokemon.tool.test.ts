@@ -110,6 +110,58 @@ describe('findPokemon', () => {
     expect(() => findPokemon.input.parse({ generation: 'generation-i', offset: -5 })).toThrow();
   });
 
+  it.each([
+    ['generation-i', 'generation-i'],
+    ['Generation I', 'generation-i'],
+    ['1', '1'],
+  ])('accepts the generation spelling %j and echoes %j', async (generation, echoed) => {
+    http.restore();
+    http = handlerHttp({
+      [`generation/${echoed}`]: {
+        pokemon_species: [
+          { name: 'bulbasaur', url: 'https://pokeapi.co/api/v2/pokemon-species/1/' },
+        ],
+      },
+    });
+    http.install();
+    const result = await runToolContract(findPokemon, { generation, limit: 1 });
+    expect(result.structuredContent).toMatchObject({
+      pokemon: [{ id: 1, name: 'bulbasaur' }],
+      appliedFilters: { generation: echoed },
+    });
+    expect(http.calls.map(({ request }) => new URL(request.url).pathname)).toEqual([
+      `/api/v2/generation/${echoed}`,
+    ]);
+  });
+
+  it('rejects an unknown generation with the generation catalog on both surfaces', async () => {
+    http.restore();
+    http = handlerHttp({
+      'generation/gen-5': new Response('', { status: 404 }),
+      'generation?limit=100': {
+        count: 2,
+        next: null,
+        results: [{ name: 'generation-i' }, { name: 'generation-ii' }],
+      },
+    });
+    http.install();
+    const result = await runToolContract(findPokemon, { generation: 'gen 5' });
+    const message =
+      'Unrecognized generation filter "gen 5". Valid names: generation-i, generation-ii.';
+    expect(result.structuredContent).toMatchObject({
+      error: {
+        code: JsonRpcErrorCode.ValidationError,
+        message,
+        data: { reason: 'invalid_filter', recovery: { hint: findPokemon.errors![0]!.recovery } },
+      },
+    });
+    expect(result.content[0]).toMatchObject({ text: expect.stringContaining(message) });
+    expect(http.calls.map(({ request }) => request.url)).toEqual([
+      'https://pokeapi.co/api/v2/generation/gen-5',
+      'https://pokeapi.co/api/v2/generation?limit=100',
+    ]);
+  });
+
   it('throws McpError for an invalid generation name', async () => {
     const ctx = createMockContext({ errors: findPokemon.errors, tenantId: 'test-tenant' });
     const input = findPokemon.input.parse({ generation: 'fake-generation-xyz' });

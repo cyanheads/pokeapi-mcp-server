@@ -80,6 +80,14 @@ describe('getNature', () => {
     await expect(getNature.handler(input, ctx)).rejects.toThrow(McpError);
   }, 15000);
 
+  it('keeps the cached nature catalog out of the "list" identifier', async () => {
+    const ctx = createMockContext({ errors: getNature.errors, tenantId: 'test-tenant' });
+    await getNature.handler(getNature.input.parse({}), ctx);
+    const lookup = getNature.handler(getNature.input.parse({ identifier: 'list' }), ctx);
+    await expect(lookup).rejects.toThrow(McpError);
+    await expect(lookup).rejects.toMatchObject({ data: { reason: 'not_found' } });
+  }, 15000);
+
   it('formats single nature with stat info', () => {
     const result = getNature.output.parse({
       natures: [

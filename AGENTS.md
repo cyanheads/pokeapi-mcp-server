@@ -188,7 +188,7 @@ Handlers receive a unified `ctx` object. Key properties:
 | Property | Description |
 |:---------|:------------|
 | `ctx.log` | Request-scoped logger — `.debug()`, `.info()`, `.notice()`, `.warning()`, `.error()`. Auto-correlates requestId, traceId, tenantId. Dual-sink: Pino and client-visible `notifications/message`. |
-| `ctx.state` | Tenant-scoped KV — `.get(key)`, `.set(key, value, { ttl? })`, `.delete(key)`, `.getMany(keys)`, `.list(prefix, { cursor, limit })`. Values round-trip as JSON; reads return fresh objects and a `Date` becomes an ISO string. Used here for PokéAPI response caching. |
+| `ctx.state` | Tenant-scoped KV — `.get(key)`, `.set(key, value, { ttl? })`, `.delete(key)`, `.getMany(keys)`, `.list(prefix, { cursor, limit })`. Values round-trip as JSON; reads return fresh objects and a `Date` becomes an ISO string. Used here for PokéAPI response caching, always through `state-cache.ts`: a storage-provider failure (the in-memory store's entry cap included) is a miss on read and a skipped write, never a failed call. |
 | `ctx.requestInput` | Suspend and ask the caller for missing input. Return it directly; the handler is re-entered with responses. Always present. |
 | `ctx.inputs` | Client-supplied responses — `.accepted(key, schema)`, `.view(key)`, `.state()`, `.dropped` — filtered to the client's declared capabilities. Consent gates redeem a stored `ctx.state` record bound to the operation, caller, and target; see `api-context`. |
 | `ctx.clientCapabilities` | What the client declared for this request, or `undefined`. Use to decide whether to ask for optional context, never to skip consent. |
@@ -256,6 +256,12 @@ src/
   services/
     pokeapi/
       pokeapi-service.ts                # PokeApiService — typed fetch methods, cache, retry
+      effect-text.ts                    # Move/item effect text, flavor-text fallback and folding
+      evolution-chain.ts                # Evolution-chain normalization and stage summaries
+      machine-reads.ts                  # Best-effort TM/TR/HM machine-record reads
+      state-cache.ts                    # ctx.state cache reads/writes that never fail a call
+      type-matchups.ts                  # Type composition and generation scoping
+      upstream-failure.ts               # PokéAPI failures a best-effort read degrades on
       types.ts                          # Domain types
   mcp-server/
     prompts/definitions/
@@ -446,7 +452,7 @@ import { getMyService } from '@/services/my-domain/my-service.js';
 - [ ] Registered in `createApp()` arrays (directly or via barrel exports)
 - [ ] Tests use `createMockContext()` from `@cyanheads/mcp-ts-core/testing`
 - [ ] PokéAPI responses: English-only text (`language.name === 'en'`) before returning; missing entries surface as `null`
-- [ ] Identifier lookups go through `PokeApiService.fetchByIdentifier`: fold display spellings, then reject empty, noncanonical, or over-`MAX_IDENTIFIER_LENGTH` results as NotFound before storage or record requests. Canonical names and IDs use tenant caching with `getServerConfig().cacheTtlSeconds`; canonical upstream errors other than 404 remain operational failures. Resource variables are decoded once by `createApp({ decodeResourceParams: true })`, never by the service
+- [ ] Identifier lookups go through `PokeApiService.fetchByIdentifier`: fold display spellings, then reject empty, noncanonical, or over-`MAX_IDENTIFIER_LENGTH` results as NotFound before storage or record requests. Canonical names and IDs use tenant caching with `getServerConfig().cacheTtlSeconds`, read and written through `state-cache.ts` so a storage failure never fails the call; canonical upstream errors other than 404 remain operational failures. Resource variables are decoded once by `createApp({ decodeResourceParams: true })`, never by the service
 - [ ] Pokémon dossiers, resources, and matchups share `resolvePokemon`: preserve direct form/numeric identity, resolve species names to their default record, and cache only verified successful species mappings with the configured TTL; never cache misses or failed defaults
 - [ ] Search intersections use IDs with species rows whenever generation, pokedex, or egg_group is present; type-only searches retain form record IDs and names
 - [ ] Default tests install explicit fetch fixtures; unmatched requests fail through `tests/setup.ts`, including attempts swallowed by handler error conversion

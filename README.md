@@ -35,11 +35,11 @@ Pokémon game data from PokéAPI: Pokémon, moves, abilities, items, and natures
 
 | Tool | Description |
 |:-----|:------------|
-| `pokeapi_get_pokemon` | Denormalized Pokémon dossier in one call — stats, types, abilities, evolution chain, sprites, and species data |
-| `pokeapi_get_type_matchups` | Computed offensive and defensive type effectiveness for a type or Pokémon, with correctly composed dual-type matchups |
-| `pokeapi_get_move` | Move details — type, damage class, power, accuracy, PP, priority, stat changes, and effect text |
+| `pokeapi_get_pokemon` | Denormalized Pokémon dossier in one call — stats, types, abilities, earlier-generation typing, abilities, and stats, evolution chain, sprites, and species data |
+| `pokeapi_get_type_matchups` | Computed offensive and defensive type effectiveness for one type, two types, or a Pokémon, with correctly composed dual-type matchups, current or as of an earlier generation |
+| `pokeapi_get_move` | Move details — type, damage class, power, accuracy, PP, priority, stat changes, effect text, and the TM, TR, or HM that teaches it per version group |
 | `pokeapi_get_ability` | Ability details — effect text and the Pokémon that have it, with hidden-ability flag and slot |
-| `pokeapi_get_item` | Item details — effect text, category, versioned prices, fling power, attributes, and common holders |
+| `pokeapi_get_item` | Item details — effect text, category, versioned prices, fling power, attributes, common holders, and the move a TM, TR, or HM teaches per version group |
 | `pokeapi_get_nature` | Nature details — stat boost/penalty and berry flavor preferences; lists all 25 when called without an identifier |
 | `pokeapi_find_pokemon` | Filter Pokémon by generation, type, pokédex, or egg group, with name-token matching and pagination |
 
@@ -73,26 +73,33 @@ For a type opponent, use `"opponent": "electric", "opponent_kind": "type"`. Retr
 
 - Accepts a name (including display spellings such as `Mr. Mime`) or numeric PokéAPI Pokémon-record ID as `identifier`; an unknown entry returns `not_found`. A species name resolves to its default variety (`deoxys` returns `deoxys-normal`, with `resolvedFromSpecies: "deoxys"`).
 - Returns stats, types, ability effects, sprites, evolution chain (every `evolutionDetails` alternative), varieties, capture and growth rates, gender ratio, and legendary/mythical flags in one dossier.
+- Each evolution stage's `trigger`, `minLevel`, `item`, and `condition` summarize its first `isDefault` alternative, else its first; `condition` lists every populated requirement of that alternative as comma-separated phrases. `evolutionDetails` holds every alternative with its full requirements.
+- `pastTypes`, `pastAbilities`, and `pastStats` hold the earlier-generation typing, ability slots, and base stats and effort yields as PokéAPI records them, oldest first, each tagged `throughGeneration`. `pastTypes` entries are complete; `pastAbilities` and `pastStats` list only what changed, and a slot or stat an entry omits takes its value from the next later entry that lists it, else the current data. Generation I lists `special` as its own stat with effort 0.
 - `id` preserves Pokémon-record identity, including forms. `speciesId` is the National Pokédex number; `pokedexNumbers` lists Pokédex entries as `{ pokedex, entryNumber }`. Breeding data includes nullable `hatchCounter` and `baseHappiness`, plus `isBaby`. Alolan Raichu keeps record ID 10100 while reporting species ID 26.
 - `include_moves` (default `false`) adds each move's learn methods, levels, and `versionGroup`, selecting the latest group per move and method by PokéAPI's chronology. Distinct levels within that group are retained. `moveCount` always counts distinct moves across all groups.
 - `version_group` (such as `scarlet-violet`) implies move inclusion and selects that group's recorded methods and levels. A known group with no moves returns an empty list and a notice; an unknown group returns `invalid_version_group`. If default-summary chronology metadata is unavailable, a notice identifies the fallback to each move and method's last group in source order.
-- `game_version` selects English flavor text independently of moves. `flavorTextVersion` names its source. A missing match, including an unknown version, keeps the successful dossier and reports the fallback to the last English entry in PokéAPI source order. Both text fields are null when no English entry exists.
+- `game_version` selects English flavor text independently of moves, by PokéAPI version name or in-game title (`omega-ruby`, `Fire Red`, `Let's Go, Pikachu!`); a blank value counts as omitted. `flavorTextVersion` names its source. A missing match, including an unknown version, keeps the successful dossier and reports the fallback to the last English entry in PokéAPI source order. Both text fields are null when no English entry exists. A soft hyphen before a line break rejoins its word.
 
 ---
 
 ### `pokeapi_get_type_matchups` <sub>tool</sub>
 
-- Requires exactly one of `type` (type name) or `pokemon` (name or PokéAPI Pokémon-record ID); unknown entries return `not_found`.
+- Requires exactly one of `type` or `pokemon` (name or PokéAPI Pokémon-record ID); unknown entries return `not_found`, and an unknown part of a two-type `type` is named in the error.
+- `type` is one string naming one type or two, separated by whitespace, `/`, `,`, or `+` (`water/ground`, `Fire, Flying`); a repeated type collapses to one, and three or more return `invalid_input`. Two types compose their defense as a dual-type Pokémon does, and `queryType` stays `type`.
 - Species names resolve to their default variety (`deoxys` uses `deoxys-normal`); `resolvedPokemon` and `resolvedFromSpecies` report the match and are null for direct type queries.
-- Returns `offensiveRelations` (null for dual-type Pokémon) and `defensiveMatchups`, with dual-type defenses composed and immunity taking precedence.
+- Returns `offensiveByType` (each resolved type's attacking relations, keyed by type, present for single types too), `offensiveRelations` (the same relations for one type, null for two), and `defensiveMatchups`, with dual-type defenses composed and immunity taking precedence.
 - `composedMultipliers` carries 0, 0.25, 0.5, 1, 2, or 4 per attacking type; absent types also deal 1×.
+- `generation` (a name such as `generation-v`, an in-game name such as `Generation V`, or a number, the grammar of `pokeapi_find_pokemon`) answers as of that generation: type relations, and a Pokémon's typing from its `pastTypes`, as they stood then, without types introduced later. The `generation` output echoes the canonical name and is null for current data. An unknown value returns `invalid_generation`; a type or Pokémon form introduced after the generation returns `not_in_generation` naming its generation. PokéAPI records no damage relations for stellar, shadow, or unknown, so those types come back empty.
 
 ---
 
 ### `pokeapi_get_move` <sub>tool</sub>
 
 - Accepts a move name (such as `King’s Shield`) or numeric ID; an unknown entry returns `not_found`.
-- Returns type, damage class, power, accuracy, PP, priority, target, stat changes, and secondary-effect chance, plus full and short English effect text
+- Returns type, damage class, power, accuracy, PP, priority, target, stat changes, and secondary-effect chance, plus full and short English effect text. `power` and `accuracy` are null when the move has none, including where PokéAPI lists a placeholder 0.
+- When PokéAPI has no English effect description, `effectText` falls back to the latest English in-game text, named by `effectTextVersionGroup` (null for PokéAPI's own description or when there is no text); `shortEffectText` is then null.
+- `statChanges` lists the stage changes PokéAPI records; it does not say whether they land on the user or the target, or under what condition, so read `effectText` for both.
+- `machines` lists the TM, TR, or HM that teaches the move per version group, in upstream order, as `{ versionGroup, item }`. `version_group` (such as `scarlet-violet`) limits the rows to one group; an unknown group returns `invalid_version_group`, and a known group with no row returns an empty list and a notice. A row whose machine record failed, ran late, or was skipped while PokéAPI rate-limits requests has a null `item` and a notice in `notices`.
 - `include_learners` (default `false`) adds the list of Pokémon that can learn the move. `learnersIncluded` distinguishes an unrequested list from a requested list with no known learners.
 
 ---
@@ -109,6 +116,8 @@ For a type opponent, use `"opponent": "electric", "opponent_kind": "type"`. Retr
 
 - Accepts an item name (such as `Poké Ball`) or numeric ID
 - Returns category, fling power, attributes (holdable, consumable, etc.), sprite URL, effect text, and Pokémon that commonly hold it
+- When PokéAPI has no English effect description, `effectText` falls back to the latest English in-game text, named by `effectTextVersionGroup`. Placeholder text (`N/A`, rows of dashes, unfilled game-text variables) is skipped, so those items keep no effect text.
+- `machines` lists the move a TM, TR, or HM teaches per version group as `{ versionGroup, move }`, in upstream order; it is empty for other items. `version_group` limits the rows to one group and behaves as on `pokeapi_get_move`. A machine's effect text is one description for every version group and can name a different move than a given row, so read the rows for a particular game.
 - `prices` lists every version/currency row (`versionGroup`, `currency`, `purchasePrice`, `sellPrice`); null means not purchasable/sellable there, and an empty list means no price records. `cost` is the legacy Pokédollar cost, or null.
 - `not_found` when the identifier resolves to no item
 
@@ -134,7 +143,7 @@ For a type opponent, use `"opponent": "electric", "opponent_kind": "type"`. Retr
 
 ### `pokeapi://pokemon/{identifier}` <sub>resource</sub>
 
-- Same payload as `pokeapi_get_pokemon` with `include_moves` fixed to `false`
+- Same payload as `pokeapi_get_pokemon` with `include_moves` fixed to `false`, including `pastTypes`, `pastAbilities`, and `pastStats`
 - `identifier` is a name or PokéAPI Pokémon-record ID, including form IDs; a species name resolves to its default variety. URI variables are percent-decoded once: `pokeapi://pokemon/mr%2Dmime` resolves to Mr. Mime. Malformed escapes return a validation error; double-encoded values remain misses
 - `not_found` when the identifier matches no Pokémon record and no species
 

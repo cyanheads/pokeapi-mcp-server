@@ -5,6 +5,7 @@
 
 import { tool, z } from '@cyanheads/mcp-ts-core';
 import { JsonRpcErrorCode, McpError } from '@cyanheads/mcp-ts-core/errors';
+import { REQUIREMENT_PHRASES } from '@/services/pokeapi/evolution-chain.js';
 import { getPokeApiService, UnknownVersionGroupError } from '@/services/pokeapi/pokeapi-service.js';
 import type { EvolutionDetail, EvolutionStep } from '@/services/pokeapi/types.js';
 
@@ -28,6 +29,54 @@ const AbilitySchema = z.object({
     .string()
     .nullable()
     .describe('Short English effect description. Null when unavailable.'),
+});
+
+const PastTypesSchema = z.object({
+  throughGeneration: z
+    .string()
+    .describe('Last generation this typing applied to (e.g. "generation-v").'),
+  types: z.array(z.string()).describe('Type names ordered by slot.'),
+});
+
+const PastAbilitiesSchema = z.object({
+  throughGeneration: z
+    .string()
+    .describe('Last generation these slots applied to (e.g. "generation-iv").'),
+  abilities: z
+    .array(
+      z
+        .object({
+          name: z
+            .string()
+            .nullable()
+            .describe('Ability name in hyphenated lowercase. Null when the slot was empty.'),
+          isHidden: z.boolean().describe('True for the hidden-ability slot.'),
+          slot: z.number().describe('Ability slot (1, 2, or 3).'),
+        })
+        .describe('One ability slot as it stood then.'),
+    )
+    .describe('Slots that differed from later data.'),
+});
+
+const PastStatsSchema = z.object({
+  throughGeneration: z
+    .string()
+    .describe('Last generation these values applied to (e.g. "generation-i").'),
+  stats: z
+    .array(
+      z
+        .object({
+          name: z
+            .string()
+            .describe(
+              'Stat name. Generation I entries list "special", the stat later split into special-attack and special-defense.',
+            ),
+          baseStat: z.number().describe('Base stat value.'),
+          effort: z.number().describe('Effort value (EV) yield.'),
+        })
+        .describe('One stat as it stood then.'),
+    )
+    .describe('Stats that differed from later data.'),
 });
 
 const MoveSummarySchema = z.object({
@@ -115,7 +164,12 @@ const EvolutionDetailSchema = z.object({
   conditionExpression: z
     .object({
       expression: z.string().describe('Verbatim upstream RPN condition expression; not evaluated.'),
-      percentageChance: z.number().describe('Upstream chance percentage, including zero.'),
+      percentageChance: z
+        .number()
+        .nullable()
+        .describe(
+          'Upstream chance percentage, including zero. Null when PokéAPI records no chance.',
+        ),
       variables: z.array(z.string()).describe('Names of expression variables in upstream order.'),
     })
     .nullable()
@@ -125,20 +179,24 @@ const EvolutionDetailSchema = z.object({
 const EvolutionStepSchema: z.ZodType<EvolutionStep> = z.lazy(() =>
   z.object({
     species: z.string().describe('Species name.'),
-    trigger: z.string().describe('First alternative trigger, or base for the root stage.'),
+    trigger: z
+      .string()
+      .describe(
+        'Trigger of the summarized alternative (the first marked default, else the first), or base for the root stage.',
+      ),
     minLevel: z
       .number()
       .nullable()
-      .describe('First alternative minimum level. Null when unspecified.'),
+      .describe('Minimum level of the summarized alternative. Null when unspecified.'),
     item: z
       .string()
       .nullable()
-      .describe('First alternative evolution item. Null when unspecified.'),
+      .describe('Evolution item of the summarized alternative. Null when unspecified.'),
     condition: z
       .string()
       .nullable()
       .describe(
-        'Compatibility summary of the first alternative; evolutionDetails contains the complete methods.',
+        'Every requirement of the summarized alternative as comma-separated phrases (e.g. "happiness 160+, know a fairy-type move"). Null when it has none; evolutionDetails contains every method.',
       ),
     evolutionDetails: z
       .array(EvolutionDetailSchema.describe('One complete alternative evolution method.'))
@@ -163,7 +221,7 @@ const VarietySchema = z.object({
 export const getPokemon = tool('pokeapi_get_pokemon', {
   title: 'Get Pokémon',
   description:
-    'Get a fully denormalized Pokémon dossier in a single call — base stats, types, abilities (with full English effect text), height/weight, resolved evolution chain, sprite URLs including official artwork, species flavor text, variety list, capture rate, growth rate, gender rate, legendary/mythical flags, egg groups, and (optionally) a summarized learnable-move list. Accepts a Pokémon name (e.g. "bulbasaur", "Mr. Mime") or PokéAPI Pokémon-record ID. A species name with no Pokémon record of its own (e.g. "deoxys") resolves to the default variety of that species ("deoxys-normal"), reported in resolvedFromSpecies. Set include_moves=true to include the move summary (large); defaults to false. Use game_version to select flavor text from a specific game (e.g. "sword", "red"); falls back to the last English entry in PokéAPI source order when no English entry matches. Use pokeapi_find_pokemon to discover Pokémon by type, generation, or egg group before calling this tool.',
+    'Get a fully denormalized Pokémon dossier in a single call — base stats, types, abilities (with full English effect text), the typing, abilities, and stats of earlier generations, height/weight, resolved evolution chain, sprite URLs including official artwork, species flavor text, variety list, capture rate, growth rate, gender rate, legendary/mythical flags, egg groups, and (optionally) a summarized learnable-move list. Accepts a Pokémon name (e.g. "bulbasaur", "Mr. Mime") or PokéAPI Pokémon-record ID. A species name with no Pokémon record of its own (e.g. "deoxys") resolves to the default variety of that species ("deoxys-normal"), reported in resolvedFromSpecies. Set include_moves=true to include the move summary (large); defaults to false. Use game_version to select flavor text from a specific game (e.g. "sword", "Fire Red"); falls back to the last English entry in PokéAPI source order when no English entry matches. Use pokeapi_find_pokemon to discover Pokémon by type, generation, or egg group before calling this tool.',
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
   input: z.object({
     identifier: z
@@ -187,7 +245,7 @@ export const getPokemon = tool('pokeapi_get_pokemon', {
       .string()
       .optional()
       .describe(
-        'PokéAPI game version name for English flavor text (e.g. "sword", "red", "scarlet"). Uses the last English entry in PokéAPI source order when no English entry matches or no version is supplied. The response names the source and reports any requested-version fallback.',
+        'Game version for English flavor text, as a PokéAPI version name or in-game title (e.g. "sword", "omega-ruby", "Fire Red", "Let\'s Go, Pikachu!"). Uses the last English entry in PokéAPI source order when no English entry matches or no version is supplied. The response names the source and reports any requested-version fallback.',
       ),
   }),
   output: z.object({
@@ -228,6 +286,21 @@ export const getPokemon = tool('pokeapi_get_pokemon', {
     abilities: z
       .array(AbilitySchema.describe('Ability entry with effect text and hidden-ability flag.'))
       .describe('Abilities with full effect text.'),
+    pastTypes: z
+      .array(PastTypesSchema.describe('Complete typing through one earlier generation.'))
+      .describe(
+        'Earlier typings, oldest first. A generation takes the earliest entry whose throughGeneration is at or after it; generations after the last entry use types.',
+      ),
+    pastAbilities: z
+      .array(PastAbilitiesSchema.describe('Changed ability slots through one earlier generation.'))
+      .describe(
+        'Earlier ability slots, oldest first. Each entry lists only the slots that differed; a slot missing from an entry takes its ability from the next later entry that lists it, else from abilities.',
+      ),
+    pastStats: z
+      .array(PastStatsSchema.describe('Changed stats through one earlier generation.'))
+      .describe(
+        'Earlier base stats and effort yields, oldest first. Each entry lists only the stats that differed; a stat missing from an entry takes its value from the next later entry that lists it, else from stats. Generation I entries report effort 0.',
+      ),
     sprites: SpritesSchema.describe('Sprite URLs.'),
     moves: z
       .array(MoveSummarySchema.describe('Move summary entry — name, learn method, and level.'))
@@ -370,6 +443,35 @@ export const getPokemon = tool('pokeapi_get_pokemon', {
       lines.push(`**Short:** ${a.shortEffectText ?? 'Not available'}`);
     }
 
+    lines.push('\n## Past Generations');
+    if (result.pastTypes.length + result.pastAbilities.length + result.pastStats.length > 0) {
+      lines.push(
+        'Each entry holds values through its generation; anything an entry omits comes from the next later entry, then the current data.',
+      );
+    }
+    if (result.pastTypes.length === 0) lines.push('**Past types:** None recorded');
+    for (const entry of result.pastTypes) {
+      lines.push(
+        `**Types through ${entry.throughGeneration}:** ${entry.types.join(', ') || 'None listed'}`,
+      );
+    }
+    if (result.pastAbilities.length === 0) lines.push('**Past abilities:** None recorded');
+    for (const entry of result.pastAbilities) {
+      const slots = entry.abilities.map(
+        (a) => `slot ${a.slot} ${a.isHidden ? 'hidden' : 'regular'}: ${a.name ?? 'empty'}`,
+      );
+      lines.push(
+        `**Abilities through ${entry.throughGeneration}:** ${slots.join('; ') || 'None listed'}`,
+      );
+    }
+    if (result.pastStats.length === 0) lines.push('**Past stats:** None recorded');
+    for (const entry of result.pastStats) {
+      const values = entry.stats.map((s) => `${s.name} ${s.baseStat} (EV: ${s.effort})`);
+      lines.push(
+        `**Stats through ${entry.throughGeneration}:** ${values.join(', ') || 'None listed'}`,
+      );
+    }
+
     lines.push('\n## Sprites');
     lines.push(`**Official Artwork:** ${result.sprites.officialArtwork ?? 'Not available'}`);
     lines.push(`**Front Default:** ${result.sprites.frontDefault ?? 'Not available'}`);
@@ -378,7 +480,7 @@ export const getPokemon = tool('pokeapi_get_pokemon', {
     lines.push('\n## Evolution Chain');
     if (result.evolutionChain) {
       lines.push(
-        'Alternative methods are separate. Unspecified requirement fields are omitted; false, zero and empty values are shown.',
+        'Each stage line summarizes its first default alternative (else its first); every alternative follows separately. Unspecified requirement fields are omitted; false, zero and empty values are shown.',
       );
       lines.push(renderEvolutionStep(result.evolutionChain, 0));
     } else {
@@ -415,8 +517,14 @@ function renderEvolutionStep(step: EvolutionStep, depth: number): string {
   const indent = '  '.repeat(depth);
   const details = [`trigger: ${step.trigger}`];
   if (step.condition) details.push(step.condition);
-  if (step.minLevel != null) details.push(`minimum level: ${step.minLevel}`);
-  if (step.item != null) details.push(`item: ${step.item}`);
+  // The condition states the summary's level and item; render them only where it does not.
+  const stated = new Set(step.condition?.split(', '));
+  if (step.minLevel != null && !stated.has(REQUIREMENT_PHRASES.minLevel(step.minLevel))) {
+    details.push(`minimum level: ${step.minLevel}`);
+  }
+  if (step.item != null && !stated.has(REQUIREMENT_PHRASES.item(step.item))) {
+    details.push(`item: ${step.item}`);
+  }
   const line = `${indent}→ **${step.species}** *(${details.join(', ')})*`;
   const alternatives = step.evolutionDetails.map((detail, index) =>
     renderEvolutionDetail(detail, index + 1, indent),
@@ -474,7 +582,7 @@ function renderEvolutionDetail(detail: EvolutionDetail, index: number, indent: s
   if (detail.conditionExpression) {
     const condition = detail.conditionExpression;
     lines.push(
-      `${indent}    Condition expression (not evaluated): ${condition.expression}; Chance: ${condition.percentageChance}%; Variables: ${condition.variables.length > 0 ? condition.variables.join(', ') : '[]'}`,
+      `${indent}    Condition expression (not evaluated): ${condition.expression}; Chance: ${condition.percentageChance === null ? 'unspecified' : `${condition.percentageChance}%`}; Variables: ${condition.variables.length > 0 ? condition.variables.join(', ') : '[]'}`,
     );
   }
   return lines.join('\n');

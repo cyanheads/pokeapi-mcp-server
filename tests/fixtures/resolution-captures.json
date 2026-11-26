@@ -2,6 +2,9 @@
   "pokemon/386": {
     "id": 386,
     "name": "deoxys-normal",
+    "past_abilities": [],
+    "past_stats": [],
+    "past_types": [],
     "height": 17,
     "weight": 608,
     "abilities": [
@@ -1132,6 +1135,9 @@
   "pokemon/deoxys-normal": {
     "id": 386,
     "name": "deoxys-normal",
+    "past_abilities": [],
+    "past_stats": [],
+    "past_types": [],
     "height": 17,
     "weight": 608,
     "abilities": [
@@ -1341,6 +1347,23 @@
   "pokemon/wormadam-plant": {
     "id": 413,
     "name": "wormadam-plant",
+    "past_abilities": [
+      {
+        "generation": {
+          "name": "generation-iv",
+          "url": "https://pokeapi.co/api/v2/generation/4/"
+        },
+        "abilities": [
+          {
+            "is_hidden": true,
+            "slot": 3,
+            "ability": null
+          }
+        ]
+      }
+    ],
+    "past_stats": [],
+    "past_types": [],
     "height": 5,
     "weight": 65,
     "abilities": [
@@ -2548,6 +2571,23 @@
   "pokemon/wormadam-trash": {
     "id": 10005,
     "name": "wormadam-trash",
+    "past_abilities": [
+      {
+        "generation": {
+          "name": "generation-iv",
+          "url": "https://pokeapi.co/api/v2/generation/4/"
+        },
+        "abilities": [
+          {
+            "is_hidden": true,
+            "slot": 3,
+            "ability": null
+          }
+        ]
+      }
+    ],
+    "past_stats": [],
+    "past_types": [],
     "height": 5,
     "weight": 65,
     "abilities": [
